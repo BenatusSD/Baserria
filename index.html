@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="eu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baserria</title>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; user-select: none; -webkit-user-select: none; touch-action: none;
+  font-family: "Trebuchet MS", Verdana, system-ui, sans-serif; }
+#game, #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+#fx { pointer-events: none; z-index: 30; }
+
+#coinbox { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; z-index: 10;
+  padding: 6px 24px 6px 8px; background: rgba(255,248,230,.94); border: 4px solid #7a5230; border-radius: 40px; box-shadow: 0 3px 0 rgba(0,0,0,.2); }
+#coinbox canvas { width: 56px; height: 56px; }
+#coinNum { font-size: 44px; font-weight: bold; color: #5a3a05; min-width: 1ch; }
+#coinbox.bump { animation: bump .22s; }
+@keyframes bump { 50% { transform: translateX(-50%) scale(1.12); } }
+
+#carry { position: fixed; top: 12px; left: 12px; display: flex; flex-wrap: wrap; gap: 8px; z-index: 10; max-width: 34vw; }
+.pill { display: flex; align-items: center; gap: 6px; padding: 4px 14px 4px 6px; background: rgba(255,248,230,.94); border: 3px solid #7a5230;
+  border-radius: 30px; font-size: 30px; font-weight: bold; color: #4a3010; }
+.pill canvas { width: 44px; height: 44px; }
+.bar { width: 110px; height: 22px; border: 3px solid #4a3010; border-radius: 12px; background: #fff; overflow: hidden; }
+.bar > div { height: 100%; background: #6ab04c; }
+.pill.full { animation: shake .45s infinite; }
+.pill.full .bar > div { background: #e2533d; }
+@keyframes shake { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+
+#tools { position: fixed; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10; }
+#tools button { width: 52px; height: 52px; border-radius: 50%; border: 3px solid #7a5230; background: rgba(255,248,230,.94); cursor: pointer; padding: 9px; }
+#tools svg { width: 100%; height: 100%; display: block; }
+
+#menuBack { position: fixed; inset: 0; background: rgba(30,20,5,.3); display: none; align-items: center; justify-content: center; z-index: 20; }
+#menuBack.open { display: flex; }
+#menu { position: relative; background: #f4e6c8; border: 6px solid #7a5230; border-radius: 22px; padding: 22px 26px 12px; min-width: 300px;
+  box-shadow: 0 10px 0 rgba(0,0,0,.25); animation: pop .18s ease-out; }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } }
+.close { position: absolute; top: -24px; right: -24px; width: 54px; height: 54px; border-radius: 50%; background: #e2533d; border: 4px solid #fff; cursor: pointer; padding: 0; }
+.close::before, .close::after { content: ""; position: absolute; left: 50%; top: 50%; width: 26px; height: 6px; background: #fff; border-radius: 3px;
+  transform: translate(-50%,-50%) rotate(45deg); }
+.close::after { transform: translate(-50%,-50%) rotate(-45deg); }
+.row { display: flex; align-items: center; gap: 14px; padding: 10px 4px; }
+.row + .row { border-top: 3px dashed #c9a06a; }
+.row canvas.ic { width: 84px; height: 84px; flex: none; }
+.coinbtn { width: 84px; height: 84px; flex: none; border-radius: 50%; border: 5px solid #a86e10; margin-left: auto; cursor: pointer; padding: 0;
+  background: radial-gradient(circle at 40% 35%, #ffe27a, #f2b42c 65%, #d8941a); box-shadow: 0 4px 0 #8a5a0c;
+  font: bold 36px "Trebuchet MS", Verdana, sans-serif; color: #5a3a05; }
+.coinbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #8a5a0c; }
+.coinbtn:disabled { filter: grayscale(1); opacity: .4; cursor: default; transform: none; }
+.star { width: 84px; height: 84px; flex: none; margin-left: auto; }
+.round { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 4px solid #4a3010; padding: 0; cursor: pointer;
+  font: bold 34px/1 "Trebuchet MS", Verdana, sans-serif; color: #fff; }
+.round.minus { background: #b9b2a4; }
+.round.plus { background: #6ab04c; }
+.round:disabled { opacity: .3; cursor: default; }
+.num { font-size: 42px; font-weight: bold; color: #4a3010; min-width: 1.5ch; text-align: center; }
+.slots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 0 0 10px; max-width: 420px; margin: 0 auto; }
+.slot { width: 24px; height: 24px; border-radius: 50%; border: 3px solid #9b7a4c; }
+.slot.full { background: #9b7a4c; }
+.slot.new { background: #f2c230; border-color: #c4941a; }
+.pips { display: flex; gap: 6px; }
+.pip { width: 22px; height: 22px; border-radius: 6px; border: 3px solid #6a8a3c; background: #fff; }
+.pip.on { background: #6ab04c; }
+.lvl { width: 150px; height: 28px; border: 3px solid #4a3010; border-radius: 14px; background: #fff; overflow: hidden; }
+.lvl > div { height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="coinbox"><canvas id="coinIcon"></canvas><span id="coinNum">0</span></div>
+<div id="carry"></div>
+<div id="tools"><button id="soundBtn" tabindex="-1"></button><button id="fsBtn" tabindex="-1"></button></div>
+<div id="menuBack"><div id="menu"></div></div>
+<canvas id="fx"></canvas>
+<script>
+'use strict';
+
+// ======================================================================
+// Tunables. Prices, speeds and timings all live here.
+// ======================================================================
+const CONFIG = {
+  startCoins: 5,
+  maxUpgradeGap: 3,            // no tractor upgrade may get more than this many levels ahead of another
+  walkSpeed: 3.2,              // tiles per second
+  horseSpeed: 5.2,
+  tractor: {
+    speed:   [3.4, 4.0, 4.6, 5.2, 5.8],
+    storage: [10, 20, 30, 45, 60],
+    yield:   [1, 2, 3, 4, 5],  // items per harvested tile
+    price:   [10, 20, 35, 50], // price of level 2, 3, 4, 5
+  },
+  crops: {                     // sow = seed price for the starting patch; grow = seconds to ripen
+    corn:   { sow: 2, grow: 30, sell: 1 },
+    potato: { sow: 3, grow: 40, sell: 1 },
+    carrot: { sow: 4, grow: 50, sell: 2 },
+  },
+  sowPerSegment: 1,            // each extension adds this to the seed price
+  cropExtendPrice: [5, 8, 12, 16, 20],
+  penExtendPrice: [6, 10, 14, 18, 24],
+  products: { egg: 1, milk: 2, manure: 1 },
+  pens: {                      // price per female / male; cap = places at start, capPerSegment = places per extension
+    chicken: { price: { f: 2, m: 3 },  cap: 5, capPerSegment: 2, produceEvery: [18, 26], breedEvery: 45, growUp: 90 },
+    pig:     { price: { f: 4, m: 5 },  cap: 4, capPerSegment: 1, produceEvery: [25, 35], breedEvery: 50, growUp: 100 },
+    cow:     { price: { f: 6, m: 8 },  cap: 3, capPerSegment: 1, produceEvery: [25, 35], breedEvery: 60, growUp: 120 },
+    horse:   { price: { f: 8, m: 10 }, cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 60, growUp: 120 },
+  },
+  trough: { foodPrice: 2, waterPrice: 1, drainBase: 0.002, drainPerAnimal: 0.0006 }, // a full trough is 1
+  cars: { minGap: 4, maxGap: 14 },  // seconds between customers: shorter the fuller the shop
+};
+
+// Generated art. When an image exists it replaces the drawn shape.
+// Views: down = front, up = back, left, right. width = size in tiles of the left/right view.
+const ART = {
+  tractor: { down: 'images/tractor-down.png', up: 'images/tractor-up.png', left: 'images/tractor-left.png', right: 'images/tractor-right.png', width: 1.9 },
+};
+
+const SAVE_KEY = 'harvester-save-v1';
+const DEV = /[?&]dev\b/.test(location.search);
+if (/[?&]reset\b/.test(location.search)) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+
+// ======================================================================
+// Map layout, in tiles. x grows to the right, y grows down the screen.
+// ======================================================================
+const W = 48, H = 35;
+const BOUND = { x0: 0.6, y0: 1.4, x1: 47.4, y1: 31 };
+const HOUSE = { x: 19, y: 4.6, w: 8, h: 3.4 };
+const SHOP = { x: 13, y: 26.4, w: 7, h: 2.6 };
+const SHOP_PAD = { x: 13, y: 29, w: 7, h: 2 };
+const SHED = { x: 26, y: 26.4, w: 5, h: 2.6 };
+const SHED_PAD = { x: 26, y: 29, w: 5, h: 2 };
+const JAR = { x: 19.35, y: 28.25 };
+const STOP_X = 16.5;
+const TRACKS = [{ x: 22, y: 8, w: 2, h: 23.2 }, { x: 5, y: 16, w: 38, h: 2 }, { x: 20, y: 7.8, w: 6, h: 1.4 }];
+const PATCHES = {
+  potato: { x0: 11, y0: 11, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 14.7 } },
+  carrot: { x0: 11, y0: 19, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 19.6 } },
+  corn:   { x0: 29, y0: 20, w: 5, h: 4, dir: 1,  sign: { x: 28.3,  y: 20.6 } },
+};
+const PENS = {
+  chicken: { x0: 29, y0: 2, w: 5, h: 5, dir: 'right', gate: [29.5, 31.5], sign: { x: 28.3, y: 7.75 },  troughs: { x: 31.9, y: 6.15 },
+             coop: { x: 29.3, y: 2.3, w: 1.6, h: 1.0 } },
+  pig:     { x0: 29, y0: 9, w: 5, h: 6, dir: 'right', gate: [29.5, 31.5], sign: { x: 28.3, y: 15.75 }, troughs: { x: 31.9, y: 14.15 },
+             mud: { x: 31.4, y: 10.7 } },
+  cow:     { x0: 11, y0: 2, w: 6, h: 7, dir: 'left',  gate: [14.5, 16.5], sign: { x: 17.6, y: 9.75 },  troughs: { x: 11.9, y: 8.15 } },
+  horse:   { x0: 41, y0: 8, w: 5, h: 7, dir: 'up',    gate: [41.5, 43.5], sign: { x: 40.4, y: 15.75 }, troughs: { x: 43.9, y: 14.15 } },
+};
+const KINDS = { chicken: { f: 'hen', m: 'rooster' }, pig: { f: 'sow', m: 'boar' }, cow: { f: 'cow', m: 'bull' }, horse: { f: 'mare', m: 'stallion' } };
+const PRODUCT = { chicken: 'egg', pig: 'manure', cow: 'milk', horse: null };
+const ANIMAL_SPEED = { chicken: 0.7, pig: 0.55, cow: 0.4, horse: 0.7 };
+const STOCK_KINDS = ['corn', 'potato', 'carrot', 'egg', 'milk', 'manure'];
+const TREES = [
+  { x: 3, y: 26.6, apple: 1 }, { x: 6, y: 27.9, apple: 1 }, { x: 9, y: 26.6, apple: 1 }, { x: 3.8, y: 29.8, apple: 1 },
+  { x: 7.6, y: 30.4, apple: 1 }, { x: 10.6, y: 29.4, apple: 1 },
+  { x: 2.6, y: 5.5 }, { x: 2.4, y: 12.8 }, { x: 2.6, y: 21 }, { x: 42.6, y: 21.6 }, { x: 45.2, y: 24.6 }, { x: 42.8, y: 28.2 },
+  { x: 45.6, y: 30.4 }, { x: 38.5, y: 28.6 },
+];
+const BUSHES = [{ x: 5, y: 1.1 }, { x: 8.5, y: 1.0 }, { x: 18, y: 1.1 }, { x: 27.5, y: 1.0 }, { x: 36.5, y: 1.1 }, { x: 39.5, y: 1.0 }, { x: 46.5, y: 1.2 }];
+const BOX = { walk: [0.22, 0.14], horse: [0.4, 0.22], tractor: [0.6, 0.4] };
+
+// ======================================================================
+// Small helpers
+// ======================================================================
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const inRect = (x, y, r, m = 0) => x >= r.x - m && x <= r.x + r.w + m && y >= r.y - m && y <= r.y + r.h + m;
+function hash(x, y) {
+  let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+// ======================================================================
+// Images
+// ======================================================================
+const IMG = {};
+for (const [name, views] of Object.entries(ART)) {
+  for (const [view, src] of Object.entries(views)) {
+    if (typeof src !== 'string') continue;
+    const im = new Image();
+    im.src = src;
+    IMG[name + '-' + view] = im;
+  }
+}
+const art = (name, view) => { const im = IMG[name + '-' + view]; return im && im.complete && im.naturalWidth ? im : null; };
+
+// ======================================================================
+// Game state (everything here is saved)
+// ======================================================================
+let state;
+
+function newGame() {
+  state = {
+    v: 1, coins: CONFIG.startCoins, nextId: 1,
+    player: { mode: 'walk', x: 23, y: 9.6, dir: 'down', carry: { egg: 0, milk: 0, manure: 0 }, horse: null },
+    tractor: { x: 26.4, y: 10.8, dir: 'left', load: { corn: 0, potato: 0, carrot: 0 }, lv: { speed: 1, storage: 1, yield: 1 } },
+    patches: {}, pens: {},
+    shop: { stock: { corn: 0, potato: 0, carrot: 0, egg: 0, milk: 0, manure: 0 }, jar: 0 },
+  };
+  for (const k in PATCHES) {
+    state.patches[k] = { ext: 0, tiles: {} };
+    eachTile(patchRect(k), (x, y) => { state.patches[k].tiles[x + ',' + y] = k === 'corn' ? 1 : -1; });
+  }
+  for (const k in PENS) state.pens[k] = { ext: 0, food: 1, water: 1, breedT: 0, animals: [], items: [] };
+}
+
+function loadGame() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s && s.v === 1) state = s;
+  } catch (e) {}
+  if (!state) newGame();
+  const p = state.player;
+  for (const a of state.pens.horse.animals) a.ridden = p.mode === 'horse' && a.id === p.horse;
+  if (p.mode === 'horse' && !findHorse(p.horse)) { p.mode = 'walk'; p.horse = null; }
+}
+
+function saveGame() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+function eachTile(r, fn) { for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) fn(x, y); }
+
+function patchRect(k) {
+  const d = PATCHES[k], e = state.patches[k].ext;
+  return d.dir < 0 ? { x: d.x0 - e, y: d.y0, w: d.w + e, h: d.h } : { x: d.x0, y: d.y0, w: d.w + e, h: d.h };
+}
+function nextPatchSeg(k) {
+  const d = PATCHES[k], e = state.patches[k].ext;
+  if (e >= 5) return null;
+  return d.dir < 0 ? { x: d.x0 - e - 1, y: d.y0, w: 1, h: d.h } : { x: d.x0 + d.w + e, y: d.y0, w: 1, h: d.h };
+}
+function penRect(k) {
+  const d = PENS[k], e = state.pens[k].ext;
+  if (d.dir === 'left') return { x: d.x0 - e, y: d.y0, w: d.w + e, h: d.h };
+  if (d.dir === 'right') return { x: d.x0, y: d.y0, w: d.w + e, h: d.h };
+  return { x: d.x0, y: d.y0 - e, w: d.w, h: d.h + e };
+}
+function nextPenSeg(k) {
+  const d = PENS[k], r = penRect(k);
+  if (state.pens[k].ext >= 5) return null;
+  if (d.dir === 'left') return { x: r.x - 1, y: r.y, w: 1, h: r.h };
+  if (d.dir === 'right') return { x: r.x + r.w, y: r.y, w: 1, h: r.h };
+  return { x: r.x, y: r.y - 1, w: r.w, h: 1 };
+}
+function penInterior(k) {
+  const r = penRect(k), m = k === 'cow' || k === 'horse' ? 0.65 : 0.4;
+  return { x0: r.x + m, x1: r.x + r.w - m, y0: r.y + 0.75, y1: r.y + r.h - 0.25 };
+}
+const penCap = k => CONFIG.pens[k].cap + CONFIG.pens[k].capPerSegment * state.pens[k].ext;
+const sowCost = k => CONFIG.crops[k].sow + CONFIG.sowPerSegment * state.patches[k].ext;
+const sellPrice = kind => CONFIG.crops[kind] ? CONFIG.crops[kind].sell : CONFIG.products[kind];
+const tractorCap = () => CONFIG.tractor.storage[state.tractor.lv.storage - 1];
+const loadTotal = () => { const l = state.tractor.load; return l.corn + l.potato + l.carrot; };
+const stockTotal = () => STOCK_KINDS.reduce((n, k) => n + state.shop.stock[k], 0);
+const findHorse = id => state.pens.horse.animals.find(a => a.id === id);
+const bareTiles = k => Object.values(state.patches[k].tiles).filter(v => v < 0).length;
+
+function patchAt(tx, ty) {
+  for (const k in PATCHES) {
+    const r = patchRect(k);
+    if (tx >= r.x && tx < r.x + r.w && ty >= r.y && ty < r.y + r.h) return k;
+  }
+  return null;
+}
+
+// ======================================================================
+// Collision
+// ======================================================================
+let obs = [];
+
+function buildObstacles() {
+  obs = [];
+  const add = (x0, y0, x1, y1, who = 'all') => obs.push({ x0, y0, x1, y1, who });
+  add(HOUSE.x + 0.15, HOUSE.y + 1.0, HOUSE.x + HOUSE.w - 0.15, HOUSE.y + HOUSE.h);
+  add(SHOP.x + 0.2, SHOP.y + 0.4, SHOP.x + SHOP.w - 0.2, SHOP.y + SHOP.h);
+  add(SHED.x + 0.1, SHED.y + 0.4, SHED.x + SHED.w - 0.1, SHED.y + SHED.h);
+  for (const t of TREES) add(t.x - 0.2, t.y - 0.15, t.x + 0.2, t.y + 0.08);
+  for (const b of BUSHES) add(b.x - 0.5, b.y - 0.3, b.x + 0.5, b.y + 0.2);
+  const t = 0.1;
+  for (const k in PENS) {
+    const d = PENS[k], r = penRect(k), x1 = r.x + r.w, y1 = r.y + r.h;
+    add(r.x - t, r.y - t, x1 + t, r.y + t);
+    add(r.x - t, r.y - t, r.x + t, y1 + t);
+    add(x1 - t, r.y - t, x1 + t, y1 + t);
+    add(r.x - t, y1 - t, d.gate[0], y1 + t);
+    add(d.gate[1], y1 - t, x1 + t, y1 + t);
+    if (d.coop) add(d.coop.x, d.coop.y + 0.3, d.coop.x + d.coop.w, d.coop.y + d.coop.h);
+    add(r.x - 0.15, r.y - 0.15, x1 + 0.15, y1 + 0.15, 'tractor');
+  }
+}
+
+function blockedAt(x, y, hw, hh, mode) {
+  if (x - hw < BOUND.x0 || x + hw > BOUND.x1 || y - hh < BOUND.y0 || y + hh > BOUND.y1) return true;
+  for (const o of obs) {
+    if (o.who !== 'all' && o.who !== mode) continue;
+    if (x + hw > o.x0 && x - hw < o.x1 && y + hh > o.y0 && y - hh < o.y1) return true;
+  }
+  return false;
+}
+
+// Move with collision. When pushing straight into something, slide sideways around
+// corners and into gate openings so a child never gets stuck on an edge.
+function moveEnt(e, dx, dy, hw, hh, mode) {
+  const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / 0.08));
+  const sx = dx / n, sy = dy / n;
+  for (let i = 0; i < n; i++) {
+    if (sx) { if (!blockedAt(e.x + sx, e.y, hw, hh, mode)) e.x += sx; else if (!sy) slide(e, sx, 0, hw, hh, mode); }
+    if (sy) { if (!blockedAt(e.x, e.y + sy, hw, hh, mode)) e.y += sy; else if (!sx) slide(e, 0, sy, hw, hh, mode); }
+  }
+}
+function slide(e, sx, sy, hw, hh, mode) {
+  for (let d = 0.05; d <= 0.55; d += 0.05) {
+    for (const s of [1, -1]) {
+      const nx = e.x + (sy ? s * d : 0), ny = e.y + (sx ? s * d : 0);
+      if (!blockedAt(nx, ny, hw, hh, mode) && !blockedAt(nx + sx, ny + sy, hw, hh, mode)) {
+        const step = Math.min(d, Math.abs(sx || sy));
+        const mx = sy ? s * step : 0, my = sx ? s * step : 0;
+        if (!blockedAt(e.x + mx, e.y + my, hw, hh, mode)) { e.x += mx; e.y += my; }
+        return;
+      }
+    }
+  }
+}
+function unstick(e, hw, hh, mode) {
+  if (!blockedAt(e.x, e.y, hw, hh, mode)) return;
+  for (let r = 0.25; r < 8; r += 0.25) {
+    for (let a = 0; a < 16; a++) {
+      const nx = e.x + Math.cos(a / 8 * Math.PI) * r, ny = e.y + Math.sin(a / 8 * Math.PI) * r;
+      if (!blockedAt(nx, ny, hw, hh, mode)) { e.x = nx; e.y = ny; return; }
+    }
+  }
+}
+function unstickAll() {
+  const p = state.player;
+  unstick(state.tractor, ...BOX.tractor, 'tractor');
+  if (p.mode === 'tractor') { p.x = state.tractor.x; p.y = state.tractor.y; }
+  else unstick(p, ...BOX[p.mode], p.mode === 'horse' ? 'horse' : 'walk');
+}
+
+// ======================================================================
+// Sound (tiny synthesised effects, no files)
+// ======================================================================
+let actx = null, muted = false, noiseBuf = null;
+try { muted = localStorage.getItem('harvester-muted') === '1'; } catch (e) {}
+function ensureAudio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; } }
+  if (actx.state === 'suspended') actx.resume();
+}
+function tone(f, dur, o = {}) {
+  if (muted || !actx) return;
+  const t0 = actx.currentTime + (o.delay || 0);
+  const osc = actx.createOscillator(), gn = actx.createGain();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(f, t0);
+  if (o.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(30, f + o.slide), t0 + dur);
+  gn.gain.setValueAtTime(0.0001, t0);
+  gn.gain.exponentialRampToValueAtTime(o.vol || 0.1, t0 + 0.01);
+  gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(gn).connect(actx.destination);
+  osc.start(t0); osc.stop(t0 + dur + 0.02);
+}
+function noise(dur, vol, freq) {
+  if (muted || !actx) return;
+  if (!noiseBuf) {
+    noiseBuf = actx.createBuffer(1, actx.sampleRate * 0.3, actx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const src = actx.createBufferSource(), f = actx.createBiquadFilter(), gn = actx.createGain(), t0 = actx.currentTime;
+  src.buffer = noiseBuf; f.type = 'bandpass'; f.frequency.value = freq;
+  gn.gain.setValueAtTime(vol, t0); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f).connect(gn).connect(actx.destination);
+  src.start(t0); src.stop(t0 + dur);
+}
+const SFX = {
+  coin:   () => { tone(1320, 0.07, { type: 'square', vol: 0.03 }); tone(1760, 0.12, { type: 'square', vol: 0.03, delay: 0.06 }); },
+  clink:  () => tone(2100, 0.06, { type: 'triangle', vol: 0.035 }),
+  pop:    () => tone(500, 0.09, { slide: 500, vol: 0.09 }),
+  buy:    () => { tone(660, 0.08, { type: 'triangle' }); tone(880, 0.08, { type: 'triangle', delay: 0.08 }); tone(1320, 0.14, { type: 'triangle', delay: 0.16 }); },
+  full:   () => { tone(330, 0.14, { type: 'triangle', vol: 0.13 }); tone(247, 0.22, { type: 'triangle', vol: 0.13, delay: 0.16 }); },
+  cut:    () => noise(0.08, 0.07, 1800),
+  drop:   () => { tone(300, 0.1, { slide: -120, vol: 0.11 }); tone(200, 0.12, { slide: -80, vol: 0.09, delay: 0.08 }); },
+  horn:   () => { tone(415, 0.12, { type: 'square', vol: 0.025 }); tone(415, 0.16, { type: 'square', vol: 0.025, delay: 0.18 }); },
+  click:  () => tone(800, 0.04, { type: 'triangle', vol: 0.05 }),
+  engine: () => tone(80, 0.35, { type: 'sawtooth', vol: 0.04, slide: 60 }),
+  neigh:  () => tone(700, 0.4, { type: 'triangle', vol: 0.04, slide: -300 }),
+  baby:   () => { tone(900, 0.08, { vol: 0.07 }); tone(1200, 0.1, { vol: 0.07, delay: 0.09 }); },
+};
+const sfxLast = {};
+function sfx(name, gap = 60) {
+  const now = performance.now();
+  if (sfxLast[name] && now - sfxLast[name] < gap) return;
+  sfxLast[name] = now;
+  SFX[name]();
+}
+
+// ======================================================================
+// Drawing helpers. Everything in the world is drawn in tile units.
+// ======================================================================
+let g = null;
+const OUT = 'rgba(45,28,12,.6)';
+const LW = 0.035;
+function stroke(s) { if (s) { g.strokeStyle = s; g.lineWidth = LW; g.lineJoin = 'round'; g.stroke(); } }
+function rect(x, y, w, h, c) { g.fillStyle = c; g.fillRect(x, y, w, h); }
+function rrect(x, y, w, h, r, c, s) { g.beginPath(); g.roundRect(x, y, w, h, r); g.fillStyle = c; g.fill(); stroke(s); }
+function circ(x, y, r, c, s) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fillStyle = c; g.fill(); stroke(s); }
+function ell(x, y, rx, ry, c, s, rot = 0) { g.beginPath(); g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); g.fillStyle = c; g.fill(); stroke(s); }
+function poly(pts, c, s) {
+  g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
+  g.closePath(); g.fillStyle = c; g.fill(); stroke(s);
+}
+function line(x1, y1, x2, y2, c, w) { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokeStyle = c; g.lineWidth = w; g.lineCap = 'round'; g.stroke(); }
+function shadow(x, y, rx, ry) { ell(x, y, rx, ry, 'rgba(30,45,10,.22)'); }
+function star(x, y, r, c) {
+  const pts = [];
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * 0.35 : r; pts.push([x + Math.sin(a) * rr, y - Math.cos(a) * rr]); }
+  poly(pts, c);
+}
+
+// ======================================================================
+// Characters and animals. (x, y) is where the feet touch the ground.
+// face is 1 (looking right) or -1 (looking left).
+// ======================================================================
+function drawFarmer(x, y, dir, phase, moving, carry) {
+  shadow(x, y, 0.2, 0.06);
+  const b = moving ? Math.abs(Math.sin(phase)) * 0.035 : 0;
+  const sw = moving ? Math.sin(phase) * 0.07 : 0;
+  const side = dir === 'left' || dir === 'right', f = dir === 'left' ? -1 : 1;
+  rect(x - 0.12, y - 0.3 - Math.max(0, sw), 0.1, 0.3, '#2d4f86');
+  rect(x + 0.02, y - 0.3 - Math.max(0, -sw), 0.1, 0.3, '#2d4f86');
+  rect(x - 0.13, y - 0.04 - Math.max(0, sw), 0.12, 0.05, '#4a3020');
+  rect(x + 0.01, y - 0.04 - Math.max(0, -sw), 0.12, 0.05, '#4a3020');
+  const by = y - 0.66 - b;
+  if (!side) { rect(x - 0.24, by + 0.06, 0.08, 0.26, '#d64b3c'); rect(x + 0.16, by + 0.06, 0.08, 0.26, '#d64b3c'); }
+  rrect(x - 0.17, by, 0.34, 0.4, 0.08, '#3f6fb5', OUT);
+  if (dir === 'down') { line(x - 0.1, by + 0.02, x - 0.08, by + 0.14, '#2d4f86', 0.03); line(x + 0.1, by + 0.02, x + 0.08, by + 0.14, '#2d4f86', 0.03); }
+  if (side) rect(x - 0.04 + f * 0.02, by + 0.08, 0.09, 0.24, '#d64b3c');
+  const hy = y - 0.8 - b;
+  circ(x, hy, 0.15, '#f1c6a0', OUT);
+  if (dir === 'up') ell(x, hy + 0.02, 0.13, 0.1, '#6b4423');
+  else if (side) { circ(x + f * 0.07, hy - 0.01, 0.018, '#222'); circ(x + f * 0.14, hy + 0.03, 0.025, '#e8a888'); }
+  else { circ(x - 0.05, hy - 0.01, 0.018, '#222'); circ(x + 0.05, hy - 0.01, 0.018, '#222'); circ(x - 0.09, hy + 0.05, 0.025, '#f0a090'); circ(x + 0.09, hy + 0.05, 0.025, '#f0a090'); }
+  ell(x, hy - 0.11, 0.18, 0.07, '#1e2230', OUT);
+  circ(x, hy - 0.18, 0.025, '#1e2230');
+  if (carry) {
+    if (carry.egg || carry.manure) {
+      rrect(x - 0.36, by + 0.22, 0.18, 0.13, 0.04, '#c48a3f', OUT);
+      line(x - 0.35, by + 0.22, x - 0.27, by + 0.08, '#8a5a25', 0.025); line(x - 0.27, by + 0.08, x - 0.19, by + 0.22, '#8a5a25', 0.025);
+      if (carry.egg) { ell(x - 0.31, by + 0.21, 0.035, 0.045, '#fbf3e3'); ell(x - 0.24, by + 0.21, 0.035, 0.045, '#fbf3e3'); }
+      else ell(x - 0.27, by + 0.21, 0.07, 0.04, '#6e4b2a');
+    }
+    if (carry.milk) {
+      rrect(x + 0.18, by + 0.14, 0.15, 0.22, 0.03, '#d8dde3', OUT);
+      rect(x + 0.2, by + 0.14 + 0.2 * (1 - Math.min(1, carry.milk / 8)), 0.11, 0.2 * Math.min(1, carry.milk / 8), '#ffffff');
+      rect(x + 0.21, by + 0.1, 0.09, 0.05, '#9aa4ad');
+    }
+  }
+}
+
+function drawChicken(x, y, face, sex, baby, peck) {
+  g.save(); g.translate(x, y); g.scale(face, 1);
+  if (baby) {
+    shadow(0, 0, 0.11, 0.035);
+    line(-0.02, -0.05, -0.03, 0, '#e08a1e', 0.02); line(0.03, -0.05, 0.03, 0, '#e08a1e', 0.02);
+    ell(0, -0.1, 0.1, 0.08, '#f7d54a', OUT);
+    circ(0.07, peck ? -0.12 : -0.18, 0.06, '#f7d54a', OUT);
+    poly([[0.12, peck ? -0.13 : -0.19], [0.17, peck ? -0.11 : -0.17], [0.12, peck ? -0.1 : -0.16]], '#f0a020');
+    circ(0.09, peck ? -0.13 : -0.19, 0.012, '#222');
+    g.restore(); return;
+  }
+  const rooster = sex === 'm', body = rooster ? '#d9792b' : '#fbf8f0', wing = rooster ? '#a8501c' : '#e9e1cf';
+  shadow(0, 0, 0.2, 0.06);
+  line(-0.04, -0.09, -0.05, 0, '#e08a1e', 0.03); line(0.05, -0.09, 0.05, 0, '#e08a1e', 0.03);
+  if (rooster) { ell(-0.18, -0.32, 0.08, 0.17, '#2f5d3a', OUT, -0.5); ell(-0.13, -0.34, 0.05, 0.14, '#1d3b26', OUT, -0.2); }
+  else poly([[-0.14, -0.2], [-0.27, -0.34], [-0.1, -0.29]], body, OUT);
+  ell(0, -0.18, 0.19, 0.13, body, OUT);
+  ell(-0.03, -0.18, 0.1, 0.06, wing);
+  const hx = peck ? 0.17 : 0.13, hy = peck ? -0.17 : -0.33;
+  if (rooster) { circ(hx - 0.03, hy - 0.08, 0.045, '#e0302a'); circ(hx + 0.02, hy - 0.09, 0.045, '#e0302a'); circ(hx + 0.06, hy - 0.07, 0.035, '#e0302a'); }
+  else circ(hx, hy - 0.08, 0.035, '#e0302a');
+  circ(hx, hy, 0.08, rooster ? '#e08a3a' : body, OUT);
+  circ(hx + 0.04, hy + 0.07, 0.025, '#e0302a');
+  poly([[hx + 0.07, hy - 0.015], [hx + 0.14, hy + 0.01], [hx + 0.07, hy + 0.03]], '#f0a020');
+  circ(hx + 0.03, hy - 0.015, 0.015, '#222');
+  g.restore();
+}
+
+function drawPig(x, y, face, sex, baby) {
+  const s = baby ? 0.55 : 1;
+  g.save(); g.translate(x, y); g.scale(face * s, s);
+  const boar = sex === 'm' && !baby, body = boar ? '#b48a78' : '#f3a9b5', dark = boar ? '#8f6656' : '#df8a99';
+  shadow(0, 0, 0.33, 0.08);
+  rect(-0.24, -0.15, 0.08, 0.15, dark); rect(-0.1, -0.13, 0.08, 0.13, dark); rect(0.1, -0.15, 0.08, 0.15, dark); rect(0.2, -0.13, 0.08, 0.13, dark);
+  g.beginPath(); g.arc(-0.35, -0.32, 0.05, 0, Math.PI * 1.6); g.strokeStyle = dark; g.lineWidth = 0.03; g.stroke();
+  ell(0, -0.28, 0.32, 0.19, body, OUT);
+  circ(0.28, -0.32, 0.14, body, OUT);
+  poly([[0.19, -0.42], [0.24, -0.53], [0.3, -0.43]], dark, OUT);
+  ell(0.41, -0.3, 0.05, 0.065, dark, OUT);
+  circ(0.4, -0.32, 0.012, '#6a3a40'); circ(0.42, -0.28, 0.012, '#6a3a40');
+  circ(0.31, -0.37, 0.02, '#222');
+  if (boar) poly([[0.37, -0.25], [0.43, -0.17], [0.35, -0.22]], '#fffbe8', OUT);
+  g.restore();
+}
+
+function drawCow(x, y, face, sex, baby) {
+  const s = baby ? 0.6 : 1;
+  g.save(); g.translate(x, y); g.scale(face * s, s);
+  const bull = sex === 'm' && !baby, body = bull ? '#7a4a2c' : '#fafaf5', leg = bull ? '#5e3820' : '#e6e6e0';
+  shadow(0, 0, 0.5, 0.1);
+  for (const lx of [-0.4, -0.25, 0.18, 0.3]) { rect(lx, -0.3, 0.09, 0.3, leg); rect(lx, -0.06, 0.09, 0.06, '#3a2a20'); }
+  line(-0.46, -0.6, -0.54, -0.32, bull ? '#5e3820' : '#cfcfc8', 0.04); ell(-0.54, -0.3, 0.035, 0.06, '#3a2a20');
+  rrect(-0.5, -0.74, 0.88, 0.48, 0.16, body, OUT);
+  if (!bull) { ell(-0.22, -0.57, 0.13, 0.09, '#2b2b2b'); ell(0.1, -0.45, 0.1, 0.07, '#2b2b2b'); ell(-0.36, -0.4, 0.06, 0.05, '#2b2b2b'); ell(0.18, -0.64, 0.06, 0.04, '#2b2b2b'); }
+  if (sex === 'f' && !baby) ell(-0.06, -0.26, 0.1, 0.065, '#f5a3b3', OUT);
+  if (bull) { poly([[0.36, -0.88], [0.27, -1.02], [0.42, -0.9]], '#efe6d0', OUT); poly([[0.52, -0.88], [0.62, -1.02], [0.48, -0.9]], '#efe6d0', OUT); }
+  else if (!baby) { poly([[0.38, -0.88], [0.34, -0.97], [0.42, -0.89]], '#efe6d0'); poly([[0.52, -0.88], [0.56, -0.97], [0.48, -0.89]], '#efe6d0'); }
+  ell(0.3, -0.82, 0.08, 0.04, body, OUT);
+  rrect(0.32, -0.9, 0.28, 0.34, 0.1, body, OUT);
+  rrect(0.41, -0.68, 0.22, 0.15, 0.06, bull ? '#a8765a' : '#f2b8a0', OUT);
+  circ(0.47, -0.62, 0.015, '#5a3a30'); circ(0.56, -0.62, 0.015, '#5a3a30');
+  circ(0.45, -0.79, 0.022, '#222');
+  if (bull) { g.beginPath(); g.arc(0.52, -0.56, 0.04, 0, Math.PI); g.strokeStyle = '#d4b14a'; g.lineWidth = 0.025; g.stroke(); }
+  g.restore();
+}
+
+function drawHorse(x, y, face, sex, baby, rider) {
+  const s = baby ? 0.6 : 1;
+  g.save(); g.translate(x, y); g.scale(face * s, s);
+  const c = baby ? '#c79a6b' : sex === 'm' ? '#3b2b25' : '#a5643a';
+  const mane = baby ? '#8a5a35' : sex === 'm' ? '#141010' : '#5b3420';
+  shadow(0, 0, 0.5, 0.1);
+  for (const lx of [-0.36, -0.24, 0.2, 0.3]) { rect(lx, -0.46, 0.08, 0.46, c); rect(lx, -0.06, 0.08, 0.06, '#2a2020'); }
+  poly([[-0.42, -0.72], [-0.52, -0.65], [-0.6, -0.3], [-0.5, -0.32], [-0.44, -0.58]], mane, OUT);
+  ell(-0.02, -0.62, 0.45, 0.21, c, OUT);
+  poly([[0.2, -0.74], [0.36, -1.05], [0.52, -0.98], [0.42, -0.62]], c, OUT);
+  rrect(0.38, -1.12, 0.36, 0.19, 0.08, c, OUT);
+  rrect(0.6, -1.06, 0.14, 0.13, 0.05, baby ? '#a87a4b' : sex === 'm' ? '#2a1e1a' : '#7e4a2a');
+  poly([[0.18, -0.76], [0.34, -1.08], [0.4, -1.04], [0.25, -0.72]], mane);
+  poly([[0.42, -1.1], [0.44, -1.22], [0.5, -1.11]], c, OUT);
+  circ(0.5, -1.05, 0.022, '#111');
+  if (sex === 'f' && !baby) line(0.56, -1.11, 0.68, -1.04, '#f4efe4', 0.04);
+  if (rider) {
+    rect(-0.04, -0.92, 0.1, 0.34, '#2d4f86'); rect(-0.05, -0.62, 0.12, 0.06, '#4a3020');
+    rrect(-0.2, -1.28, 0.32, 0.38, 0.08, '#3f6fb5', OUT);
+    rect(0.02, -1.2, 0.09, 0.22, '#d64b3c');
+    circ(-0.04, -1.42, 0.15, '#f1c6a0', OUT);
+    circ(0.04, -1.43, 0.018, '#222'); circ(0.1, -1.39, 0.025, '#e8a888');
+    ell(-0.04, -1.53, 0.18, 0.07, '#1e2230', OUT); circ(-0.04, -1.6, 0.025, '#1e2230');
+  }
+  g.restore();
+}
+
+function drawAnimal(k, a) {
+  const peck = a.wait > 0 && Math.sin(T * 6 + a.id) > 0.6;
+  if (k === 'chicken') drawChicken(a.x, a.y, a.face, a.sex, !a.adult, peck);
+  else if (k === 'pig') drawPig(a.x, a.y, a.face, a.sex, !a.adult);
+  else if (k === 'cow') {
+    drawCow(a.x, a.y, a.face, a.sex, !a.adult);
+    if (a.milk > 0) { const by = Math.sin(T * 3 + a.id) * 0.05; circ(a.x + a.face * 0.45, a.y - 1.15 + by, 0.12, '#ffffff', OUT); ell(a.x + a.face * 0.45, a.y - 1.15 + by, 0.05, 0.07, '#cfe6f5'); }
+  } else drawHorse(a.x, a.y, a.face, a.sex, !a.adult, false);
+}
+
+// ======================================================================
+// Tractor
+// ======================================================================
+function tractorSprite(dir) {
+  const im = art('tractor', dir);
+  if (!im) return null;
+  const ref = IMG['tractor-left'] && IMG['tractor-left'].naturalWidth || 546;
+  const k = ART.tractor.width / ref;
+  return { im, w: im.naturalWidth * k, h: im.naturalHeight * k };
+}
+function drawTractor(t) {
+  const side = t.dir === 'left' || t.dir === 'right';
+  const shake = state.player.mode === 'tractor' && anim.moving ? Math.sin(T * 40) * 0.01 : 0;
+  shadow(t.x, t.y + 0.36, side ? 0.95 : 0.72, 0.2);
+  const sp = tractorSprite(t.dir);
+  if (sp) { g.drawImage(sp.im, t.x - sp.w / 2, t.y + 0.45 - sp.h + shake, sp.w, sp.h); return; }
+  // drawn stand-in, used only if the images are missing
+  g.save(); g.translate(t.x, t.y + 0.45 + shake);
+  if (side) {
+    g.scale(t.dir === 'left' ? -1 : 1, 1);
+    rrect(-0.15, -0.8, 0.95, 0.42, 0.1, '#d8352a', OUT);
+    rrect(-0.75, -1.45, 0.65, 0.8, 0.08, '#d8352a', OUT);
+    rrect(-0.66, -1.32, 0.48, 0.45, 0.04, '#8fc6e8');
+    rect(-0.8, -1.52, 0.75, 0.12, '#e8473a');
+    rect(0.35, -1.2, 0.08, 0.42, '#333');
+    circ(-0.4, -0.38, 0.38, '#2a2a2a', OUT); circ(-0.4, -0.38, 0.2, '#f2c230');
+    circ(0.55, -0.22, 0.22, '#2a2a2a', OUT); circ(0.55, -0.22, 0.11, '#f2c230');
+  } else {
+    rrect(-0.65, -0.75, 0.3, 0.7, 0.1, '#2a2a2a', OUT); rrect(0.35, -0.75, 0.3, 0.7, 0.1, '#2a2a2a', OUT);
+    rrect(-0.4, -1.5, 0.8, 0.85, 0.08, '#d8352a', OUT);
+    rrect(-0.3, -1.38, 0.6, 0.4, 0.04, '#8fc6e8');
+    rect(-0.45, -1.58, 0.9, 0.12, '#e8473a');
+    if (t.dir === 'down') { rrect(-0.25, -0.85, 0.5, 0.5, 0.08, '#d8352a', OUT); circ(-0.12, -0.6, 0.05, '#fff6c0'); circ(0.12, -0.6, 0.05, '#fff6c0'); }
+  }
+  g.restore();
+}
+function tractorTop(t) { const sp = tractorSprite(t.dir); return t.y + 0.45 - (sp ? sp.h : 1.6); }
+
+// ======================================================================
+// Icons: the same drawings, fitted into a box from -0.5 to 0.5.
+// Used on signs, in menus, in the top bar and for flying items.
+// ======================================================================
+function scaled(sc, fn) { g.save(); g.scale(sc, sc); fn(); g.restore(); }
+const ICON = {
+  corn: () => {
+    poly([[-0.05, 0.42], [-0.3, 0.05], [-0.22, -0.2], [-0.04, 0.2]], '#5fa53a', OUT);
+    poly([[0.05, 0.42], [0.3, 0.05], [0.22, -0.2], [0.04, 0.2]], '#4f8f2f', OUT);
+    ell(0, -0.02, 0.15, 0.36, '#f2c535', OUT);
+    for (let i = -3; i <= 3; i++) for (let j = -1; j <= 1; j++) circ(j * 0.07, -0.02 + i * 0.09, 0.025, '#e0a820');
+  },
+  potato: () => {
+    ell(0.12, 0.1, 0.26, 0.2, '#b98a50', OUT, 0.3);
+    ell(-0.1, -0.05, 0.3, 0.22, '#c99a5a', OUT, -0.2);
+    circ(-0.2, -0.08, 0.025, '#8a6538'); circ(0.02, 0.02, 0.025, '#8a6538'); circ(-0.08, -0.16, 0.02, '#8a6538');
+  },
+  carrot: () => {
+    for (const a of [-0.5, -0.2, 0.1]) line(0.12, -0.24, 0.12 + Math.sin(a) * 0.3, -0.24 - Math.cos(a) * 0.26, '#4f9f2f', 0.07);
+    poly([[-0.02, -0.28], [0.26, -0.18], [-0.3, 0.44]], '#ef8a23', OUT);
+    line(-0.02, 0, 0.08, 0.02, '#c86a10', 0.03); line(-0.1, 0.16, 0, 0.18, '#c86a10', 0.03);
+  },
+  egg: () => ell(0, 0.02, 0.25, 0.33, '#fbf3e3', OUT),
+  milk: () => {
+    rrect(-0.24, -0.18, 0.48, 0.62, 0.1, '#eef2f5', OUT);
+    rrect(-0.13, -0.38, 0.26, 0.24, 0.05, '#eef2f5', OUT);
+    rect(-0.15, -0.44, 0.3, 0.09, '#3d7cc9');
+    rect(-0.24, 0.04, 0.48, 0.16, '#3d7cc9');
+  },
+  manure: () => {
+    ell(0, 0.28, 0.4, 0.14, '#5e4024', OUT); ell(0, 0.12, 0.3, 0.13, '#6e4b2a', OUT);
+    ell(0, -0.03, 0.2, 0.1, '#7a5532', OUT); ell(0.02, -0.15, 0.09, 0.07, '#86603a', OUT);
+    line(-0.3, -0.25, -0.25, -0.38, '#6b5a40', 0.025); line(0.28, -0.2, 0.33, -0.34, '#6b5a40', 0.025);
+  },
+  coin: () => { circ(0, 0, 0.46, '#f4b52f', '#9b6a10'); circ(0, 0, 0.33, '#ffd257'); circ(0, 0, 0.33, 'rgba(0,0,0,0)', 'rgba(155,106,16,.6)'); star(0, 0, 0.18, '#f4b52f'); },
+  hen: () => scaled(1.9, () => drawChicken(0, 0.22, 1, 'f', false, false)),
+  rooster: () => scaled(1.75, () => drawChicken(0.02, 0.24, 1, 'm', false, false)),
+  sow: () => scaled(1.4, () => drawPig(-0.03, 0.3, 1, 'f', false)),
+  boar: () => scaled(1.4, () => drawPig(-0.03, 0.3, 1, 'm', false)),
+  cow: () => scaled(0.82, () => drawCow(-0.06, 0.55, 1, 'f', false)),
+  bull: () => scaled(0.82, () => drawCow(-0.06, 0.6, 1, 'm', false)),
+  mare: () => scaled(0.76, () => drawHorse(-0.1, 0.62, 1, 'f', false, false)),
+  stallion: () => scaled(0.76, () => drawHorse(-0.1, 0.62, 1, 'm', false, false)),
+  speed: () => {
+    for (const yy of [-0.2, 0, 0.2]) line(-0.48, yy, -0.2, yy, '#6a8a3c', 0.06);
+    circ(0.12, 0, 0.36, '#2a2a2a', OUT); circ(0.12, 0, 0.17, '#f2c230', OUT); circ(0.12, 0, 0.05, '#2a2a2a');
+  },
+  storage: () => {
+    ell(0, -0.12, 0.36, 0.17, '#f2c535', OUT);
+    rrect(-0.4, -0.12, 0.8, 0.5, 0.06, '#b77b3f', OUT);
+    line(-0.4, 0.06, 0.4, 0.06, '#8a5a25', 0.03); line(-0.4, 0.22, 0.4, 0.22, '#8a5a25', 0.03);
+  },
+  yield: () => {
+    g.save(); g.translate(-0.17, 0.05); g.rotate(-0.35); g.scale(0.75, 0.75); ICON.corn(); g.restore();
+    g.save(); g.translate(0.17, 0.05); g.rotate(0.35); g.scale(0.75, 0.75); ICON.corn(); g.restore();
+    g.save(); g.translate(0, -0.02); g.scale(0.8, 0.8); ICON.corn(); g.restore();
+  },
+  food: () => {
+    ell(0, -0.02, 0.4, 0.14, '#e7c14a', OUT);
+    rrect(-0.45, 0, 0.9, 0.3, 0.06, '#8a5a30', OUT);
+    for (let i = -3; i <= 3; i++) circ(i * 0.1, -0.06 + (i % 2) * 0.04, 0.03, '#c99a20');
+  },
+  water: () => {
+    g.beginPath(); g.moveTo(0, -0.42); g.bezierCurveTo(0.12, -0.2, 0.32, 0, 0.32, 0.14);
+    g.arc(0, 0.14, 0.32, 0, Math.PI); g.bezierCurveTo(-0.32, 0, -0.12, -0.2, 0, -0.42);
+    g.fillStyle = '#4aa3df'; g.fill(); stroke(OUT);
+    ell(-0.12, 0.14, 0.06, 0.1, 'rgba(255,255,255,.6)');
+  },
+  extendCrop: () => {
+    rrect(-0.46, -0.3, 0.6, 0.6, 0.06, '#8e6b44', OUT);
+    for (const yy of [-0.15, 0, 0.15]) line(-0.4, yy, 0.08, yy, '#6f5233', 0.04);
+    rrect(0.18, -0.3, 0.28, 0.6, 0.06, 'rgba(0,0,0,0)', '#6a8a3c');
+    circ(0.32, 0.26, 0.17, '#6ab04c', OUT); line(0.22, 0.26, 0.42, 0.26, '#fff', 0.06); line(0.32, 0.16, 0.32, 0.36, '#fff', 0.06);
+  },
+  extendPen: () => {
+    rect(-0.48, -0.16, 0.8, 0.07, '#9a6a3a'); rect(-0.48, 0.04, 0.8, 0.07, '#9a6a3a');
+    for (const xx of [-0.42, -0.08, 0.26]) rect(xx - 0.05, -0.28, 0.1, 0.48, '#6f4826');
+    circ(0.32, 0.26, 0.17, '#6ab04c', OUT); line(0.22, 0.26, 0.42, 0.26, '#fff', 0.06); line(0.32, 0.16, 0.32, 0.36, '#fff', 0.06);
+  },
+  tractor: () => {
+    const sp = tractorSprite('right');
+    if (sp) { const h = 0.95 * sp.h / sp.w; g.drawImage(sp.im, -0.48, 0.42 - h, 0.95, h); }
+    else scaled(0.5, () => drawTractor({ x: 0, y: 0.4, dir: 'right' }));
+  },
+  wrench: () => {
+    g.save(); g.rotate(-0.78);
+    rrect(-0.07, -0.1, 0.14, 0.55, 0.05, '#5c6670');
+    circ(0, -0.18, 0.18, '#5c6670'); rect(-0.06, -0.38, 0.12, 0.18, '#f2c230');
+    g.restore();
+  },
+  star: () => star(0, 0, 0.46, '#f2c230'),
+};
+function drawIcon(k, x, y, size) { g.save(); g.translate(x, y); g.scale(size, size); ICON[k](); g.restore(); }
+
+function iconCanvas(k, px, cls) {
+  const c = document.createElement('canvas'), d = Math.min(2, devicePixelRatio || 1);
+  c.width = c.height = Math.round(px * d);
+  if (cls) c.className = cls;
+  const prev = g; g = c.getContext('2d');
+  g.setTransform(px * d, 0, 0, px * d, px * d / 2, px * d / 2);
+  ICON[k]();
+  g = prev;
+  return c;
+}
+
+// ======================================================================
+// Scenery
+// ======================================================================
+const FENCE = '#a0703e', FENCE_D = '#6f4826';
+function post(x, y, tall) { const h = tall ? 0.68 : 0.56; rect(x - 0.055, y - h + 0.02, 0.11, h, FENCE_D); rect(x - 0.055, y - h + 0.02, 0.11, 0.06, '#c4925a'); }
+function fenceH(x0, x1, y) {
+  if (x1 - x0 < 0.05) return;
+  rect(x0, y - 0.45, x1 - x0, 0.07, FENCE); rect(x0, y - 0.25, x1 - x0, 0.07, FENCE);
+  post(x0, y); post(x1, y);
+  for (let x = Math.ceil(x0 + 0.3); x < x1 - 0.3; x++) post(x, y);
+}
+function fenceV(x, y0, y1) { rect(x - 0.04, y0 - 0.45, 0.08, y1 - y0 + 0.2, FENCE); post(x, y1); }
+
+function drawTree(t) {
+  shadow(t.x, t.y, 0.6, 0.18);
+  rect(t.x - 0.1, t.y - 0.7, 0.2, 0.72, '#7a5230');
+  circ(t.x, t.y - 1.15, 0.62, t.apple ? '#5a9a3c' : '#4a8636', OUT);
+  circ(t.x - 0.22, t.y - 1.32, 0.3, t.apple ? '#6fb04a' : '#5c9c42');
+  if (t.apple) for (let i = 0; i < 6; i++) { const a = hash(i, t.x * 10) * 6.28, r = 0.2 + hash(t.y * 10, i) * 0.32; circ(t.x + Math.cos(a) * r, t.y - 1.15 + Math.sin(a) * r * 0.9, 0.06, '#e2452f'); }
+}
+function drawBush(b) { shadow(b.x, b.y, 0.6, 0.14); ell(b.x, b.y - 0.28, 0.6, 0.38, '#4f8f3a', OUT); ell(b.x - 0.18, b.y - 0.4, 0.25, 0.15, '#62a548'); }
+
+function windowShutters(x, y, w, h) {
+  rect(x - w * 0.45, y, w * 0.42, h, '#b8352a'); rect(x + w * 1.03, y, w * 0.42, h, '#b8352a');
+  rrect(x, y, w, h, 0.03, '#3d5a6e', OUT);
+  line(x + w / 2, y, x + w / 2, y + h, '#f4efe4', 0.04); line(x, y + h / 2, x + w, y + h / 2, '#f4efe4', 0.04);
+}
+
+function drawHouse() {
+  const L0 = 19.2, R0 = 26.8, F = 8, cx = 23;
+  shadow(cx, F, 4.5, 0.4);
+  poly([[18.2, 5.85], [cx, 2.7], [cx, 1.75], [18.2, 4.9]], '#a9472f', OUT);
+  poly([[27.8, 5.85], [cx, 2.7], [cx, 1.75], [27.8, 4.9]], '#c35a3d', OUT);
+  for (let i = 1; i < 4; i++) {
+    const f = i / 4;
+    line(18.2, 5.85 - f * 0.95, cx, 2.7 - f * 0.95, 'rgba(90,30,20,.35)', 0.04);
+    line(27.8, 5.85 - f * 0.95, cx, 2.7 - f * 0.95, 'rgba(90,30,20,.35)', 0.04);
+  }
+  poly([[L0, F], [L0, 5.4], [cx, 3.05], [R0, 5.4], [R0, F]], '#f4efe4', OUT);
+  rect(L0, F - 0.32, R0 - L0, 0.32, '#cfc6b4');
+  for (let i = 0; i < 5; i++) { rect(L0, 5.6 + i * 0.48, 0.3 + (i % 2) * 0.15, 0.4, '#d9d0bd'); rect(R0 - 0.3 - (i % 2) * 0.15, 5.6 + i * 0.48, 0.3 + (i % 2) * 0.15, 0.4, '#d9d0bd'); }
+  rect(L0, 5.35, R0 - L0, 0.14, '#7a5230');
+  rect(20.3, 4.95, 5.4, 0.1, '#7a5230');
+  for (let x = 20.4; x < 25.7; x += 0.3) rect(x, 5.0, 0.06, 0.36, '#7a5230');
+  windowShutters(21.3, 4.25, 0.55, 0.5); windowShutters(24.15, 4.25, 0.55, 0.5);
+  windowShutters(20.4, 6.1, 0.75, 0.7); windowShutters(24.85, 6.1, 0.75, 0.7);
+  rrect(22.35, 6.35, 1.3, 1.65, [0.65, 0.65, 0, 0], '#6b4226', OUT);
+  line(23, 6.4, 23, 8, '#4f2f18', 0.04);
+  circ(23.35, 7.2, 0.05, '#e2c27a');
+  poly([[18.1, 5.95], [cx, 2.6], [cx, 3.05], [18.4, 6.2]], '#8f3b27', OUT);
+  poly([[27.9, 5.95], [cx, 2.6], [cx, 3.05], [27.6, 6.2]], '#8f3b27', OUT);
+}
+
+function drawShop() {
+  const x = SHOP.x, w = SHOP.w, top = SHOP.y - 1.0, F = SHOP.y + SHOP.h;
+  shadow(x + w / 2, F, w / 2 + 0.3, 0.3);
+  poly([[x - 0.2, top + 0.7], [x + w / 2, top - 0.6], [x + w + 0.2, top + 0.7]], '#b5523b', OUT);
+  rrect(x + 0.2, top + 0.55, w - 0.4, F - top - 0.55, 0.04, '#f6ecd6', OUT);
+  rect(x + 0.6, top + 1.35, w - 1.2, 1.6, '#5a4636');
+  rect(x + 0.7, top + 1.95, w - 1.4, 0.08, '#8a6a4a'); rect(x + 0.7, top + 2.5, w - 1.4, 0.08, '#8a6a4a');
+  for (let i = 0; i < 9; i++) { circ(x + 0.95 + i * 0.6, top + 1.86, 0.1, ['#f2c535', '#ef8a23', '#c99a5a'][i % 3]); circ(x + 1.1 + i * 0.6, top + 2.42, 0.1, ['#eef2f5', '#fbf3e3', '#e2452f'][i % 3]); }
+  const ay = top + 0.85, n = 10, sw = (w + 0.2) / n;
+  for (let i = 0; i < n; i++) rect(x - 0.1 + i * sw, ay, sw, 0.45, i % 2 ? '#f6f2ea' : '#d8352a');
+  for (let i = 0; i < n; i++) circ(x - 0.1 + (i + 0.5) * sw, ay + 0.45, sw / 2, i % 2 ? '#f6f2ea' : '#d8352a');
+  rrect(x + 0.3, F - 0.78, w - 0.6, 0.8, 0.06, '#a8743f', OUT);
+  rect(x + 0.3, F - 0.8, w - 0.6, 0.16, '#c99459');
+  STOCK_KINDS.forEach((kind, i) => {
+    const n2 = Math.min(4, state.shop.stock[kind]), sx = slotX(i);
+    for (let j = 0; j < n2; j++) drawIcon(kind, sx + (j % 2) * 0.24 - 0.12, F - 0.92 - Math.floor(j / 2) * 0.2, 0.36);
+  });
+  drawJar();
+}
+const slotX = i => SHOP.x + 0.9 + i * 0.95;
+function drawJar() {
+  const x = JAR.x, y = JAR.y, jar = state.shop.jar;
+  rrect(x - 0.25, y - 0.6, 0.5, 0.6, 0.1, 'rgba(205,235,250,.55)', OUT);
+  const h = 0.48 * Math.min(1, jar / 30);
+  if (jar > 0) { rect(x - 0.19, y - 0.06 - h, 0.38, h, '#f2b42c'); for (let i = 0; i < Math.min(6, jar); i++) circ(x - 0.12 + (i % 3) * 0.12, y - 0.1 - Math.floor(i / 3) * 0.1, 0.05, '#ffd257'); }
+  rect(x - 0.2, y - 0.66, 0.4, 0.09, '#8a5a30');
+  ell(x - 0.12, y - 0.38, 0.04, 0.12, 'rgba(255,255,255,.6)');
+}
+
+function drawShed() {
+  const x = SHED.x, w = SHED.w, top = SHED.y - 0.8, F = SHED.y + SHED.h;
+  shadow(x + w / 2, F, w / 2 + 0.3, 0.3);
+  poly([[x - 0.2, top + 0.5], [x + 0.5, top - 0.5], [x + w - 0.5, top - 0.5], [x + w + 0.2, top + 0.5]], '#5d6f7a', OUT);
+  rect(x + 0.1, top + 0.45, w - 0.2, F - top - 0.45, '#a9b8bf');
+  for (let xx = x + 0.3; xx < x + w - 0.1; xx += 0.25) line(xx, top + 0.5, xx, F, 'rgba(70,90,100,.35)', 0.025);
+  rect(x + 1.0, top + 1.3, w - 2, F - top - 1.3, '#4b5661');
+  for (let yy = top + 1.5; yy < F; yy += 0.28) line(x + 1.0, yy, x + w - 1.0, yy, 'rgba(0,0,0,.25)', 0.03);
+  rect(x + 0.1, top + 0.45, w - 0.2, 0.06, '#7d8f98');
+  const hov = hoverId === 'shed';
+  circ(x + w / 2, top + 0.85, 0.38, hov ? '#ffd257' : '#f2c230', OUT);
+  drawIcon('wrench', x + w / 2, top + 0.85, 0.6);
+}
+
+function drawSign(s, icon, id, wiggle) {
+  const hov = hoverId === id;
+  shadow(s.x, s.y, 0.14, 0.05);
+  rect(s.x - 0.05, s.y - 0.62, 0.1, 0.64, '#6f4826');
+  g.save(); g.translate(s.x, s.y - 0.8);
+  if (wiggle) g.rotate(Math.sin(T * 5) * 0.06);
+  if (hov) g.scale(1.12, 1.12);
+  rrect(-0.46, -0.4, 0.92, 0.7, 0.08, hov ? '#e8bf82' : '#cf9f60', '#6f4826');
+  rect(-0.38, -0.33, 0.76, 0.56, hov ? '#f6dcae' : '#e9cb98');
+  drawIcon(icon, 0, -0.05, 0.52);
+  g.restore();
+}
+
+function troughBox(x, y, w, lvl, c) {
+  rrect(x, y, w, 0.42, 0.07, '#8a5a30', OUT);
+  rect(x + 0.07, y + 0.08, w - 0.14, 0.2, '#4a2f18');
+  if (lvl > 0) rect(x + 0.07, y + 0.08, (w - 0.14) * lvl, 0.2, c);
+}
+function drawTroughs(k) {
+  const d = PENS[k].troughs, pen = state.pens[k];
+  if (hoverId === 'trough-' + k) rrect(d.x - 0.12, d.y - 0.12, 2.04, 0.66, 0.12, 'rgba(255,240,170,.6)');
+  troughBox(d.x, d.y, 0.9, pen.food, '#e7c14a');
+  troughBox(d.x + 1.0, d.y, 0.8, pen.water, '#4aa3df');
+}
+
+function drawCoop(c) {
+  shadow(c.x + c.w / 2, c.y + c.h, c.w / 2 + 0.1, 0.12);
+  rect(c.x + 0.1, c.y + 0.25, c.w - 0.2, c.h - 0.25, '#c9955a');
+  for (let yy = c.y + 0.4; yy < c.y + c.h; yy += 0.18) line(c.x + 0.1, yy, c.x + c.w - 0.1, yy, 'rgba(90,50,20,.3)', 0.025);
+  poly([[c.x - 0.05, c.y + 0.35], [c.x + c.w / 2, c.y - 0.25], [c.x + c.w + 0.05, c.y + 0.35]], '#b5523b', OUT);
+  rrect(c.x + c.w / 2 - 0.18, c.y + c.h - 0.42, 0.36, 0.42, [0.18, 0.18, 0, 0], '#3a2618');
+  line(c.x + c.w / 2 + 0.2, c.y + c.h, c.x + c.w / 2 + 0.55, c.y + c.h - 0.3, '#8a5a30', 0.05);
+}
+
+function drawCar(c) {
+  g.save(); g.translate(c.x, carY(c)); g.scale(c.dir, 1);
+  shadow(0, 0, 0.95, 0.12);
+  poly([[-0.55, -0.55], [-0.35, -0.92], [0.38, -0.92], [0.62, -0.55]], c.color, OUT);
+  poly([[-0.45, -0.57], [-0.3, -0.85], [0, -0.85], [0, -0.57]], '#cfe8f6');
+  poly([[0.06, -0.57], [0.06, -0.85], [0.34, -0.85], [0.52, -0.57]], '#cfe8f6');
+  rrect(-0.95, -0.58, 1.9, 0.44, 0.14, c.color, OUT);
+  circ(0.86, -0.42, 0.05, '#fff6c0');
+  rect(-0.95, -0.36, 0.08, 0.08, '#d8352a');
+  for (const wx of [-0.55, 0.55]) { circ(wx, -0.14, 0.17, '#222', OUT); circ(wx, -0.14, 0.07, '#bbb'); }
+  g.restore();
+}
+
+// ======================================================================
+// Ground layer
+// ======================================================================
+function drawGround(v) {
+  rect(v.x0, v.y0, v.x1 - v.x0, v.y1 - v.y0, '#7aa951');
+  rect(0, 0, W, H, '#8cc063');
+  const tx0 = Math.max(0, Math.floor(v.x0)), tx1 = Math.min(W - 1, Math.ceil(v.x1));
+  const ty0 = Math.max(0, Math.floor(v.y0)), ty1 = Math.min(H - 1, Math.ceil(v.y1));
+  for (let ty = ty0; ty <= ty1; ty++) {
+    if (ty >= 31 && ty <= 32) continue;
+    for (let tx = tx0; tx <= tx1; tx++) {
+      const h = hash(tx, ty), h2 = hash(ty + 7, tx + 3);
+      if (h < 0.6) {
+        const gx = tx + 0.1 + h * 0.8, gy = ty + 0.15 + h2 * 0.75;
+        line(gx, gy, gx - 0.05, gy - 0.12, '#79ad52', 0.035); line(gx, gy, gx + 0.05, gy - 0.12, '#79ad52', 0.035);
+      }
+      if (h > 0.95) { const fx = tx + h2 * 0.8 + 0.1, fy = ty + h * 0.5 + 0.2; for (let i = 0; i < 4; i++) circ(fx + Math.cos(i * 1.57) * 0.05, fy + Math.sin(i * 1.57) * 0.05, 0.04, h2 > 0.5 ? '#fff' : '#f7d54a'); circ(fx, fy, 0.03, '#f2a020'); }
+    }
+  }
+  for (const t of TRACKS) rrect(t.x, t.y, t.w, t.h, 0.35, '#d9be88');
+  for (const t of TRACKS) for (let i = 0; i < t.w * t.h * 0.6; i++) {
+    const px = t.x + 0.2 + hash(i, t.x) * (t.w - 0.4), py = t.y + 0.2 + hash(t.y, i) * (t.h - 0.4);
+    if (px > v.x0 && px < v.x1 && py > v.y0 && py < v.y1) circ(px, py, 0.04, '#c4a670');
+  }
+  for (const p of [SHOP_PAD, SHED_PAD]) rrect(p.x, p.y, p.w, p.h - 0.05, 0.12, '#cdc8bc', '#a8a294');
+  ell(28.2, 30.2, 0.4, 0.15, 'rgba(60,60,60,.18)');
+  rect(0, 31, W, 2.2, '#77756f');
+  rect(0, 30.92, W, 0.14, '#d8d3c6'); rect(0, 33.14, W, 0.12, '#d8d3c6');
+  for (let x = 0.3; x < W; x += 1.6) rect(x, 32.06, 0.8, 0.08, '#f0ece0');
+  for (let x = 0.5; x < W; x += 1.1) ell(x, 34.35, 0.75, 0.5, x % 2.2 < 1.1 ? '#4f8a3a' : '#5a9842', OUT);
+  // mud and dropped items in the pens
+  const mud = PENS.pig.mud;
+  ell(mud.x, mud.y, 1.0, 0.42, '#7a5a3a'); ell(mud.x + 0.2, mud.y - 0.05, 0.55, 0.2, '#8a6842');
+  for (const k in PENS) for (const it of state.pens[k].items) {
+    if (it.kind === 'egg') { shadow(it.x, it.y, 0.1, 0.03); ell(it.x, it.y - 0.09, 0.085, 0.11, '#fbf3e3', OUT); }
+    else {
+      ell(it.x, it.y - 0.04, 0.17, 0.07, '#5e4024', OUT); ell(it.x, it.y - 0.1, 0.11, 0.055, '#6e4b2a'); ell(it.x, it.y - 0.15, 0.055, 0.035, '#7a5532');
+      const a = T * 5 + it.id; circ(it.x + Math.cos(a) * 0.2, it.y - 0.32 + Math.sin(a * 1.3) * 0.06, 0.018, '#222');
+    }
+  }
+}
+
+function drawPatches() {
+  for (const k in PATCHES) {
+    const r = patchRect(k), tiles = state.patches[k].tiles;
+    rrect(r.x - 0.06, r.y - 0.06, r.w + 0.12, r.h + 0.12, 0.14, '#7d5c39');
+    rect(r.x, r.y, r.w, r.h, '#8e6b44');
+    for (let ty = r.y; ty < r.y + r.h; ty++) { rect(r.x + 0.08, ty + 0.28, r.w - 0.16, 0.06, '#77583a'); rect(r.x + 0.08, ty + 0.72, r.w - 0.16, 0.06, '#77583a'); }
+    const seg = nextPatchSeg(k);
+    if (seg) dashed(seg);
+    eachTile(r, (tx, ty) => { const v = tiles[tx + ',' + ty]; if (v >= 0) drawCrop(k, tx, ty, v); });
+  }
+  for (const k in PENS) { const seg = nextPenSeg(k); if (seg) dashed(seg); }
+}
+function dashed(r) {
+  g.save(); g.setLineDash([0.18, 0.14]); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 0.05;
+  g.strokeRect(r.x + 0.08, r.y + 0.08, r.w - 0.16, r.h - 0.16); g.restore();
+}
+
+function drawCrop(k, tx, ty, v) {
+  const ripe = v >= 1, st = ripe ? 3 : v < 0.34 ? 0 : v < 0.67 ? 1 : 2;
+  const sway = Math.sin(T * 2 + tx * 0.7 + ty * 1.3) * (ripe ? 0.05 : 0.02);
+  if (k === 'corn') {
+    for (let i = 0; i < 3; i++) {
+      const px = tx + 0.2 + i * 0.3, py = ty + 0.5 + (i % 2) * 0.28, h = [0.12, 0.35, 0.6, 0.88][st];
+      if (st === 0) { ell(px, py - 0.04, 0.06, 0.04, '#6dbb45'); continue; }
+      line(px, py, px + sway, py - h, '#4f8f2f', 0.06);
+      line(px, py - h * 0.35, px - 0.15 + sway * 0.5, py - h * 0.5, '#5fa53a', 0.05);
+      line(px, py - h * 0.6, px + 0.15 + sway * 0.6, py - h * 0.75, '#5fa53a', 0.05);
+      if (ripe) { ell(px + sway * 0.7 + 0.06, py - h * 0.55, 0.055, 0.12, '#f3c837', OUT); line(px + sway, py - h, px + sway * 1.2, py - h - 0.12, '#e8cf8a', 0.04); }
+    }
+  } else if (k === 'potato') {
+    for (let i = 0; i < 2; i++) {
+      const px = tx + 0.3 + i * 0.4, py = ty + 0.45 + i * 0.25;
+      if (st === 0) { ell(px, py - 0.03, 0.07, 0.04, '#6dbb45'); continue; }
+      const r = [0, 0.12, 0.17, 0.22][st];
+      if (ripe) { ell(px - 0.13, py + 0.04, 0.08, 0.055, '#c99a5a', OUT); ell(px + 0.12, py + 0.06, 0.06, 0.045, '#b98a50', OUT); }
+      ell(px + sway, py - r * 0.7, r, r * 0.75, ripe ? '#4f8f2f' : '#5a9e3a', OUT);
+      ell(px - r * 0.3 + sway, py - r * 0.95, r * 0.45, r * 0.3, '#6fb04a');
+      if (ripe) { circ(px - 0.07 + sway, py - r * 1.2, 0.035, '#fff'); circ(px + 0.09 + sway, py - r * 1.0, 0.035, '#c9a6e8'); }
+    }
+  } else {
+    for (let i = 0; i < 3; i++) {
+      const px = tx + 0.2 + i * 0.3, py = ty + 0.55 + (i % 2) * 0.22, h = [0.1, 0.2, 0.3, 0.36][st];
+      for (let j = -2; j <= 2; j++) line(px, py, px + j * 0.055 + sway, py - h + Math.abs(j) * 0.04, '#5fb03a', 0.035);
+      if (ripe) ell(px, py + 0.02, 0.065, 0.045, '#ef8a23', OUT);
+    }
+  }
+  if (ripe) {
+    const ph = (T * 0.8 + hash(tx, ty) * 10) % 4;
+    if (ph < 0.5) star(tx + 0.3 + hash(ty, tx) * 0.4, ty - 0.1, 0.12 * Math.sin(ph / 0.5 * Math.PI), '#fffbe0');
+  }
+}
+
+// ======================================================================
+// Runtime (not saved)
+// ======================================================================
+const cam = { x: 23, y: 12 };
+const anim = { moving: false, phase: 0 };
+let T = 0, hoverId = null, pendingCoins = 0;
+let particles = [], flyers = [], cars = [];
+let carT = 3, jarT = 0, milkT = 0, fullWarnT = 0, tractorOnShedPad = false;
+
+function burst(x, y, c, n, up = 2) {
+  for (let i = 0; i < n; i++) particles.push({ x, y, vx: rand(-1.5, 1.5), vy: rand(-up - 1, -up + 0.5), life: rand(0.4, 0.8), max: 0.8, c, s: rand(0.04, 0.08) });
+}
+
+// flyers move an icon between two screen points (functions, so they follow the camera)
+function toScreen(x, y) { return [(x - cam.x) * S + VW / 2, (y - cam.y) * S + VH / 2]; }
+const worldPt = (x, y) => () => toScreen(x, y);
+const entPt = (e, dy) => () => toScreen(e.x, e.y + dy);
+const playerPt = () => { const p = state.player; return toScreen(p.x, p.y - 0.6); };
+const elPt = el => () => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+function fly(k, from, to, dur, done, delay = 0, size = 0.42) { flyers.push({ k, from, to, dur, done, t: -delay, size }); }
+
+// ======================================================================
+// Update
+// ======================================================================
+function update(dt) {
+  T += dt;
+  updatePlayer(dt);
+  updateHarvest(dt);
+  updateCrops(dt);
+  for (const k in PENS) updatePen(k, dt);
+  updatePickups(dt);
+  updateShop(dt);
+  updateCars(dt);
+  for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 6 * dt; p.life -= dt; }
+  particles = particles.filter(p => p.life > 0);
+  for (const f of flyers) f.t += dt;
+  for (const f of flyers) if (f.t >= f.dur && f.done) f.done();
+  flyers = flyers.filter(f => f.t < f.dur);
+  const p = state.player;
+  const tx = clamp(p.x, 0, W), ty = clamp(p.y - 0.5, 0, H);
+  const k = Math.min(1, dt * 6);
+  cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+  clampCam();
+  if (menu.open && menuSig() !== menu.sig) renderMenu();
+  updateHUD();
+}
+function clampCam() {
+  const vw = VW / S, vh = VH / S;
+  cam.x = vw >= W ? W / 2 : clamp(cam.x, vw / 2, W - vw / 2);
+  cam.y = vh >= H ? H / 2 : clamp(cam.y, vh / 2, H - vh / 2);
+}
+
+const keys = {};
+function updatePlayer(dt) {
+  const p = state.player;
+  let ix = 0, iy = 0;
+  if (!menu.open) { ix = (keys.right ? 1 : 0) - (keys.left ? 1 : 0); iy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0); }
+  let dir = p.dir;
+  if (ix && !iy) dir = ix > 0 ? 'right' : 'left';
+  else if (iy && !ix) dir = iy > 0 ? 'down' : 'up';
+  else if (ix && iy) { const h = ix > 0 ? 'right' : 'left', v = iy > 0 ? 'down' : 'up'; if (dir !== h && dir !== v) dir = h; }
+  const mode = p.mode, moving = !!(ix || iy);
+  const speed = mode === 'tractor' ? CONFIG.tractor.speed[state.tractor.lv.speed - 1] : mode === 'horse' ? CONFIG.horseSpeed : CONFIG.walkSpeed;
+  const ent = mode === 'tractor' ? state.tractor : p;
+  if (moving) {
+    const len = Math.hypot(ix, iy);
+    moveEnt(ent, ix / len * speed * dt, iy / len * speed * dt, ...BOX[mode], mode);
+  }
+  p.dir = dir;
+  if (mode === 'tractor') { state.tractor.dir = dir; p.x = ent.x; p.y = ent.y; }
+  if (mode === 'horse') { const h = findHorse(p.horse); if (h) { h.x = p.x; h.y = p.y; if (ix) h.face = ix > 0 ? 1 : -1; } }
+  anim.moving = moving;
+  if (moving) anim.phase += dt * (mode === 'horse' ? 10 : 8);
+}
+
+function nearestMount() {
+  const p = state.player, t = state.tractor;
+  if (p.mode !== 'walk') return null;
+  let best = null, bd = 1e9;
+  const d0 = Math.hypot(Math.max(0, Math.abs(p.x - t.x) - 0.6), Math.max(0, Math.abs(p.y - t.y) - 0.4));
+  if (d0 < 0.8) { best = { type: 'tractor', e: t }; bd = d0; }
+  for (const a of state.pens.horse.animals) {
+    if (!a.adult || a.ridden) continue;
+    const d = Math.hypot(a.x - p.x, (a.y - p.y) * 1.5) - 0.35;
+    if (d < 0.8 && d < bd) { best = { type: 'horse', e: a }; bd = d; }
+  }
+  return best;
+}
+
+function toggleMount() {
+  const p = state.player;
+  if (p.mode === 'walk') {
+    const m = nearestMount();
+    if (!m) return;
+    if (m.type === 'tractor') { p.mode = 'tractor'; p.x = m.e.x; p.y = m.e.y; p.dir = m.e.dir; sfx('engine'); }
+    else { p.mode = 'horse'; p.horse = m.e.id; m.e.ridden = true; p.x = m.e.x; p.y = m.e.y; sfx('neigh'); unstick(p, ...BOX.horse, 'horse'); }
+    return;
+  }
+  const horse = p.mode === 'horse' ? findHorse(p.horse) : null;
+  const from = p.mode === 'tractor' ? state.tractor : p;
+  const offs = p.mode === 'tractor'
+    ? [[0, 0.7], [-1.0, 0], [1.0, 0], [0, -0.7], [0, 1.1], [-1.3, 0.4], [1.3, 0.4], [-1.3, -0.4], [1.3, -0.4]]
+    : [[0, 0.45], [-0.65, 0], [0.65, 0], [0, -0.45], [0, 0.8], [-0.9, 0.3], [0.9, 0.3]];
+  const fx0 = from.x, fy0 = from.y;
+  let placed = false;
+  for (const [ox, oy] of offs) {
+    if (!blockedAt(fx0 + ox, fy0 + oy, ...BOX.walk, 'walk')) { p.x = fx0 + ox; p.y = fy0 + oy; placed = true; break; }
+  }
+  if (!placed) { p.x = fx0; p.y = fy0; unstick(p, ...BOX.walk, 'walk'); }
+  if (horse) { horse.ridden = false; horse.x = fx0; horse.y = fy0; horse.wait = rand(1, 3); horse.tx = fx0; horse.ty = fy0; }
+  p.mode = 'walk'; p.horse = null;
+  p.dir = 'down';
+}
+
+function updateHarvest(dt) {
+  fullWarnT -= dt;
+  if (state.player.mode !== 'tractor') return;
+  const t = state.tractor, cap = tractorCap(), yld = CONFIG.tractor.yield[t.lv.yield - 1];
+  for (let tx = Math.floor(t.x - 0.3); tx <= Math.floor(t.x + 0.3); tx++) {
+    for (let ty = Math.floor(t.y - 0.3); ty <= Math.floor(t.y + 0.3); ty++) {
+      const k = patchAt(tx, ty);
+      if (!k) continue;
+      const tiles = state.patches[k].tiles, key = tx + ',' + ty;
+      if (!(tiles[key] >= 1)) continue;
+      const load = loadTotal();
+      if (load >= cap) { if (fullWarnT <= 0) { sfx('full'); fullWarnT = 2.5; } continue; }
+      tiles[key] = -1;
+      t.load[k] += Math.min(yld, cap - load);
+      burst(tx + 0.5, ty + 0.4, { corn: '#f2c535', potato: '#c99a5a', carrot: '#ef8a23' }[k], 5);
+      burst(tx + 0.5, ty + 0.4, '#6fb04a', 3);
+      sfx('cut', 40);
+      if (loadTotal() >= cap) { sfx('full'); fullWarnT = 2.5; }
+    }
+  }
+}
+
+function updateCrops(dt) {
+  for (const k in PATCHES) {
+    const tiles = state.patches[k].tiles, step = dt / CONFIG.crops[k].grow;
+    for (const key in tiles) { const v = tiles[key]; if (v >= 0 && v < 1) tiles[key] = Math.min(1, v + step); }
+  }
+}
+
+function makeAnimal(k, sex, adult, x, y) {
+  const pe = CONFIG.pens[k].produceEvery;
+  return { id: state.nextId++, sex, adult, age: 0, x, y, tx: x, ty: y, wait: rand(0.3, 1.5), face: Math.random() < 0.5 ? -1 : 1,
+    prodT: pe ? rand(pe[0], pe[1]) : 0, milk: 0 };
+}
+function pickTarget(k, a) {
+  const r = penInterior(k), coop = PENS[k].coop;
+  for (let i = 0; i < 8; i++) {
+    const x = rand(r.x0, r.x1), y = rand(r.y0, r.y1);
+    if (coop && x > coop.x - 0.3 && x < coop.x + coop.w + 0.3 && y < coop.y + coop.h + 0.3) continue;
+    a.tx = x; a.ty = y; return;
+  }
+  a.tx = a.x; a.ty = a.y;
+}
+
+function updatePen(k, dt) {
+  const pen = state.pens[k], cfg = CONFIG.pens[k], A = pen.animals;
+  if (A.length) {
+    const drain = (CONFIG.trough.drainBase + CONFIG.trough.drainPerAnimal * A.length) * dt;
+    pen.food = Math.max(0, pen.food - drain);
+    pen.water = Math.max(0, pen.water - drain);
+  }
+  const ok = pen.food > 0 && pen.water > 0, r = penRect(k), ir = penInterior(k);
+  for (const a of A) {
+    if (a.ridden) continue;
+    a.age += dt;
+    if (!a.adult && a.age >= cfg.growUp) { a.adult = true; burst(a.x, a.y - 0.4, '#fff3a0', 8); sfx('pop'); }
+    const inPen = inRect(a.x, a.y, r);
+    if (inPen) {
+      a.x = clamp(a.x, ir.x0, ir.x1); a.y = clamp(a.y, ir.y0, ir.y1);
+      a.wait -= dt;
+      if (a.wait <= 0) {
+        const dx = a.tx - a.x, dy = a.ty - a.y, d = Math.hypot(dx, dy);
+        if (d < 0.05) { a.wait = rand(1, 4); pickTarget(k, a); }
+        else {
+          const st = Math.min(d, ANIMAL_SPEED[k] * (a.adult ? 1 : 1.2) * dt);
+          a.x += dx / d * st; a.y += dy / d * st;
+          if (Math.abs(dx) > 0.02) a.face = dx > 0 ? 1 : -1;
+        }
+      }
+    }
+    if (!ok || !a.adult || !cfg.produceEvery) continue;
+    if (k !== 'pig' && a.sex !== 'f') continue;
+    a.prodT -= dt;
+    if (a.prodT > 0) continue;
+    a.prodT = rand(cfg.produceEvery[0], cfg.produceEvery[1]);
+    if (k === 'cow') a.milk = Math.min(3, a.milk + 1);
+    else if (inPen && pen.items.length < 14) pen.items.push({ id: state.nextId++, kind: PRODUCT[k], x: a.x + rand(-0.15, 0.15), y: a.y + rand(0, 0.1) });
+  }
+  const adults = A.filter(a => a.adult && !a.ridden);
+  if (ok && adults.some(a => a.sex === 'f') && adults.some(a => a.sex === 'm') && A.length < penCap(k)) {
+    pen.breedT += dt;
+    if (pen.breedT >= cfg.breedEvery) {
+      pen.breedT = 0;
+      const moms = adults.filter(a => a.sex === 'f' && inRect(a.x, a.y, r));
+      if (moms.length) {
+        const mom = moms[Math.floor(Math.random() * moms.length)];
+        const baby = makeAnimal(k, Math.random() < 0.5 ? 'f' : 'm', false, clamp(mom.x + rand(-0.3, 0.3), ir.x0, ir.x1), clamp(mom.y + 0.15, ir.y0, ir.y1));
+        A.push(baby);
+        burst(baby.x, baby.y - 0.3, '#ff8fb0', 10);
+        sfx('baby');
+      }
+    }
+  }
+}
+
+function updatePickups(dt) {
+  const p = state.player;
+  if (p.mode === 'tractor') return;
+  for (const k in PENS) {
+    const items = state.pens[k].items;
+    for (let i = items.length - 1; i >= 0; i--) {
+      const it = items[i];
+      if (Math.hypot(it.x - p.x, it.y - p.y) > 1.0) continue;
+      items.splice(i, 1);
+      fly(it.kind, worldPt(it.x, it.y - 0.1), playerPt, 0.35, () => { p.carry[it.kind]++; sfx('pop'); }, 0, 0.3);
+    }
+  }
+  milkT -= dt;
+  if (milkT <= 0 && inRect(p.x, p.y, penRect('cow'))) {
+    const cow = state.pens.cow.animals.find(a => a.milk > 0);
+    if (cow) {
+      cow.milk--;
+      fly('milk', worldPt(cow.x + cow.face * 0.3, cow.y - 0.35), playerPt, 0.4, () => { p.carry.milk++; sfx('pop'); }, 0, 0.3);
+      milkT = 0.3;
+    }
+  }
+}
+
+function updateShop(dt) {
+  const p = state.player, t = state.tractor;
+  const onShed = inRect(t.x, t.y, SHED_PAD, 0.1);
+  if (onShed && !tractorOnShedPad && p.mode === 'tractor' && !menu.open) openMenu('repair');
+  tractorOnShedPad = onShed;
+  const ent = p.mode === 'tractor' ? t : p;
+  if (!inRect(ent.x, ent.y, SHOP_PAD, 0.2)) return;
+  unload(p.mode === 'tractor' ? t.load : p.carry, ent, p.mode === 'tractor' ? -1.0 : -0.6);
+  jarT -= dt;
+  const jar = state.shop.jar;
+  if (jar > 0 && jarT <= 0) {
+    const take = Math.min(jar, Math.max(1, Math.ceil(jar / 15)));
+    state.shop.jar -= take; state.coins += take; pendingCoins += take;
+    fly('coin', worldPt(JAR.x, JAR.y - 0.5), elPt(coinIcon), 0.55, () => { pendingCoins -= take; bumpCoins(); sfx('coin', 50); });
+    jarT = 0.09;
+  }
+}
+
+function unload(src, ent, dy) {
+  let n = 0;
+  for (const kind in src) {
+    const c = src[kind];
+    if (!c) continue;
+    state.shop.stock[kind] += c;
+    src[kind] = 0;
+    const i = STOCK_KINDS.indexOf(kind);
+    for (let j = 0; j < Math.min(c, 6); j++) fly(kind, entPt(ent, dy), worldPt(slotX(i), SHOP.y + SHOP.h - 1.0), 0.5, null, j * 0.07 + n * 0.1, 0.34);
+    n++;
+  }
+  if (n) { sfx('drop'); carT = Math.min(carT, 0.8); }
+}
+
+const carY = c => c.lane ? 32.95 : 31.85;
+const CAR_COLORS = ['#3d7cc9', '#e2a21a', '#6ab04c', '#9b59b6', '#e05a4a', '#2fa3a0', '#f0f0ea'];
+function updateCars(dt) {
+  carT -= dt;
+  if (carT <= 0) {
+    const stock = stockTotal(), stopper = cars.some(c => c.stop && c.state !== 'out');
+    const color = CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)];
+    if (stock > 0 && !stopper) {
+      cars.push({ x: -2, lane: 0, dir: 1, v: 7, color, stop: true, state: 'in', timer: 0, bought: false });
+      carT = clamp(CONFIG.cars.maxGap - stock * 0.4, CONFIG.cars.minGap, CONFIG.cars.maxGap) + rand(0, 2);
+    } else {
+      const lane = stopper || Math.random() < 0.5 ? 1 : 0;
+      cars.push({ x: lane ? W + 3 : -3, lane, dir: lane ? -1 : 1, v: 4.5, color, stop: false, state: 'out', timer: 0 });
+      carT = stock > 0 ? rand(2, 4) : rand(9, 18);
+    }
+  }
+  for (const c of cars) {
+    if (c.state === 'in') {
+      const d = STOP_X - c.x;
+      c.v = clamp(d * 2.2, 0.5, 7);
+      c.x += c.v * dt;
+      if (d < 0.03) { c.x = STOP_X; c.state = 'wait'; c.timer = 0.5; sfx('horn', 400); }
+    } else if (c.state === 'wait') {
+      c.timer -= dt;
+      if (c.timer <= 0) {
+        if (!c.bought) { c.bought = true; c.timer = carBuys(c) * 0.25 + 1.2; }
+        else c.state = 'out';
+      }
+    } else {
+      c.v = Math.min(4.5, c.v + dt * 3);
+      c.x += c.v * c.dir * dt;
+    }
+  }
+  cars = cars.filter(c => c.x > -4 && c.x < W + 4);
+}
+
+function carBuys(car) {
+  const stock = state.shop.stock;
+  const total = stockTotal();
+  if (!total) return 0;
+  const n = Math.min(total, 1 + Math.floor(Math.random() * 3) + Math.floor(total / 12));
+  for (let i = 0; i < n; i++) {
+    let r = Math.random() * stockTotal(), kind = null;
+    for (const k of STOCK_KINDS) { r -= stock[k]; if (r < 0) { kind = k; break; } }
+    if (!kind) kind = STOCK_KINDS.find(k => stock[k] > 0);
+    stock[kind]--;
+    const price = sellPrice(kind), idx = STOCK_KINDS.indexOf(kind);
+    fly(kind, worldPt(slotX(idx), SHOP.y + SHOP.h - 1.0), () => toScreen(car.x, 31.4), 0.45, () => {
+      fly('coin', worldPt(car.x, 31.3), worldPt(JAR.x, JAR.y - 0.4), 0.45, () => { state.shop.jar += price; sfx('clink', 40); }, 0, 0.3);
+    }, i * 0.25, 0.32);
+  }
+  return n;
+}
+
+// ======================================================================
+// Draw
+// ======================================================================
+const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+const fxCv = document.getElementById('fx'), fx = fxCv.getContext('2d');
+let VW = 0, VH = 0, DPR = 1, S = 64;
+function resize() {
+  DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight;
+  for (const c of [cv, fxCv]) { c.width = Math.round(VW * DPR); c.height = Math.round(VH * DPR); }
+  S = Math.max(36, Math.min(VW / 20, VH / 12));
+}
+
+function draw() {
+  g = ctx;
+  ctx.setTransform(DPR * S, 0, 0, DPR * S, DPR * (VW / 2 - cam.x * S), DPR * (VH / 2 - cam.y * S));
+  const v = { x0: cam.x - VW / 2 / S - 1, y0: cam.y - VH / 2 / S - 1, x1: cam.x + VW / 2 / S + 1, y1: cam.y + VH / 2 / S + 2 };
+  drawGround(v);
+  drawPatches();
+  const list = [];
+  collectSorted(list);
+  list.sort((a, b) => a.y - b.y);
+  for (const it of list) it.f();
+  for (const p of particles) { g.globalAlpha = clamp(p.life / 0.4, 0, 1); circ(p.x, p.y, p.s, p.c); }
+  g.globalAlpha = 1;
+  drawWorldOverlays();
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  drawScreenOverlays();
+  g = fx;
+  fx.setTransform(1, 0, 0, 1, 0, 0); fx.clearRect(0, 0, fxCv.width, fxCv.height);
+  fx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  for (const f of flyers) {
+    if (f.t < 0) continue;
+    const q = clamp(f.t / f.dur, 0, 1), e = q * q * (3 - 2 * q), a = f.from(), b = f.to();
+    drawIcon(f.k, a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e - Math.sin(q * Math.PI) * 50, S * f.size);
+  }
+}
+
+function collectSorted(list) {
+  const add = (y, f) => list.push({ y, f });
+  add(HOUSE.y + HOUSE.h, drawHouse);
+  add(SHOP.y + SHOP.h + 0.1, drawShop);
+  add(SHED.y + SHED.h, drawShed);
+  for (const t of TREES) add(t.y, () => drawTree(t));
+  for (const b of BUSHES) add(b.y, () => drawBush(b));
+  for (const k in PENS) {
+    const d = PENS[k], r = penRect(k), x1 = r.x + r.w, y1 = r.y + r.h;
+    add(r.y, () => fenceH(r.x, x1, r.y));
+    for (let y = r.y; y < y1; y++) add(y + 1, () => { fenceV(r.x, y, y + 1); fenceV(x1, y, y + 1); });
+    add(y1 + 0.01, () => { fenceH(r.x, d.gate[0], y1); fenceH(d.gate[1], x1, y1); post(d.gate[0], y1, true); post(d.gate[1], y1, true); });
+    if (d.coop) add(d.coop.y + d.coop.h, () => drawCoop(d.coop));
+    add(d.troughs.y + 0.42, () => drawTroughs(k));
+    for (const a of state.pens[k].animals) if (!a.ridden) add(a.y, () => drawAnimal(k, a));
+    add(d.sign.y, () => drawSign(d.sign, KINDS[k].f, 'pen-' + k, false));
+  }
+  for (const k in PATCHES) {
+    const wiggle = bareTiles(k) === Object.keys(state.patches[k].tiles).length && state.coins >= sowCost(k);
+    add(PATCHES[k].sign.y, () => drawSign(PATCHES[k].sign, k, 'crop-' + k, wiggle));
+  }
+  const p = state.player, t = state.tractor;
+  add(t.y + 0.45, () => drawTractor(t));
+  if (p.mode === 'walk') add(p.y + 0.14, () => drawFarmer(p.x, p.y + 0.14, p.dir, anim.phase, anim.moving, p.carry));
+  if (p.mode === 'horse') {
+    const h = findHorse(p.horse);
+    if (h) add(p.y + 0.22, () => { const b = anim.moving ? Math.abs(Math.sin(anim.phase)) * 0.05 : 0; g.save(); g.translate(0, -b); drawHorse(p.x, p.y + 0.22 + b, h.face, h.sex, false, true); g.restore(); });
+  }
+  for (const c of cars) add(carY(c), () => drawCar(c));
+}
+
+function drawWorldOverlays() {
+  // empty trough bubbles
+  for (const k in PENS) {
+    const pen = state.pens[k], d = PENS[k].troughs;
+    if (!pen.animals.length) continue;
+    const pulse = 1 + Math.sin(T * 6) * 0.08;
+    if (pen.food <= 0) { circ(d.x + 0.45, d.y - 0.5, 0.32 * pulse, '#fff', OUT); drawIcon('food', d.x + 0.45, d.y - 0.5, 0.42 * pulse); }
+    if (pen.water <= 0) { circ(d.x + 1.4, d.y - 0.5, 0.32 * pulse, '#fff', OUT); drawIcon('water', d.x + 1.4, d.y - 0.5, 0.42 * pulse); }
+  }
+  // tractor load bar
+  const t = state.tractor, load = loadTotal(), cap = tractorCap();
+  if (state.player.mode === 'tractor' || load > 0) {
+    const y = tractorTop(t) - 0.25, full = load >= cap;
+    rrect(t.x - 0.6, y, 1.2, 0.2, 0.1, '#fff', '#4a3010');
+    if (load) rrect(t.x - 0.57, y + 0.03, 1.14 * load / cap, 0.14, 0.07, full ? (Math.sin(T * 10) > 0 ? '#e2533d' : '#f08a5d') : '#6ab04c');
+    if (full) { const b = Math.abs(Math.sin(T * 5)) * 0.18; drawIcon('storage', t.x, y - 0.4 - b, 0.6); }
+  }
+}
+
+function drawScreenOverlays() {
+  const jar = state.shop.jar;
+  if (jar > 0) {
+    const [sx, sy] = toScreen(JAR.x, JAR.y - 1.05);
+    numberBadge(sx, sy, jar);
+  }
+  const m = nearestMount();
+  if (m && !menu.open) {
+    const top = m.type === 'tractor' ? tractorTop(m.e) - 0.2 : m.e.y - 1.4;
+    const [sx, sy] = toScreen(m.e.x, top);
+    keyHint(sx, sy - Math.abs(Math.sin(T * 4)) * 6);
+  }
+  if (DEV) { g.font = '12px monospace'; g.fillStyle = '#fff'; g.fillText(`${state.player.x.toFixed(1)}, ${state.player.y.toFixed(1)}  fps ${fpsShown}`, 8, VH - 8); }
+}
+function numberBadge(x, y, n) {
+  const s = String(n), w = Math.max(34, 16 + s.length * 16);
+  g.beginPath(); g.roundRect(x - w / 2, y - 17, w, 34, 17); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#a86e10'; g.stroke();
+  g.font = 'bold 24px "Trebuchet MS", Verdana, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#5a3a05';
+  g.fillText(s, x, y + 1);
+}
+function keyHint(x, y) {
+  g.beginPath(); g.roundRect(x - 26, y - 22, 52, 40, 9); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#4a3010'; g.stroke();
+  g.beginPath(); g.moveTo(x + 12, y - 12); g.lineTo(x + 12, y + 4); g.lineTo(x - 12, y + 4);
+  g.strokeStyle = '#4a3010'; g.lineWidth = 4; g.lineCap = 'round'; g.lineJoin = 'round'; g.stroke();
+  g.beginPath(); g.moveTo(x - 4, y - 3); g.lineTo(x - 13, y + 4); g.lineTo(x - 4, y + 11); g.stroke();
+}
+
+// ======================================================================
+// Top bar
+// ======================================================================
+const coinBox = document.getElementById('coinbox'), coinNum = document.getElementById('coinNum'), carryEl = document.getElementById('carry');
+const coinIcon = document.getElementById('coinIcon');
+let lastBump = 0, coinShown = null, carrySig = '';
+function bumpCoins() {
+  const now = performance.now();
+  if (now - lastBump < 180) return;
+  lastBump = now;
+  coinBox.classList.remove('bump'); void coinBox.offsetWidth; coinBox.classList.add('bump');
+}
+function updateHUD() {
+  const shown = state.coins - pendingCoins;
+  if (shown !== coinShown) { coinNum.textContent = shown; coinShown = shown; }
+  const p = state.player, t = state.tractor, load = loadTotal(), cap = tractorCap();
+  const sig = p.mode === 'tractor' ? `t|${load}|${cap}` : `w|${p.carry.egg}|${p.carry.milk}|${p.carry.manure}`;
+  if (sig === carrySig) return;
+  carrySig = sig;
+  carryEl.innerHTML = '';
+  if (p.mode === 'tractor') {
+    const pill = document.createElement('div');
+    pill.className = 'pill' + (load >= cap ? ' full' : '');
+    pill.append(iconCanvas('tractor', 44));
+    const bar = document.createElement('div'); bar.className = 'bar';
+    const fill = document.createElement('div'); fill.style.width = (100 * load / cap) + '%';
+    bar.append(fill); pill.append(bar);
+    const num = document.createElement('span'); num.textContent = load + '/' + cap; pill.append(num);
+    carryEl.append(pill);
+  } else {
+    for (const k of ['egg', 'milk', 'manure']) {
+      if (!p.carry[k]) continue;
+      const pill = document.createElement('div'); pill.className = 'pill';
+      pill.append(iconCanvas(k, 44));
+      const num = document.createElement('span'); num.textContent = p.carry[k]; pill.append(num);
+      carryEl.append(pill);
+    }
+  }
+}
+
+// ======================================================================
+// Menus (signs, troughs, repair shed). No words: pictures, numbers, coins.
+// ======================================================================
+const menuBack = document.getElementById('menuBack'), menuEl = document.getElementById('menu');
+const menu = { open: false, type: null, key: null, pending: { f: 0, m: 0 }, sig: '' };
+menuBack.addEventListener('pointerdown', e => { if (e.target === menuBack) closeMenu(); });
+
+function openMenu(type, key) {
+  Object.assign(menu, { open: true, type, key, pending: { f: 0, m: 0 } });
+  for (const k in keys) keys[k] = false;
+  renderMenu();
+  menuBack.classList.add('open');
+  sfx('click');
+}
+function closeMenu() { if (!menu.open) return; menu.open = false; menuBack.classList.remove('open'); }
+
+function menuSig() {
+  const k = menu.key, parts = [menu.type, k, state.coins, menu.pending.f, menu.pending.m];
+  if (menu.type === 'crop') parts.push(state.patches[k].ext, bareTiles(k) > 0);
+  if (menu.type === 'pen') parts.push(state.pens[k].ext, state.pens[k].animals.length);
+  if (menu.type === 'trough') parts.push(Math.ceil(state.pens[k].food * 20), Math.ceil(state.pens[k].water * 20));
+  if (menu.type === 'repair') parts.push(JSON.stringify(state.tractor.lv));
+  return parts.join('|');
+}
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; e.tabIndex = -1; return e; }
+function row(...kids) { const r = el('div', 'row'); r.append(...kids); return r; }
+function pips(n) { const p = el('div', 'pips'); for (let i = 0; i < 5; i++) p.append(el('div', 'pip' + (i < n ? ' on' : ''))); return p; }
+const maxStar = () => iconCanvas('star', 84, 'star');
+function coinBtn(price, enabled, onBuy) {
+  const b = el('button', 'coinbtn', price);
+  b.disabled = !enabled || state.coins < price;
+  b.onclick = () => {
+    b.blur();
+    if (b.disabled || state.coins < price) return;
+    spend(price, b);
+    onBuy();
+    if (menu.open) renderMenu();
+  };
+  return b;
+}
+function spend(price, btn) {
+  state.coins -= price;
+  const to = elPt(btn), from = elPt(coinIcon);
+  const a = from(), b = to();
+  for (let i = 0; i < Math.min(price, 6); i++) fly('coin', () => a, () => b, 0.4, null, i * 0.06, 0.4);
+  sfx('buy');
+}
+
+function renderMenu() {
+  menuEl.innerHTML = '';
+  const close = el('button', 'close');
+  close.onclick = closeMenu;
+  menuEl.append(close);
+  const k = menu.key;
+  if (menu.type === 'crop') {
+    menuEl.append(row(iconCanvas(k, 84, 'ic'), coinBtn(sowCost(k), bareTiles(k) > 0, () => sow(k))));
+    const ext = state.patches[k].ext;
+    menuEl.append(row(iconCanvas('extendCrop', 84, 'ic'), pips(ext),
+      ext < 5 ? coinBtn(CONFIG.cropExtendPrice[ext], true, () => extendPatch(k)) : maxStar()));
+  } else if (menu.type === 'pen') {
+    const pen = state.pens[k], cap = penCap(k), n = pen.animals.length, pend = menu.pending.f + menu.pending.m;
+    const slots = el('div', 'slots');
+    for (let i = 0; i < cap; i++) slots.append(el('div', 'slot' + (i < n ? ' full' : i < n + pend ? ' new' : '')));
+    menuEl.append(slots);
+    for (const sex of ['f', 'm']) {
+      const price = CONFIG.pens[k].price[sex], cnt = menu.pending[sex];
+      const minus = el('button', 'round minus', '−'), plus = el('button', 'round plus', '+'), num = el('div', 'num', cnt);
+      minus.disabled = cnt <= 0;
+      plus.disabled = n + pend >= cap;
+      minus.onclick = () => { minus.blur(); if (menu.pending[sex] > 0) { menu.pending[sex]--; sfx('click'); renderMenu(); } };
+      plus.onclick = () => { plus.blur(); if (n + menu.pending.f + menu.pending.m < cap) { menu.pending[sex]++; sfx('click'); renderMenu(); } };
+      menuEl.append(row(iconCanvas(KINDS[k][sex], 84, 'ic'), minus, num, plus, coinBtn(price * cnt, cnt > 0, () => buyAnimals(k, sex, cnt))));
+    }
+    const ext = pen.ext;
+    menuEl.append(row(iconCanvas('extendPen', 84, 'ic'), pips(ext),
+      ext < 5 ? coinBtn(CONFIG.penExtendPrice[ext], true, () => extendPen(k)) : maxStar()));
+  } else if (menu.type === 'trough') {
+    const pen = state.pens[k];
+    for (const [what, price, color] of [['food', CONFIG.trough.foodPrice, '#e7c14a'], ['water', CONFIG.trough.waterPrice, '#4aa3df']]) {
+      const bar = el('div', 'lvl'), fill = el('div');
+      fill.style.width = (100 * pen[what]) + '%'; fill.style.background = color; bar.append(fill);
+      menuEl.append(row(iconCanvas(what, 84, 'ic'), bar, coinBtn(price, pen[what] < 0.95, () => { pen[what] = 1; })));
+    }
+  } else if (menu.type === 'repair') {
+    const lv = state.tractor.lv;
+    for (const a of ['speed', 'storage', 'yield']) {
+      menuEl.append(row(iconCanvas(a, 84, 'ic'), pips(lv[a]),
+        lv[a] < 5 ? coinBtn(CONFIG.tractor.price[lv[a] - 1], canUpgrade(a), () => upgrade(a)) : maxStar()));
+    }
+  }
+  menu.sig = menuSig();
+}
+
+function canUpgrade(a) {
+  const lv = state.tractor.lv;
+  if (lv[a] >= 5) return false;
+  const after = { ...lv, [a]: lv[a] + 1 };
+  return after[a] - Math.min(after.speed, after.storage, after.yield) <= CONFIG.maxUpgradeGap;
+}
+
+function sow(k) {
+  const tiles = state.patches[k].tiles;
+  for (const key in tiles) if (tiles[key] < 0) {
+    tiles[key] = 0;
+    const [x, y] = key.split(',').map(Number);
+    burst(x + 0.5, y + 0.5, '#6dbb45', 2, 1);
+  }
+  closeMenu();
+}
+function extendPatch(k) {
+  const seg = nextPatchSeg(k);
+  state.patches[k].ext++;
+  eachTile(seg, (x, y) => { state.patches[k].tiles[x + ',' + y] = -1; burst(x + 0.5, y + 0.5, '#fff3a0', 3); });
+  closeMenu();
+}
+function extendPen(k) {
+  const seg = nextPenSeg(k);
+  state.pens[k].ext++;
+  buildObstacles();
+  unstickAll();
+  eachTile(seg, (x, y) => burst(x + 0.5, y + 0.5, '#fff3a0', 3));
+  closeMenu();
+}
+function buyAnimals(k, sex, n) {
+  const d = PENS[k], ir = penInterior(k), gx = (d.gate[0] + d.gate[1]) / 2;
+  for (let i = 0; i < n; i++) {
+    const a = makeAnimal(k, sex, true, clamp(gx + rand(-0.6, 0.6), ir.x0, ir.x1), clamp(ir.y1 - rand(0, 0.6), ir.y0, ir.y1));
+    a.wait = 0.2 + i * 0.15;
+    state.pens[k].animals.push(a);
+    burst(a.x, a.y - 0.3, '#fff3a0', 8);
+  }
+  menu.pending[sex] = 0;
+}
+function upgrade(a) {
+  state.tractor.lv[a]++;
+  const t = state.tractor;
+  burst(t.x, t.y - 0.6, '#fff3a0', 14, 3);
+}
+
+// ======================================================================
+// Input
+// ======================================================================
+const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', KeyA: 'left', KeyD: 'right', KeyW: 'up', KeyS: 'down' };
+addEventListener('keydown', e => {
+  ensureAudio();
+  const k = KEYMAP[e.code];
+  if (k) { keys[k] = true; e.preventDefault(); return; }
+  if (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space') {
+    e.preventDefault();
+    if (!e.repeat && !menu.open) toggleMount();
+    return;
+  }
+  if (e.code === 'Escape') closeMenu();
+  if (DEV && e.code === 'KeyM') state.coins += 50;
+  if (DEV && e.code === 'KeyG') for (const pk in PATCHES) for (const key in state.patches[pk].tiles) if (state.patches[pk].tiles[key] >= 0) state.patches[pk].tiles[key] = 1;
+});
+addEventListener('keyup', e => {
+  const k = KEYMAP[e.code];
+  if (k) keys[k] = false;
+  if (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space') e.preventDefault();
+});
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+addEventListener('contextmenu', e => e.preventDefault());
+
+function hitTargets() {
+  const T2 = [];
+  for (const k in PENS) {
+    const d = PENS[k].troughs;
+    T2.push({ id: 'trough-' + k, r: { x: d.x - 0.15, y: d.y - 0.9, w: 2.1, h: 1.4 }, act: () => openMenu('trough', k) });
+  }
+  for (const k in PATCHES) { const s = PATCHES[k].sign; T2.push({ id: 'crop-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('crop', k) }); }
+  for (const k in PENS) { const s = PENS[k].sign; T2.push({ id: 'pen-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('pen', k) }); }
+  T2.push({ id: 'shed', r: { x: SHED.x + 0.2, y: SHED.y - 1.3, w: SHED.w - 0.4, h: SHED.h + 1.3 }, act: () => openMenu('repair') });
+  return T2;
+}
+function hitTest(cx, cy) {
+  const x = (cx - VW / 2) / S + cam.x, y = (cy - VH / 2) / S + cam.y;
+  for (const t of hitTargets()) if (inRect(x, y, t.r)) return t;
+  return null;
+}
+cv.addEventListener('pointermove', e => { const h = hitTest(e.clientX, e.clientY); hoverId = h ? h.id : null; cv.style.cursor = h ? 'pointer' : 'default'; });
+cv.addEventListener('pointerdown', e => { ensureAudio(); const h = hitTest(e.clientX, e.clientY); if (h) h.act(); });
+
+const SVG_SOUND_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#4a3010"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>';
+const SVG_SOUND_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#4a3010"/><path d="M16 9l5 6M21 9l-5 6"/></svg>';
+const SVG_FULL = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const soundBtn = document.getElementById('soundBtn'), fsBtn = document.getElementById('fsBtn');
+soundBtn.innerHTML = muted ? SVG_SOUND_OFF : SVG_SOUND_ON;
+fsBtn.innerHTML = SVG_FULL;
+soundBtn.onclick = () => {
+  soundBtn.blur(); muted = !muted;
+  try { localStorage.setItem('harvester-muted', muted ? '1' : '0'); } catch (e) {}
+  soundBtn.innerHTML = muted ? SVG_SOUND_OFF : SVG_SOUND_ON;
+  ensureAudio(); sfx('click');
+};
+fsBtn.onclick = () => {
+  fsBtn.blur();
+  if (document.fullscreenElement) document.exitFullscreen();
+  else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+};
+
+// ======================================================================
+// Start
+// ======================================================================
+let fpsShown = 0, fpsN = 0, fpsT = 0;
+loadGame();
+buildObstacles();
+resize();
+{ const g0 = g; g = coinIcon.getContext('2d'); const d = Math.min(2, devicePixelRatio || 1); coinIcon.width = coinIcon.height = 56 * d; g.setTransform(56 * d, 0, 0, 56 * d, 28 * d, 28 * d); ICON.coin(); g = g0; }
+cam.x = state.player.x; cam.y = state.player.y - 0.5; clampCam();
+addEventListener('resize', () => { resize(); clampCam(); });
+setInterval(saveGame, 5000);
+addEventListener('pagehide', saveGame);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (!document.hidden) {
+    update(dt);
+    draw();
+    if (DEV) { fpsN++; fpsT += dt; if (fpsT > 1) { fpsShown = fpsN; fpsN = 0; fpsT = 0; } }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
