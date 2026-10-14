@@ -8,7 +8,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; user-select: none; -webkit-user-select: none; touch-action: none;
   font-family: "Trebuchet MS", Verdana, system-ui, sans-serif; }
-#game, #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+#game, #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; }
 #fx { pointer-events: none; z-index: 30; }
 
 #coinbox { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; z-index: 10;
@@ -65,6 +65,43 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; use
 .pip.on { background: #6ab04c; }
 .lvl { width: 150px; height: 28px; border: 3px solid #4a3010; border-radius: 14px; background: #fff; overflow: hidden; }
 .lvl > div { height: 100%; }
+
+/* touch screens: arrow pad and on/off button (shown only after a touch) */
+#touch { display: none; }
+body.touch #touch { display: block; }
+#pad { position: fixed; left: 18px; bottom: 18px; width: 140px; height: 140px; border-radius: 50%; z-index: 10; touch-action: none;
+  background: rgba(255,248,230,.55); border: 4px solid rgba(122,82,48,.7); -webkit-touch-callout: none; }
+#pad svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+#padKnob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%;
+  background: rgba(122,82,48,.5); pointer-events: none; }
+#enterBtn { position: fixed; right: 22px; bottom: 26px; width: 92px; height: 92px; border-radius: 50%; border: 4px solid #4a3010; z-index: 10;
+  background: rgba(255,255,255,.88); padding: 18px; touch-action: none; -webkit-touch-callout: none; }
+#enterBtn svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+#enterBtn.idle { opacity: .35; }
+
+/* small screens */
+@media (max-width: 700px), (max-height: 500px) {
+  #coinbox { top: 6px; padding: 3px 16px 3px 5px; border-width: 3px; gap: 6px; }
+  #coinbox canvas { width: 38px; height: 38px; }
+  #coinNum { font-size: 30px; }
+  #carry { top: 6px; left: 6px; gap: 5px; }
+  .pill { font-size: 20px; padding: 2px 10px 2px 4px; border-width: 2px; gap: 4px; }
+  .pill canvas { width: 30px; height: 30px; }
+  .bar { width: 64px; height: 16px; border-width: 2px; }
+  #tools { top: 6px; right: 6px; }
+  #tools button { width: 40px; height: 40px; padding: 6px; border-width: 2px; }
+  #menu { padding: 16px 16px 8px; min-width: 0; border-width: 4px; }
+  .close { width: 44px; height: 44px; top: -18px; right: -18px; }
+  .row { gap: 8px; padding: 6px 2px; }
+  .row canvas.ic { width: 58px; height: 58px; }
+  .coinbtn, .star { width: 60px; height: 60px; font-size: 26px; border-width: 4px; }
+  .round { width: 40px; height: 40px; font-size: 26px; border-width: 3px; }
+  .num { font-size: 30px; }
+  .slot { width: 18px; height: 18px; border-width: 2px; }
+  .pip { width: 16px; height: 16px; border-width: 2px; }
+  .lvl { width: 100px; height: 22px; }
+}
+@media (max-width: 700px) { #carry { top: 56px; max-width: 90vw; } }
 </style>
 </head>
 <body>
@@ -73,6 +110,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; use
 <div id="carry"></div>
 <div id="tools"><button id="soundBtn" tabindex="-1"></button><button id="fsBtn" tabindex="-1"></button></div>
 <div id="menuBack"><div id="menu"></div></div>
+<div id="touch">
+  <div id="pad">
+    <svg viewBox="0 0 100 100" fill="#4a3010" opacity=".75"><path d="M50 8 62 24H38zM50 92 62 76H38zM8 50 24 38V62zM92 50 76 38V62z"/></svg>
+    <div id="padKnob"></div>
+  </div>
+  <button id="enterBtn" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4v9H5M10 8l-5 5 5 5"/></svg></button>
+</div>
 <canvas id="fx"></canvas>
 <script>
 'use strict';
@@ -81,7 +125,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; use
 // Tunables. Prices, speeds and timings all live here.
 // ======================================================================
 const CONFIG = {
-  startCoins: 5,
+  startCoins: 2,
+  itemsPerCoin: 5,             // customers buy any 5 items for 1 coin
+  carryLimit: 10,              // the farmer's basket
   maxUpgradeGap: 3,            // no tractor upgrade may get more than this many levels ahead of another
   walkSpeed: 3.2,              // tiles per second
   horseSpeed: 5.2,
@@ -89,25 +135,31 @@ const CONFIG = {
     speed:   [3.4, 4.0, 4.6, 5.2, 5.8],
     storage: [10, 20, 30, 45, 60],
     yield:   [1, 2, 3, 4, 5],  // items per harvested tile
-    price:   [10, 20, 35, 50], // price of level 2, 3, 4, 5
+    price:   [3, 5, 7, 9],     // price of level 2, 3, 4, 5
   },
   crops: {                     // sow = seed price for the starting patch; grow = seconds to ripen
-    corn:   { sow: 2, grow: 30, sell: 1 },
-    potato: { sow: 3, grow: 40, sell: 1 },
-    carrot: { sow: 4, grow: 50, sell: 2 },
+    corn:   { sow: 1, grow: 30 },
+    potato: { sow: 1, grow: 40 },
+    carrot: { sow: 1, grow: 50 },
   },
   sowPerSegment: 1,            // each extension adds this to the seed price
-  cropExtendPrice: [5, 8, 12, 16, 20],
-  penExtendPrice: [6, 10, 14, 18, 24],
-  products: { egg: 1, milk: 2, manure: 1 },
+  cropExtendPrice: [2, 3, 4, 5, 6],
+  penExtendPrice:  [2, 3, 4, 5, 6],
   pens: {                      // price per female / male; cap = places at start, capPerSegment = places per extension
-    chicken: { price: { f: 2, m: 3 },  cap: 5, capPerSegment: 2, produceEvery: [18, 26], breedEvery: 45, growUp: 90 },
-    pig:     { price: { f: 4, m: 5 },  cap: 4, capPerSegment: 1, produceEvery: [25, 35], breedEvery: 50, growUp: 100 },
-    cow:     { price: { f: 6, m: 8 },  cap: 3, capPerSegment: 1, produceEvery: [25, 35], breedEvery: 60, growUp: 120 },
-    horse:   { price: { f: 8, m: 10 }, cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 60, growUp: 120 },
+    chicken: { price: { f: 4, m: 5 },  cap: 5, capPerSegment: 2, produceEvery: [27, 33], breedEvery: 120, growUp: 90 },
+    pig:     { price: { f: 6, m: 7 },  cap: 4, capPerSegment: 1, produceEvery: [27, 33], breedEvery: 120, growUp: 100 },
+    cow:     { price: { f: 8, m: 9 },  cap: 3, capPerSegment: 1, produceEvery: [18, 22], breedEvery: 120, growUp: 120 },
+    horse:   { price: { f: 9, m: 10 }, cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 120, growUp: 120 },
   },
-  trough: { foodPrice: 2, waterPrice: 1, drainBase: 0.002, drainPerAnimal: 0.0006 }, // a full trough is 1
-  cars: { minGap: 4, maxGap: 14 },  // seconds between customers: shorter the fuller the shop
+  trees: {                     // grow = seconds from sapling to grown tree; every = seconds per new fruit
+    apple:  { price: 5, grow: 150, every: 40 },
+    pear:   { price: 6, grow: 150, every: 36 },
+    peach:  { price: 7, grow: 150, every: 34 },
+    orange: { price: 8, grow: 150, every: 30 },
+  },
+  maxFruitPerTree: 6,
+  trough: { foodPrice: 1, waterPrice: 1, drainBase: 0.001, drainPerAnimal: 0.0003 }, // a full trough is 1
+  cars: { minGap: 3, maxGap: 9 },   // seconds between customers: shorter the fuller the shop
 };
 
 // Generated art. When an image exists it replaces the drawn shape.
@@ -116,7 +168,7 @@ const ART = {
   tractor: { down: 'images/tractor-down.png', up: 'images/tractor-up.png', left: 'images/tractor-left.png', right: 'images/tractor-right.png', width: 1.9 },
 };
 
-const SAVE_KEY = 'harvester-save-v1';
+const SAVE_KEY = 'harvester-save-v2';
 const DEV = /[?&]dev\b/.test(location.search);
 if (/[?&]reset\b/.test(location.search)) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 
@@ -149,10 +201,16 @@ const PENS = {
 const KINDS = { chicken: { f: 'hen', m: 'rooster' }, pig: { f: 'sow', m: 'boar' }, cow: { f: 'cow', m: 'bull' }, horse: { f: 'mare', m: 'stallion' } };
 const PRODUCT = { chicken: 'egg', pig: 'manure', cow: 'milk', horse: null };
 const ANIMAL_SPEED = { chicken: 0.7, pig: 0.55, cow: 0.4, horse: 0.7 };
-const STOCK_KINDS = ['corn', 'potato', 'carrot', 'egg', 'milk', 'manure'];
+const FRUITS = ['apple', 'pear', 'peach', 'orange'];
+const FRUIT_COLOR = { apple: '#e2452f', pear: '#c9d84a', peach: '#f6a26b', orange: '#f39a1e' };
+const LEAF_COLOR = { apple: '#5a9a3c', pear: '#64a446', peach: '#6fae4c', orange: '#2f7d3a' };
+const CARRY_KINDS = ['egg', 'milk', 'manure', ...FRUITS];
+const STOCK_KINDS = ['corn', 'potato', 'carrot', 'egg', 'milk', 'manure', ...FRUITS];
+const SPOTS = [
+  { x: 2.9, y: 26.4 }, { x: 5.3, y: 26.4 }, { x: 7.7, y: 26.4 }, { x: 10.1, y: 26.4 },
+  { x: 2.9, y: 29.5 }, { x: 5.3, y: 29.5 }, { x: 7.7, y: 29.5 }, { x: 10.1, y: 29.5 },
+];
 const TREES = [
-  { x: 3, y: 26.6, apple: 1 }, { x: 6, y: 27.9, apple: 1 }, { x: 9, y: 26.6, apple: 1 }, { x: 3.8, y: 29.8, apple: 1 },
-  { x: 7.6, y: 30.4, apple: 1 }, { x: 10.6, y: 29.4, apple: 1 },
   { x: 2.6, y: 5.5 }, { x: 2.4, y: 12.8 }, { x: 2.6, y: 21 }, { x: 42.6, y: 21.6 }, { x: 45.2, y: 24.6 }, { x: 42.8, y: 28.2 },
   { x: 45.6, y: 30.4 }, { x: 38.5, y: 28.6 },
 ];
@@ -191,12 +249,14 @@ const art = (name, view) => { const im = IMG[name + '-' + view]; return im && im
 let state;
 
 function newGame() {
+  const zero = kinds => Object.fromEntries(kinds.map(k => [k, 0]));
   state = {
     v: 1, coins: CONFIG.startCoins, nextId: 1,
-    player: { mode: 'walk', x: 23, y: 9.6, dir: 'down', carry: { egg: 0, milk: 0, manure: 0 }, horse: null },
+    player: { mode: 'walk', x: 23, y: 9.6, dir: 'down', carry: zero(CARRY_KINDS), horse: null },
     tractor: { x: 26.4, y: 10.8, dir: 'left', load: { corn: 0, potato: 0, carrot: 0 }, lv: { speed: 1, storage: 1, yield: 1 } },
     patches: {}, pens: {},
-    shop: { stock: { corn: 0, potato: 0, carrot: 0, egg: 0, milk: 0, manure: 0 }, jar: 0 },
+    orchard: SPOTS.map(() => ({ kind: null, age: 0, fruit: 0, t: 0 })),
+    shop: { stock: zero(STOCK_KINDS), jar: 0 },
   };
   for (const k in PATCHES) {
     state.patches[k] = { ext: 0, tiles: {} };
@@ -205,12 +265,22 @@ function newGame() {
   for (const k in PENS) state.pens[k] = { ext: 0, food: 1, water: 1, breedT: 0, animals: [], items: [] };
 }
 
+// Adds anything a save from an older version of the game is missing.
+function fillMissing(obj, def) {
+  for (const k in def) {
+    if (!(k in obj)) obj[k] = def[k];
+    else if (def[k] && typeof def[k] === 'object' && !Array.isArray(def[k]) && obj[k] && typeof obj[k] === 'object') fillMissing(obj[k], def[k]);
+  }
+}
+
 function loadGame() {
+  let saved = null;
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (s && s.v === 1) state = s;
+    if (s && s.v === 1) saved = s;
   } catch (e) {}
-  if (!state) newGame();
+  newGame();
+  if (saved) { fillMissing(saved, state); state = saved; }
   const p = state.player;
   for (const a of state.pens.horse.animals) a.ridden = p.mode === 'horse' && a.id === p.horse;
   if (p.mode === 'horse' && !findHorse(p.horse)) { p.mode = 'walk'; p.horse = null; }
@@ -248,10 +318,11 @@ function penInterior(k) {
 }
 const penCap = k => CONFIG.pens[k].cap + CONFIG.pens[k].capPerSegment * state.pens[k].ext;
 const sowCost = k => CONFIG.crops[k].sow + CONFIG.sowPerSegment * state.patches[k].ext;
-const sellPrice = kind => CONFIG.crops[kind] ? CONFIG.crops[kind].sell : CONFIG.products[kind];
 const tractorCap = () => CONFIG.tractor.storage[state.tractor.lv.storage - 1];
 const loadTotal = () => { const l = state.tractor.load; return l.corn + l.potato + l.carrot; };
 const stockTotal = () => STOCK_KINDS.reduce((n, k) => n + state.shop.stock[k], 0);
+const carryTotal = () => CARRY_KINDS.reduce((n, k) => n + state.player.carry[k], 0);
+const basketRoom = () => CONFIG.carryLimit - carryTotal();
 const findHorse = id => state.pens.horse.animals.find(a => a.id === id);
 const bareTiles = k => Object.values(state.patches[k].tiles).filter(v => v < 0).length;
 
@@ -275,6 +346,7 @@ function buildObstacles() {
   add(SHOP.x + 0.2, SHOP.y + 0.4, SHOP.x + SHOP.w - 0.2, SHOP.y + SHOP.h);
   add(SHED.x + 0.1, SHED.y + 0.4, SHED.x + SHED.w - 0.1, SHED.y + SHED.h);
   for (const t of TREES) add(t.x - 0.2, t.y - 0.15, t.x + 0.2, t.y + 0.08);
+  SPOTS.forEach((s, i) => { if (state.orchard[i].kind) add(s.x - 0.2, s.y - 0.15, s.x + 0.2, s.y + 0.08); });
   for (const b of BUSHES) add(b.x - 0.5, b.y - 0.3, b.x + 0.5, b.y + 0.2);
   const t = 0.1;
   for (const k in PENS) {
@@ -444,11 +516,11 @@ function drawFarmer(x, y, dir, phase, moving, carry) {
   ell(x, hy - 0.11, 0.18, 0.07, '#1e2230', OUT);
   circ(x, hy - 0.18, 0.025, '#1e2230');
   if (carry) {
-    if (carry.egg || carry.manure) {
-      rrect(x - 0.36, by + 0.22, 0.18, 0.13, 0.04, '#c48a3f', OUT);
+    const inBasket = ['egg', 'manure', ...FRUITS].filter(k => carry[k] > 0);
+    if (inBasket.length) {
       line(x - 0.35, by + 0.22, x - 0.27, by + 0.08, '#8a5a25', 0.025); line(x - 0.27, by + 0.08, x - 0.19, by + 0.22, '#8a5a25', 0.025);
-      if (carry.egg) { ell(x - 0.31, by + 0.21, 0.035, 0.045, '#fbf3e3'); ell(x - 0.24, by + 0.21, 0.035, 0.045, '#fbf3e3'); }
-      else ell(x - 0.27, by + 0.21, 0.07, 0.04, '#6e4b2a');
+      inBasket.slice(0, 3).forEach((k, i) => circ(x - 0.33 + i * 0.06, by + 0.21, 0.04, k === 'egg' ? '#fbf3e3' : k === 'manure' ? '#6e4b2a' : FRUIT_COLOR[k]));
+      rrect(x - 0.36, by + 0.22, 0.18, 0.13, 0.04, '#c48a3f', OUT);
     }
     if (carry.milk) {
       rrect(x + 0.18, by + 0.14, 0.15, 0.22, 0.03, '#d8dde3', OUT);
@@ -622,6 +694,21 @@ const ICON = {
     line(-0.02, 0, 0.08, 0.02, '#c86a10', 0.03); line(-0.1, 0.16, 0, 0.18, '#c86a10', 0.03);
   },
   egg: () => ell(0, 0.02, 0.25, 0.33, '#fbf3e3', OUT),
+  apple: () => drawFruit('apple', 0, 0.08, 0.34),
+  pear: () => drawFruit('pear', 0, 0.12, 0.34),
+  peach: () => drawFruit('peach', 0, 0.08, 0.34),
+  orange: () => drawFruit('orange', 0, 0.08, 0.34),
+  basket: () => {
+    g.beginPath(); g.arc(0, 0, 0.3, Math.PI, 0); g.strokeStyle = '#8a5a25'; g.lineWidth = 0.07; g.stroke();
+    circ(-0.16, 0.0, 0.1, '#fbf3e3'); circ(0.02, -0.03, 0.1, FRUIT_COLOR.apple); circ(0.18, 0.01, 0.09, FRUIT_COLOR.orange);
+    poly([[-0.42, 0.02], [0.42, 0.02], [0.32, 0.4], [-0.32, 0.4]], '#c48a3f', OUT);
+    line(-0.38, 0.15, 0.38, 0.15, '#9b6a2e', 0.04); line(-0.35, 0.28, 0.35, 0.28, '#9b6a2e', 0.04);
+  },
+  ...Object.fromEntries(['apple', 'pear', 'peach', 'orange'].map(k => ['tree-' + k, () => {
+    scaled(0.5, () => drawFruitTree(-0.2, 0.9, k, 1, 5, 3));
+    circ(0.27, 0.27, 0.2, '#fff', OUT);
+    drawFruit(k, 0.27, 0.3, 0.13);
+  }])),
   milk: () => {
     rrect(-0.24, -0.18, 0.48, 0.62, 0.1, '#eef2f5', OUT);
     rrect(-0.13, -0.38, 0.26, 0.24, 0.05, '#eef2f5', OUT);
@@ -724,6 +811,45 @@ function drawTree(t) {
   circ(t.x - 0.22, t.y - 1.32, 0.3, t.apple ? '#6fb04a' : '#5c9c42');
   if (t.apple) for (let i = 0; i < 6; i++) { const a = hash(i, t.x * 10) * 6.28, r = 0.2 + hash(t.y * 10, i) * 0.32; circ(t.x + Math.cos(a) * r, t.y - 1.15 + Math.sin(a) * r * 0.9, 0.06, '#e2452f'); }
 }
+function drawFruit(kind, x, y, r) {
+  if (kind === 'pear') {
+    circ(x, y + r * 0.25, r * 0.8, FRUIT_COLOR.pear, OUT);
+    circ(x, y - r * 0.45, r * 0.5, FRUIT_COLOR.pear, OUT);
+    circ(x, y + r * 0.25, r * 0.78, FRUIT_COLOR.pear);
+  } else circ(x, y, r, FRUIT_COLOR[kind], OUT);
+  if (kind === 'peach') { line(x, y - r * 0.8, x - r * 0.25, y + r * 0.5, 'rgba(190,80,50,.5)', r * 0.12); circ(x + r * 0.35, y - r * 0.2, r * 0.3, 'rgba(230,90,80,.45)'); }
+  if (kind === 'orange') for (let i = 0; i < 3; i++) circ(x - r * 0.3 + i * r * 0.3, y + r * 0.1 - (i % 2) * r * 0.3, r * 0.06, 'rgba(180,90,10,.5)');
+  if (kind === 'apple') circ(x - r * 0.35, y - r * 0.3, r * 0.22, 'rgba(255,255,255,.4)');
+  line(x, y - r * (kind === 'pear' ? 0.9 : 0.85), x + r * 0.1, y - r * 1.25, '#6f4826', r * 0.14);
+  ell(x + r * 0.4, y - r * 1.05, r * 0.32, r * 0.16, '#4f9f2f', null, -0.4);
+}
+
+// a planted fruit tree; growth 0..1 grows the sapling, fruit = ripe fruit hanging on it
+function drawFruitTree(x, y, kind, growth, fruit, seed) {
+  const s = 0.35 + 0.65 * growth;
+  shadow(x, y, 0.6 * s, 0.18 * s);
+  g.save(); g.translate(x, y); g.scale(s, s);
+  rect(-0.1, -0.7, 0.2, 0.72, '#7a5230');
+  circ(0, -1.15, 0.62, LEAF_COLOR[kind], OUT);
+  circ(-0.22, -1.32, 0.3, 'rgba(255,255,255,.14)');
+  if (kind === 'orange') circ(0.2, -0.95, 0.25, 'rgba(0,0,0,.08)');
+  for (let j = 0; j < fruit; j++) {
+    const a = hash(seed, j * 7 + 1) * Math.PI * 2, r = 0.15 + hash(j + 3, seed) * 0.33;
+    drawFruit(kind, Math.cos(a) * r, -1.12 + Math.sin(a) * r * 0.85, 0.1);
+  }
+  g.restore();
+}
+
+function drawSpot(i) {
+  const sp = SPOTS[i], o = state.orchard[i];
+  if (o.kind) { drawFruitTree(sp.x, sp.y, o.kind, Math.min(1, o.age / CONFIG.trees[o.kind].grow), o.fruit, i + 11); return; }
+  const hov = hoverId === 'spot-' + i;
+  ell(sp.x, sp.y - 0.05, 0.5, 0.22, hov ? '#a8825a' : '#8e6b44', OUT);
+  ell(sp.x - 0.1, sp.y - 0.1, 0.22, 0.08, 'rgba(255,255,255,.12)');
+  rect(sp.x + 0.18, sp.y - 0.62, 0.07, 0.6, '#c4925a');
+  if (hov) { g.save(); g.globalAlpha = 0.6; drawFruitTree(sp.x, sp.y, 'apple', 0, 0, 0); g.restore(); }
+}
+
 function drawBush(b) { shadow(b.x, b.y, 0.6, 0.14); ell(b.x, b.y - 0.28, 0.6, 0.38, '#4f8f3a', OUT); ell(b.x - 0.18, b.y - 0.4, 0.25, 0.15, '#62a548'); }
 
 function windowShutters(x, y, w, h) {
@@ -772,11 +898,11 @@ function drawShop() {
   rect(x + 0.3, F - 0.8, w - 0.6, 0.16, '#c99459');
   STOCK_KINDS.forEach((kind, i) => {
     const n2 = Math.min(4, state.shop.stock[kind]), sx = slotX(i);
-    for (let j = 0; j < n2; j++) drawIcon(kind, sx + (j % 2) * 0.24 - 0.12, F - 0.92 - Math.floor(j / 2) * 0.2, 0.36);
+    for (let j = 0; j < n2; j++) drawIcon(kind, sx + (j % 2) * 0.18 - 0.09, F - 0.9 - Math.floor(j / 2) * 0.17, 0.3);
   });
   drawJar();
 }
-const slotX = i => SHOP.x + 0.9 + i * 0.95;
+const slotX = i => SHOP.x + 0.8 + i * 0.56;
 function drawJar() {
   const x = JAR.x, y = JAR.y, jar = state.shop.jar;
   rrect(x - 0.25, y - 0.6, 0.5, 0.6, 0.1, 'rgba(205,235,250,.55)', OUT);
@@ -948,7 +1074,7 @@ const cam = { x: 23, y: 12 };
 const anim = { moving: false, phase: 0 };
 let T = 0, hoverId = null, pendingCoins = 0;
 let particles = [], flyers = [], cars = [];
-let carT = 3, jarT = 0, milkT = 0, fullWarnT = 0, tractorOnShedPad = false;
+let carT = 3, jarT = 0, milkT = 0, fruitT = 0, fullWarnT = 0, tractorOnShedPad = false;
 
 function burst(x, y, c, n, up = 2) {
   for (let i = 0; i < n; i++) particles.push({ x, y, vx: rand(-1.5, 1.5), vy: rand(-up - 1, -up + 0.5), life: rand(0.4, 0.8), max: 0.8, c, s: rand(0.04, 0.08) });
@@ -971,6 +1097,7 @@ function update(dt) {
   updateHarvest(dt);
   updateCrops(dt);
   for (const k in PENS) updatePen(k, dt);
+  updateOrchard(dt);
   updatePickups(dt);
   updateShop(dt);
   updateCars(dt);
@@ -1150,6 +1277,16 @@ function updatePen(k, dt) {
   }
 }
 
+// Everything the farmer picks up goes in the basket, up to CONFIG.carryLimit.
+function takeIntoBasket(kind, from) {
+  if (basketRoom() <= 0) { basketFull(); return false; }
+  state.player.carry[kind]++;
+  fly(kind, from, playerPt, 0.35, () => sfx('pop'), 0, 0.3);
+  if (basketRoom() <= 0) basketFull();
+  return true;
+}
+function basketFull() { if (fullWarnT <= 0) { sfx('full'); fullWarnT = 2.5; } }
+
 function updatePickups(dt) {
   const p = state.player;
   if (p.mode === 'tractor') return;
@@ -1158,19 +1295,38 @@ function updatePickups(dt) {
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
       if (Math.hypot(it.x - p.x, it.y - p.y) > 1.0) continue;
+      if (!takeIntoBasket(it.kind, worldPt(it.x, it.y - 0.1))) break;
       items.splice(i, 1);
-      fly(it.kind, worldPt(it.x, it.y - 0.1), playerPt, 0.35, () => { p.carry[it.kind]++; sfx('pop'); }, 0, 0.3);
     }
   }
   milkT -= dt;
   if (milkT <= 0 && inRect(p.x, p.y, penRect('cow'))) {
     const cow = state.pens.cow.animals.find(a => a.milk > 0);
-    if (cow) {
-      cow.milk--;
-      fly('milk', worldPt(cow.x + cow.face * 0.3, cow.y - 0.35), playerPt, 0.4, () => { p.carry.milk++; sfx('pop'); }, 0, 0.3);
-      milkT = 0.3;
-    }
+    if (cow && takeIntoBasket('milk', worldPt(cow.x + cow.face * 0.3, cow.y - 0.35))) cow.milk--;
+    milkT = 0.3;
   }
+  fruitT -= dt;
+  if (fruitT <= 0) {
+    SPOTS.forEach((sp, i) => {
+      const o = state.orchard[i];
+      if (!o.kind || o.fruit <= 0 || fruitT > 0 || Math.hypot(sp.x - p.x, (sp.y - p.y) * 1.3) > 1.4) return;
+      if (takeIntoBasket(o.kind, worldPt(sp.x, sp.y - 1.15))) o.fruit--;
+      fruitT = 0.15;
+    });
+  }
+}
+
+function updateOrchard(dt) {
+  SPOTS.forEach((sp, i) => {
+    const o = state.orchard[i];
+    if (!o.kind) return;
+    const cfg = CONFIG.trees[o.kind], wasYoung = o.age < cfg.grow;
+    o.age += dt;
+    if (o.age < cfg.grow) return;
+    if (wasYoung) { burst(sp.x, sp.y - 1.1, '#fff3a0', 12, 2.5); sfx('pop'); }
+    o.t += dt;
+    if (o.t >= cfg.every) { o.t = 0; o.fruit = Math.min(CONFIG.maxFruitPerTree, o.fruit + 1); }
+  });
 }
 
 function updateShop(dt) {
@@ -1210,15 +1366,15 @@ const CAR_COLORS = ['#3d7cc9', '#e2a21a', '#6ab04c', '#9b59b6', '#e05a4a', '#2fa
 function updateCars(dt) {
   carT -= dt;
   if (carT <= 0) {
-    const stock = stockTotal(), stopper = cars.some(c => c.stop && c.state !== 'out');
+    const bundles = Math.floor(stockTotal() / CONFIG.itemsPerCoin), stopper = cars.some(c => c.stop && c.state !== 'out');
     const color = CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)];
-    if (stock > 0 && !stopper) {
+    if (bundles > 0 && !stopper) {
       cars.push({ x: -2, lane: 0, dir: 1, v: 7, color, stop: true, state: 'in', timer: 0, bought: false });
-      carT = clamp(CONFIG.cars.maxGap - stock * 0.4, CONFIG.cars.minGap, CONFIG.cars.maxGap) + rand(0, 2);
+      carT = clamp(CONFIG.cars.maxGap - bundles * 1.5, CONFIG.cars.minGap, CONFIG.cars.maxGap) + rand(0, 1.5);
     } else {
       const lane = stopper || Math.random() < 0.5 ? 1 : 0;
       cars.push({ x: lane ? W + 3 : -3, lane, dir: lane ? -1 : 1, v: 4.5, color, stop: false, state: 'out', timer: 0 });
-      carT = stock > 0 ? rand(2, 4) : rand(9, 18);
+      carT = bundles > 0 ? rand(2, 4) : rand(9, 18);
     }
   }
   for (const c of cars) {
@@ -1230,7 +1386,7 @@ function updateCars(dt) {
     } else if (c.state === 'wait') {
       c.timer -= dt;
       if (c.timer <= 0) {
-        if (!c.bought) { c.bought = true; c.timer = carBuys(c) * 0.25 + 1.2; }
+        if (!c.bought) { c.bought = true; c.timer = carBuys(c) * 0.12 + 1.2; }
         else c.state = 'out';
       }
     } else {
@@ -1242,19 +1398,18 @@ function updateCars(dt) {
 }
 
 function carBuys(car) {
-  const stock = state.shop.stock;
-  const total = stockTotal();
-  if (!total) return 0;
-  const n = Math.min(total, 1 + Math.floor(Math.random() * 3) + Math.floor(total / 12));
-  for (let i = 0; i < n; i++) {
-    let r = Math.random() * stockTotal(), kind = null;
-    for (const k of STOCK_KINDS) { r -= stock[k]; if (r < 0) { kind = k; break; } }
-    if (!kind) kind = STOCK_KINDS.find(k => stock[k] > 0);
-    stock[kind]--;
-    const price = sellPrice(kind), idx = STOCK_KINDS.indexOf(kind);
-    fly(kind, worldPt(slotX(idx), SHOP.y + SHOP.h - 1.0), () => toScreen(car.x, 31.4), 0.45, () => {
-      fly('coin', worldPt(car.x, 31.3), worldPt(JAR.x, JAR.y - 0.4), 0.45, () => { state.shop.jar += price; sfx('clink', 40); }, 0, 0.3);
-    }, i * 0.25, 0.32);
+  const stock = state.shop.stock, per = CONFIG.itemsPerCoin;
+  const bundles = Math.min(Math.floor(stockTotal() / per), 1 + Math.floor(Math.random() * 2) + Math.floor(stockTotal() / 40));
+  let n = 0;
+  for (let b = 0; b < bundles; b++) {
+    for (let i = 0; i < per; i++, n++) {
+      let r = Math.random() * stockTotal(), kind = null;
+      for (const k of STOCK_KINDS) { r -= stock[k]; if (r < 0) { kind = k; break; } }
+      if (!kind) kind = STOCK_KINDS.find(k => stock[k] > 0);
+      stock[kind]--;
+      const payNow = i === per - 1 ? () => fly('coin', worldPt(car.x, 31.3), worldPt(JAR.x, JAR.y - 0.4), 0.45, () => { state.shop.jar += 1; sfx('clink', 40); }, 0, 0.36) : null;
+      fly(kind, worldPt(slotX(STOCK_KINDS.indexOf(kind)), SHOP.y + SHOP.h - 1.0), () => toScreen(car.x, 31.4), 0.4, payNow, n * 0.12, 0.32);
+    }
   }
   return n;
 }
@@ -1317,6 +1472,7 @@ function collectSorted(list) {
     const wiggle = bareTiles(k) === Object.keys(state.patches[k].tiles).length && state.coins >= sowCost(k);
     add(PATCHES[k].sign.y, () => drawSign(PATCHES[k].sign, k, 'crop-' + k, wiggle));
   }
+  SPOTS.forEach((sp, i) => add(sp.y, () => drawSpot(i)));
   const p = state.player, t = state.tractor;
   add(t.y + 0.45, () => drawTractor(t));
   if (p.mode === 'walk') add(p.y + 0.14, () => drawFarmer(p.x, p.y + 0.14, p.dir, anim.phase, anim.moving, p.carry));
@@ -1343,6 +1499,12 @@ function drawWorldOverlays() {
     rrect(t.x - 0.6, y, 1.2, 0.2, 0.1, '#fff', '#4a3010');
     if (load) rrect(t.x - 0.57, y + 0.03, 1.14 * load / cap, 0.14, 0.07, full ? (Math.sin(T * 10) > 0 ? '#e2533d' : '#f08a5d') : '#6ab04c');
     if (full) { const b = Math.abs(Math.sin(T * 5)) * 0.18; drawIcon('storage', t.x, y - 0.4 - b, 0.6); }
+  }
+  // full basket
+  const p = state.player;
+  if (p.mode !== 'tractor' && basketRoom() <= 0) {
+    const b = Math.abs(Math.sin(T * 5)) * 0.18;
+    drawIcon('basket', p.x, p.y - (p.mode === 'horse' ? 2.05 : 1.45) - b, 0.7);
   }
 }
 
@@ -1386,24 +1548,28 @@ function bumpCoins() {
   coinBox.classList.remove('bump'); void coinBox.offsetWidth; coinBox.classList.add('bump');
 }
 function updateHUD() {
+  enterBtn.classList.toggle('idle', state.player.mode === 'walk' && !nearestMount());
   const shown = state.coins - pendingCoins;
   if (shown !== coinShown) { coinNum.textContent = shown; coinShown = shown; }
   const p = state.player, t = state.tractor, load = loadTotal(), cap = tractorCap();
-  const sig = p.mode === 'tractor' ? `t|${load}|${cap}` : `w|${p.carry.egg}|${p.carry.milk}|${p.carry.manure}`;
+  const sig = p.mode === 'tractor' ? `t|${load}|${cap}` : 'w|' + CARRY_KINDS.map(k => p.carry[k]).join('|');
   if (sig === carrySig) return;
   carrySig = sig;
   carryEl.innerHTML = '';
-  if (p.mode === 'tractor') {
+  const meter = (icon, n, max) => {
     const pill = document.createElement('div');
-    pill.className = 'pill' + (load >= cap ? ' full' : '');
-    pill.append(iconCanvas('tractor', 44));
+    pill.className = 'pill' + (n >= max ? ' full' : '');
+    pill.append(iconCanvas(icon, 44));
     const bar = document.createElement('div'); bar.className = 'bar';
-    const fill = document.createElement('div'); fill.style.width = (100 * load / cap) + '%';
+    const fill = document.createElement('div'); fill.style.width = (100 * n / max) + '%';
     bar.append(fill); pill.append(bar);
-    const num = document.createElement('span'); num.textContent = load + '/' + cap; pill.append(num);
+    const num = document.createElement('span'); num.textContent = n + '/' + max; pill.append(num);
     carryEl.append(pill);
-  } else {
-    for (const k of ['egg', 'milk', 'manure']) {
+  };
+  if (p.mode === 'tractor') meter('tractor', load, cap);
+  else {
+    meter('basket', carryTotal(), CONFIG.carryLimit);
+    for (const k of CARRY_KINDS) {
       if (!p.carry[k]) continue;
       const pill = document.createElement('div'); pill.className = 'pill';
       pill.append(iconCanvas(k, 44));
@@ -1497,6 +1663,8 @@ function renderMenu() {
       fill.style.width = (100 * pen[what]) + '%'; fill.style.background = color; bar.append(fill);
       menuEl.append(row(iconCanvas(what, 84, 'ic'), bar, coinBtn(price, pen[what] < 0.95, () => { pen[what] = 1; })));
     }
+  } else if (menu.type === 'tree') {
+    for (const f of FRUITS) menuEl.append(row(iconCanvas('tree-' + f, 84, 'ic'), coinBtn(CONFIG.trees[f].price, !state.orchard[k].kind, () => plantTree(k, f))));
   } else if (menu.type === 'repair') {
     const lv = state.tractor.lv;
     for (const a of ['speed', 'storage', 'yield']) {
@@ -1547,6 +1715,13 @@ function buyAnimals(k, sex, n) {
   }
   menu.pending[sex] = 0;
 }
+function plantTree(i, kind) {
+  Object.assign(state.orchard[i], { kind, age: 0, fruit: 0, t: 0 });
+  buildObstacles();
+  unstickAll();
+  burst(SPOTS[i].x, SPOTS[i].y - 0.3, '#6dbb45', 10);
+  closeMenu();
+}
 function upgrade(a) {
   state.tractor.lv[a]++;
   const t = state.tractor;
@@ -1586,6 +1761,7 @@ function hitTargets() {
   }
   for (const k in PATCHES) { const s = PATCHES[k].sign; T2.push({ id: 'crop-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('crop', k) }); }
   for (const k in PENS) { const s = PENS[k].sign; T2.push({ id: 'pen-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('pen', k) }); }
+  SPOTS.forEach((sp, i) => { if (!state.orchard[i].kind) T2.push({ id: 'spot-' + i, r: { x: sp.x - 0.6, y: sp.y - 0.8, w: 1.2, h: 1.0 }, act: () => openMenu('tree', i) }); });
   T2.push({ id: 'shed', r: { x: SHED.x + 0.2, y: SHED.y - 1.3, w: SHED.w - 0.4, h: SHED.h + 1.3 }, act: () => openMenu('repair') });
   return T2;
 }
@@ -1609,11 +1785,44 @@ soundBtn.onclick = () => {
   soundBtn.innerHTML = muted ? SVG_SOUND_OFF : SVG_SOUND_ON;
   ensureAudio(); sfx('click');
 };
+if (!document.documentElement.requestFullscreen) fsBtn.style.display = 'none';
 fsBtn.onclick = () => {
   fsBtn.blur();
   if (document.fullscreenElement) document.exitFullscreen();
   else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
 };
+
+// ======================================================================
+// Touch screens: the pad works like the arrow keys, the round button like Enter.
+// ======================================================================
+const pad = document.getElementById('pad'), knob = document.getElementById('padKnob'), enterBtn = document.getElementById('enterBtn');
+let padId = null;
+function enableTouch() { document.body.classList.add('touch'); }
+if (matchMedia('(pointer: coarse)').matches) enableTouch();
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') enableTouch(); }, { capture: true });
+function padSet(e) {
+  const r = pad.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+  const d = Math.hypot(dx, dy);
+  keys.left = keys.right = keys.up = keys.down = false;
+  if (d > 12) {
+    const nx = dx / d, ny = dy / d;
+    if (nx > 0.38) keys.right = true; else if (nx < -0.38) keys.left = true;
+    if (ny > 0.38) keys.down = true; else if (ny < -0.38) keys.up = true;
+  }
+  const k = Math.min(d, r.width * 0.3) / (d || 1);
+  knob.style.transform = `translate(${dx * k}px, ${dy * k}px)`;
+}
+function padEnd(e) {
+  if (e.pointerId !== padId) return;
+  padId = null;
+  keys.left = keys.right = keys.up = keys.down = false;
+  knob.style.transform = '';
+}
+pad.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); padId = e.pointerId; try { pad.setPointerCapture(e.pointerId); } catch (err) {} padSet(e); });
+pad.addEventListener('pointermove', e => { if (e.pointerId === padId) padSet(e); });
+pad.addEventListener('pointerup', padEnd);
+pad.addEventListener('pointercancel', padEnd);
+enterBtn.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(); if (!menu.open) toggleMount(); });
 
 // ======================================================================
 // Start
