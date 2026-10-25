@@ -43,7 +43,24 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; use
 .close::after { transform: translate(-50%,-50%) rotate(-45deg); }
 .row { display: flex; align-items: center; gap: 14px; padding: 10px 4px; }
 .row + .row { border-top: 3px dashed #c9a06a; }
-.row canvas.ic { width: 84px; height: 84px; flex: none; }
+.bigred { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #8f2a1c; background: #e2533d; padding: 22px; cursor: pointer;
+  box-shadow: 0 5px 0 #8f2a1c; display: block; margin: 8px auto; touch-action: none; -webkit-touch-callout: none; }
+.toolbtn { width: 84px; height: 84px; flex: none; margin-left: auto; border-radius: 50%; border: 5px solid #7a5230; background: #e9cb98;
+  box-shadow: 0 4px 0 #7a5230; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; }
+.toolbtn canvas { width: 64px; height: 64px; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 0 10px; }
+.card { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 3px solid #d9b98a; border-radius: 16px; background: #fbf1dc; }
+.cards + .row { border-top: 3px dashed #c9a06a; }
+.picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-bottom: 6px; }
+.pick { border: 3px solid #d9b98a; border-radius: 16px; background: #fbf1dc; padding: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.pick:hover { background: #fff7e6; border-color: #b88c55; }
+.pick canvas { width: 76px; height: 76px; }
+.toolbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a5230; }
+.bigred svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+.ring { width: 150px; height: 150px; border-radius: 50%; margin: 6px auto; display: flex; align-items: center; justify-content: center;
+  background: conic-gradient(#4a3010 calc(var(--p, 0) * 1%), #e8d6b0 0); }
+.ring .bigred { margin: 0; box-shadow: none; }
+canvas.ic { width: 84px; height: 84px; flex: none; }
 .coinbtn { width: 84px; height: 84px; flex: none; border-radius: 50%; border: 5px solid #a86e10; margin-left: auto; cursor: pointer; padding: 0;
   background: radial-gradient(circle at 40% 35%, #ffe27a, #f2b42c 65%, #d8941a); box-shadow: 0 4px 0 #8a5a0c;
   font: bold 36px "Trebuchet MS", Verdana, sans-serif; color: #5a3a05; }
@@ -65,6 +82,8 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #8cc063; use
 .pip.on { background: #6ab04c; }
 .lvl { width: 150px; height: 28px; border: 3px solid #4a3010; border-radius: 14px; background: #fff; overflow: hidden; }
 .lvl > div { height: 100%; }
+
+#ver { position: fixed; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: 11px; color: rgba(40,30,10,.4); pointer-events: none; z-index: 5; }
 
 /* touch screens: arrow pad and on/off button (shown only after a touch) */
 #touch { display: none; }
@@ -93,13 +112,36 @@ body.touch #touch { display: block; }
   #menu { padding: 16px 16px 8px; min-width: 0; border-width: 4px; }
   .close { width: 44px; height: 44px; top: -18px; right: -18px; }
   .row { gap: 8px; padding: 6px 2px; }
-  .row canvas.ic { width: 58px; height: 58px; }
+  canvas.ic { width: 58px; height: 58px; }
+  .card { padding: 4px 6px; gap: 6px; }
+  .pick canvas { width: 54px; height: 54px; }
+  .picks { gap: 5px; }
   .coinbtn, .star { width: 60px; height: 60px; font-size: 26px; border-width: 4px; }
+  .toolbtn { width: 60px; height: 60px; border-width: 4px; }
+  .toolbtn canvas { width: 44px; height: 44px; }
   .round { width: 40px; height: 40px; font-size: 26px; border-width: 3px; }
   .num { font-size: 30px; }
   .slot { width: 18px; height: 18px; border-width: 2px; }
   .pip { width: 16px; height: 16px; border-width: 2px; }
   .lvl { width: 100px; height: 22px; }
+}
+@media (max-height: 420px) {
+  .row { padding: 3px 2px; }
+  canvas.ic { width: 46px; height: 46px; }
+  .cards { gap: 5px; padding-bottom: 4px; }
+  .card { padding: 2px 6px; }
+  .pick canvas { width: 46px; height: 46px; }
+  #menu { padding: 12px 14px 6px; }
+  .coinbtn, .star { width: 44px; height: 44px; font-size: 20px; }
+  canvas.ic { width: 42px; height: 42px; }
+  .slots { padding-bottom: 4px; gap: 4px; }
+  .slot { width: 14px; height: 14px; }
+  .round { width: 34px; height: 34px; font-size: 22px; }
+  .num { font-size: 24px; }
+  .pip { width: 13px; height: 13px; }
+  .toolbtn { width: 44px; height: 44px; }
+  .toolbtn canvas { width: 32px; height: 32px; }
+  .coinbtn, .star { width: 50px; height: 50px; font-size: 22px; }
 }
 @media (max-width: 700px) { #carry { top: 56px; max-width: 90vw; } }
 </style>
@@ -108,7 +150,7 @@ body.touch #touch { display: block; }
 <canvas id="game"></canvas>
 <div id="coinbox"><canvas id="coinIcon"></canvas><span id="coinNum">0</span></div>
 <div id="carry"></div>
-<div id="tools"><button id="soundBtn" tabindex="-1"></button><button id="fsBtn" tabindex="-1"></button></div>
+<div id="tools"><button id="resetBtn" tabindex="-1"></button><button id="soundBtn" tabindex="-1"></button><button id="fsBtn" tabindex="-1"></button></div>
 <div id="menuBack"><div id="menu"></div></div>
 <div id="touch">
   <div id="pad">
@@ -117,6 +159,7 @@ body.touch #touch { display: block; }
   </div>
   <button id="enterBtn" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4v9H5M10 8l-5 5 5 5"/></svg></button>
 </div>
+<div id="ver"></div>
 <canvas id="fx"></canvas>
 <script>
 'use strict';
@@ -127,37 +170,54 @@ body.touch #touch { display: block; }
 const CONFIG = {
   startCoins: 2,
   itemsPerCoin: 5,             // customers buy any 5 items for 1 coin
-  carryLimit: 10,              // the farmer's basket
+  basket: { size: [10, 15, 20, 25, 30], price: [3, 5, 7, 9] }, // the farmer's basket, upgraded at the house
   maxUpgradeGap: 3,            // no tractor upgrade may get more than this many levels ahead of another
   walkSpeed: 3.2,              // tiles per second
-  horseSpeed: 5.2,
   tractor: {
     speed:   [3.4, 4.0, 4.6, 5.2, 5.8],
     storage: [10, 20, 30, 45, 60],
     yield:   [1, 2, 3, 4, 5],  // items per harvested tile
     price:   [3, 5, 7, 9],     // price of level 2, 3, 4, 5
   },
-  crops: {                     // sow = seed price for the starting patch; grow = seconds to ripen
-    corn:   { sow: 1, grow: 30 },
-    potato: { sow: 1, grow: 40 },
-    carrot: { sow: 1, grow: 50 },
+  crops: {                     // sow = seed price; grow = seconds to ripen; perTile = items per tile (times the tractor's yield)
+    carrot:  { sow: 1, grow: 25, perTile: 1 },
+    onion:   { sow: 1, grow: 30, perTile: 1 },
+    corn:    { sow: 1, grow: 35, perTile: 1 },
+    potato:  { sow: 2, grow: 45, perTile: 2 },
+    pepper:  { sow: 2, grow: 50, perTile: 2 },
+    tomato:  { sow: 3, grow: 55, perTile: 3 },
+    pumpkin: { sow: 3, grow: 60, perTile: 3 },
   },
   sowPerSegment: 1,            // each extension adds this to the seed price
   cropExtendPrice: [2, 3, 4, 5, 6],
   penExtendPrice:  [2, 3, 4, 5, 6],
-  pens: {                      // price per female / male; cap = places at start, capPerSegment = places per extension
-    chicken: { price: { f: 4, m: 5 },  cap: 5, capPerSegment: 2, produceEvery: [27, 33], breedEvery: 120, growUp: 90 },
-    pig:     { price: { f: 6, m: 7 },  cap: 4, capPerSegment: 1, produceEvery: [27, 33], breedEvery: 120, growUp: 100 },
-    cow:     { price: { f: 8, m: 9 },  cap: 3, capPerSegment: 1, produceEvery: [18, 22], breedEvery: 120, growUp: 120 },
-    horse:   { price: { f: 9, m: 10 }, cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 120, growUp: 120 },
+  // price of a female / male; cap = places in a pen, capPerSegment = extra places per extension;
+  // produceEvery = seconds per egg, milk, manure or full coat of wool (null: nothing, they are ridden)
+  animals: {
+    hen:    { price: { f: 4, m: 5 },  cap: 5, capPerSegment: 2, produceEvery: [43, 51], breedEvery: 120, growUp: 90 },
+    duck:   { price: { f: 4, m: 5 },  cap: 5, capPerSegment: 2, produceEvery: [50, 60], breedEvery: 120, growUp: 90 },
+    goose:  { price: { f: 5, m: 6 },  cap: 4, capPerSegment: 2, produceEvery: [55, 66], breedEvery: 120, growUp: 100 },
+    turkey: { price: { f: 5, m: 6 },  cap: 4, capPerSegment: 2, produceEvery: [55, 66], breedEvery: 120, growUp: 100 },
+    sheep:  { price: { f: 5, m: 6 },  cap: 4, capPerSegment: 1, produceEvery: [50, 62], breedEvery: 120, growUp: 100 },
+    goat:   { price: { f: 6, m: 7 },  cap: 4, capPerSegment: 1, produceEvery: [32, 38], breedEvery: 120, growUp: 100 },
+    pig:    { price: { f: 6, m: 7 },  cap: 4, capPerSegment: 1, produceEvery: [34, 41], breedEvery: 120, growUp: 100 },
+    pony:   { price: { f: 6, m: 7 },  cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 120, growUp: 110 },
+    alpaca: { price: { f: 7, m: 8 },  cap: 3, capPerSegment: 1, produceEvery: [55, 66], breedEvery: 120, growUp: 110 },
+    donkey: { price: { f: 7, m: 8 },  cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 120, growUp: 120 },
+    cow:    { price: { f: 8, m: 9 },  cap: 3, capPerSegment: 1, produceEvery: [23, 28], breedEvery: 120, growUp: 120 },
+    horse:  { price: { f: 9, m: 10 }, cap: 3, capPerSegment: 1, produceEvery: null,     breedEvery: 120, growUp: 120 },
   },
+  limits: { manure: 5, milk: 2 },                     // manure piles per pen, milk per animal; then they wait
+  coop: { eggs: [6, 9, 12, 15], price: [3, 5, 7] },   // eggs the nest basket holds at each coop level; price of levels 2–4
+  plotPrice: [30, 35, 40, 45, 50],                    // the new land up north: each plot bought costs a bit more
   trees: {                     // grow = seconds from sapling to grown tree; every = seconds per new fruit
-    apple:  { price: 5, grow: 150, every: 40 },
-    pear:   { price: 6, grow: 150, every: 36 },
-    peach:  { price: 7, grow: 150, every: 34 },
-    orange: { price: 8, grow: 150, every: 30 },
+    apple:   { price: 5, grow: 150, every: 50 },
+    pear:    { price: 6, grow: 150, every: 45 },
+    peach:   { price: 7, grow: 150, every: 43 },
+    orange:  { price: 8, grow: 150, every: 38 },
+    avocado: { price: 9, grow: 150, every: 56 },
   },
-  maxFruitPerTree: 6,
+  maxFruitPerTree: 4,
   trough: { foodPrice: 1, waterPrice: 1, drainBase: 0.001, drainPerAnimal: 0.0003 }, // a full trough is 1
   cars: { minGap: 3, maxGap: 9 },   // seconds between customers: shorter the fuller the shop
 };
@@ -165,47 +225,89 @@ const CONFIG = {
 // Generated art. When an image exists it replaces the drawn shape.
 // Views: down = front, up = back, left, right. width = size in tiles of the left/right view.
 const ART = {
-  tractor: { down: 'images/tractor-down.png', up: 'images/tractor-up.png', left: 'images/tractor-left.png', right: 'images/tractor-right.png', width: 1.9 },
+  tractor: { down: 'images/tractor-down.webp', up: 'images/tractor-up.webp', left: 'images/tractor-left.webp', right: 'images/tractor-right.webp', width: 1.9 },
+  // animation strips (frames side by side), cut from one sheet with tools/cut_sprites.py --sheet
+  dog: { left: 'images/dog-left.webp', right: 'images/dog-right.webp', up: 'images/dog-up.webp', down: 'images/dog-down.webp', sit: 'images/dog-sit.webp' },
+  // horses: walking right is the left strip mirrored; foals are the mare drawn smaller and lighter
+  horse_f: { left: 'images/horse-f-left.webp', up: 'images/horse-f-up.webp', down: 'images/horse-f-down.webp' },
+  horse_m: { left: 'images/horse-m-left.webp', up: 'images/horse-m-up.webp', down: 'images/horse-m-down.webp' },
 };
+const HORSE_FRAMES = { left: 4, up: 2, down: 2 };
+const HORSE_SCALE = 1.22 / 180;       // tiles per image pixel: the mare's side view (180 px) as tall as the drawn horse
+const HORSE_SEAT = { left: -0.64, right: -0.64, up: -0.92, down: -0.96 };   // where the rider sits in each view
+const DOG_FRAMES = { left: 4, right: 4, up: 4, down: 4, sit: 4 };
+const DOG_SIT = { left: 0, down: 1, up: 2, right: 3 };   // which sitting frame faces which way
+const DOG_SCALE = 0.62 / 160;         // tiles per image pixel: the side view (160 px high) is 0.62 tiles tall
 
-const SAVE_KEY = 'harvester-save-v2';
+const VERSION = 'v0.12';            // bump with every change, to check a fresh copy has loaded
+const SAVE_KEY = 'harvester-save-v3';
 const DEV = /[?&]dev\b/.test(location.search);
 if (/[?&]reset\b/.test(location.search)) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 
 // ======================================================================
 // Map layout, in tiles. x grows to the right, y grows down the screen.
 // ======================================================================
-const W = 48, H = 35;
-const BOUND = { x0: 0.6, y0: 1.4, x1: 47.4, y1: 31 };
+const W = 48, H = 35, Y0 = -14;   // the map runs from the north woods (y = -14) down to the road verge (y = 35)
+const BOUND = { x0: 0.6, y0: -12.5, x1: 47.4, y1: 31 };
 const HOUSE = { x: 19, y: 4.6, w: 8, h: 3.4 };
 const SHOP = { x: 13, y: 26.4, w: 7, h: 2.6 };
 const SHOP_PAD = { x: 13, y: 29, w: 7, h: 2 };
 const SHED = { x: 26, y: 26.4, w: 5, h: 2.6 };
 const SHED_PAD = { x: 26, y: 29, w: 5, h: 2 };
-const JAR = { x: 19.35, y: 28.25 };
+const JAR = { x: 20.25, y: 28.95 };
+const DOGHOUSE = { x: 19.5, y: 10.0 };
+const DOG_HOME = { x: 17.5, y: 9.3, w: 11, h: 5.2 };   // the patch in front of the house where the dog potters about
 const STOP_X = 16.5;
-const TRACKS = [{ x: 22, y: 8, w: 2, h: 23.2 }, { x: 5, y: 16, w: 38, h: 2 }, { x: 20, y: 7.8, w: 6, h: 1.4 }];
+const STREAM = { y: -6, h: 1, bridge: [26.7, 29.3] };
+const TRACKS = [
+  { x: 22, y: 8, w: 2, h: 23.2 }, { x: 5, y: 16, w: 38, h: 2 }, { x: 20, y: 7.8, w: 9, h: 1.4 },
+  { x: 27, y: -7, w: 2, h: 15.6 }, { x: 4, y: -7, w: 40, h: 1 },
+];
+// plot: true = land up north that has to be bought first
 const PATCHES = {
-  potato: { x0: 11, y0: 11, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 14.7 } },
-  carrot: { x0: 11, y0: 19, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 19.6 } },
-  corn:   { x0: 29, y0: 20, w: 5, h: 4, dir: 1,  sign: { x: 28.3,  y: 20.6 } },
+  field1: { x0: 11, y0: 11, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 14.7 } },
+  field2: { x0: 11, y0: 19, w: 5, h: 4, dir: -1, sign: { x: 16.75, y: 19.6 } },
+  field3: { x0: 29, y0: 20, w: 5, h: 4, dir: 1,  sign: { x: 28.3,  y: 20.6 } },
+  field4: { plot: true, x0: 13, y0: -3, w: 5, h: 3, dir: -1, sign: { x: 18.75, y: -0.3 } },
+  field5: { plot: true, x0: 33, y0: -3, w: 5, h: 3, dir: 1,  sign: { x: 32.3,  y: -2.4 } },
 };
+const CROPS = Object.keys(CONFIG.crops);
+const CROP_COLOR = { carrot: '#ef8a23', onion: '#d9a25a', corn: '#f2c535', potato: '#c99a5a', pepper: '#d93a2a', tomato: '#e2452f', pumpkin: '#f08a24' };
+// Any pen can hold any animal from PEN_CHOICES; the meadow always holds sheep.
 const PENS = {
-  chicken: { x0: 29, y0: 2, w: 5, h: 5, dir: 'right', gate: [29.5, 31.5], sign: { x: 28.3, y: 7.75 },  troughs: { x: 31.9, y: 6.15 },
-             coop: { x: 29.3, y: 2.3, w: 1.6, h: 1.0 } },
-  pig:     { x0: 29, y0: 9, w: 5, h: 6, dir: 'right', gate: [29.5, 31.5], sign: { x: 28.3, y: 15.75 }, troughs: { x: 31.9, y: 14.15 },
-             mud: { x: 31.4, y: 10.7 } },
-  cow:     { x0: 11, y0: 2, w: 6, h: 7, dir: 'left',  gate: [14.5, 16.5], sign: { x: 17.6, y: 9.75 },  troughs: { x: 11.9, y: 8.15 } },
-  horse:   { x0: 41, y0: 8, w: 5, h: 7, dir: 'up',    gate: [41.5, 43.5], sign: { x: 40.4, y: 15.75 }, troughs: { x: 43.9, y: 14.15 } },
+  pen1:   { x0: 11, y0: 2, w: 6, h: 7, dir: 'left',  gate: [14.5, 16.5], sign: { x: 17.6, y: 9.75 },  troughs: { x: 11.9, y: 8.15 } },
+  pen2:   { x0: 29, y0: 2, w: 5, h: 5, dir: 'right', gate: [29.5, 31.5], sign: { x: 32.3, y: 7.8 },   troughs: { x: 31.9, y: 6.15 } },
+  pen3:   { x0: 29, y0: 9, w: 5, h: 6, dir: 'right', gate: [29.5, 31.5], sign: { x: 28.3, y: 15.75 }, troughs: { x: 31.9, y: 14.15 } },
+  pen4:   { x0: 41, y0: 8, w: 5, h: 7, dir: 'up',    gate: [41.5, 43.5], sign: { x: 40.4, y: 15.75 }, troughs: { x: 43.9, y: 14.15 } },
+  pen5:   { plot: true, x0: 6,  y0: -11.6, w: 5, h: 4.6, dir: 'left',  gate: [6.5, 8.5],   sign: { x: 11.6, y: -6.15 }, troughs: { x: 8.9, y: -7.85 } },
+  pen6:   { plot: true, x0: 18, y0: -11.6, w: 5, h: 4.6, dir: 'left',  gate: [18.5, 20.5], sign: { x: 23.6, y: -6.15 }, troughs: { x: 20.9, y: -7.85 } },
+  pen7:   { plot: true, x0: 33, y0: -11.6, w: 5, h: 4.6, dir: 'right', gate: [33.5, 35.5], sign: { x: 32.4, y: -6.15 }, troughs: { x: 35.9, y: -7.85 } },
+  // an open meadow: no fence or troughs; sheep stay inside, the farmer walks in and out
+  meadow: { x0: 40, y0: 19, w: 7, h: 6, dir: 'down', open: true, species: 'sheep', sign: { x: 40.6, y: 18.8 } },
 };
-const KINDS = { chicken: { f: 'hen', m: 'rooster' }, pig: { f: 'sow', m: 'boar' }, cow: { f: 'cow', m: 'bull' }, horse: { f: 'mare', m: 'stallion' } };
-const PRODUCT = { chicken: 'egg', pig: 'manure', cow: 'milk', horse: null };
-const ANIMAL_SPEED = { chicken: 0.7, pig: 0.55, cow: 0.4, horse: 0.7 };
-const FRUITS = ['apple', 'pear', 'peach', 'orange'];
-const FRUIT_COLOR = { apple: '#e2452f', pear: '#c9d84a', peach: '#f6a26b', orange: '#f39a1e' };
-const LEAF_COLOR = { apple: '#5a9a3c', pear: '#64a446', peach: '#6fae4c', orange: '#2f7d3a' };
-const CARRY_KINDS = ['egg', 'milk', 'manure', ...FRUITS];
-const STOCK_KINDS = ['corn', 'potato', 'carrot', 'egg', 'milk', 'manure', ...FRUITS];
+// bird: lives with a coop and lays eggs in its nest basket; product: what the farmer collects;
+// ride: can be ridden, at this speed; big: needs more room from the fence; pond / mud: what appears in its pen
+const SPECIES = {
+  hen:    { bird: true, product: 'egg', speed: 0.7 },
+  duck:   { bird: true, product: 'egg', speed: 0.6, pond: true },
+  goose:  { bird: true, product: 'egg', speed: 0.6, pond: true },
+  turkey: { bird: true, product: 'egg', speed: 0.55 },
+  pig:    { product: 'manure', speed: 0.55, mud: true },
+  goat:   { product: 'milk', speed: 0.6 },
+  cow:    { product: 'milk', speed: 0.4, big: true },
+  sheep:  { product: 'wool', speed: 0.45 },
+  alpaca: { product: 'wool', speed: 0.5, big: true },
+  pony:   { ride: 4.6, speed: 0.6 },
+  donkey: { ride: 4.2, speed: 0.5, big: true },
+  horse:  { ride: 5.2, speed: 0.7, big: true },
+};
+const PEN_CHOICES = ['hen', 'duck', 'goose', 'turkey', 'pig', 'goat', 'cow', 'alpaca', 'pony', 'donkey', 'horse'];
+const SEAT = { horse: -0.78, pony: -0.6, donkey: -0.7 };   // where the rider sits on each mount
+const FRUITS = ['apple', 'pear', 'peach', 'orange', 'avocado'];
+const FRUIT_COLOR = { apple: '#e2452f', pear: '#c9d84a', peach: '#f6a26b', orange: '#f39a1e', avocado: '#4e6f24' };
+const LEAF_COLOR = { apple: '#5a9a3c', pear: '#64a446', peach: '#6fae4c', orange: '#2f7d3a', avocado: '#3c7330' };
+const CARRY_KINDS = ['egg', 'milk', 'manure', 'wool', ...FRUITS];
+const STOCK_KINDS = [...CROPS, ...CARRY_KINDS];
 const SPOTS = [
   { x: 2.9, y: 26.4 }, { x: 5.3, y: 26.4 }, { x: 7.7, y: 26.4 }, { x: 10.1, y: 26.4 },
   { x: 2.9, y: 29.5 }, { x: 5.3, y: 29.5 }, { x: 7.7, y: 29.5 }, { x: 10.1, y: 29.5 },
@@ -214,8 +316,12 @@ const TREES = [
   { x: 2.6, y: 5.5 }, { x: 2.4, y: 12.8 }, { x: 2.6, y: 21 }, { x: 42.6, y: 21.6 }, { x: 45.2, y: 24.6 }, { x: 42.8, y: 28.2 },
   { x: 45.6, y: 30.4 }, { x: 38.5, y: 28.6 },
 ];
-const BUSHES = [{ x: 5, y: 1.1 }, { x: 8.5, y: 1.0 }, { x: 18, y: 1.1 }, { x: 27.5, y: 1.0 }, { x: 36.5, y: 1.1 }, { x: 39.5, y: 1.0 }, { x: 46.5, y: 1.2 }];
-const BOX = { walk: [0.22, 0.14], horse: [0.4, 0.22], tractor: [0.6, 0.4] };
+for (let i = 0; i < 20; i++) {   // the woods along the north edge: two staggered rows
+  TREES.push({ x: 1.2 + i * 2.4 + (i % 3) * 0.25, y: -12.3, woods: true });
+  TREES.push({ x: 2.4 + i * 2.4, y: -13.5, woods: true });
+}
+const BUSHES = [{ x: 5, y: 1.1 }, { x: 46.5, y: 1.2 }];
+const BOX = { walk: [0.22, 0.14], horse: [0.4, 0.22], tractor: [0.6, 0.4], dog: [0.28, 0.12] };
 
 // ======================================================================
 // Small helpers
@@ -251,18 +357,21 @@ let state;
 function newGame() {
   const zero = kinds => Object.fromEntries(kinds.map(k => [k, 0]));
   state = {
-    v: 1, coins: CONFIG.startCoins, nextId: 1,
-    player: { mode: 'walk', x: 23, y: 9.6, dir: 'down', carry: zero(CARRY_KINDS), horse: null },
-    tractor: { x: 26.4, y: 10.8, dir: 'left', load: { corn: 0, potato: 0, carrot: 0 }, lv: { speed: 1, storage: 1, yield: 1 } },
+    v: 1, coins: CONFIG.startCoins, nextId: 1, basketLv: 1,
+    player: { mode: 'walk', x: 23, y: 9.6, dir: 'down', carry: zero(CARRY_KINDS), mount: null },
+    tractor: { x: 26.4, y: 10.8, dir: 'left', load: zero(CROPS), lv: { speed: 1, storage: 1, yield: 1 } },
     patches: {}, pens: {},
     orchard: SPOTS.map(() => ({ kind: null, age: 0, fruit: 0, t: 0 })),
     shop: { stock: zero(STOCK_KINDS), jar: 0 },
+    dog: { x: 20.8, y: 10.6, tx: 20.8, ty: 10.6, dir: 'down', speed: 1.3, waitT: 3 },
+    plots: Object.fromEntries(Object.entries({ ...PENS, ...PATCHES }).filter(([, d]) => d.plot).map(([k]) => [k, false])),
   };
+  // tiles: growth per tile (-1 = bare soil, 1 = ripe); crops: what was sown on each tile; last: the crop on the sign
   for (const k in PATCHES) {
-    state.patches[k] = { ext: 0, tiles: {} };
-    eachTile(patchRect(k), (x, y) => { state.patches[k].tiles[x + ',' + y] = k === 'corn' ? 1 : -1; });
+    const start = k === 'field3' ? 'corn' : null, f = state.patches[k] = { ext: 0, tiles: {}, crops: {}, last: start };
+    eachTile(patchRect(k), (x, y) => { f.tiles[x + ',' + y] = start ? 1 : -1; if (start) f.crops[x + ',' + y] = start; });
   }
-  for (const k in PENS) state.pens[k] = { ext: 0, food: 1, water: 1, breedT: 0, animals: [], items: [] };
+  for (const k in PENS) state.pens[k] = { species: PENS[k].species || null, ext: 0, food: 1, water: 1, breedT: 0, animals: [], items: [], coopLv: 1, eggs: 0 };
 }
 
 // Adds anything a save from an older version of the game is missing.
@@ -281,12 +390,12 @@ function loadGame() {
   } catch (e) {}
   newGame();
   if (saved) { fillMissing(saved, state); state = saved; }
-  const p = state.player;
-  for (const a of state.pens.horse.animals) a.ridden = p.mode === 'horse' && a.id === p.horse;
-  if (p.mode === 'horse' && !findHorse(p.horse)) { p.mode = 'walk'; p.horse = null; }
+  const p = state.player, m = findMount(p.mount);
+  for (const k in PENS) for (const a of state.pens[k].animals) a.ridden = p.mode === 'horse' && !!m && a === m.a;
+  if (p.mode === 'horse' && !m) { p.mode = 'walk'; p.mount = null; }
 }
 
-function saveGame() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
+function saveGame() { if (resetting) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
 
 function eachTile(r, fn) { for (let y = r.y; y < r.y + r.h; y++) for (let x = r.x; x < r.x + r.w; x++) fn(x, y); }
 
@@ -303,6 +412,7 @@ function penRect(k) {
   const d = PENS[k], e = state.pens[k].ext;
   if (d.dir === 'left') return { x: d.x0 - e, y: d.y0, w: d.w + e, h: d.h };
   if (d.dir === 'right') return { x: d.x0, y: d.y0, w: d.w + e, h: d.h };
+  if (d.dir === 'down') return { x: d.x0, y: d.y0, w: d.w, h: d.h + e };
   return { x: d.x0, y: d.y0 - e, w: d.w, h: d.h + e };
 }
 function nextPenSeg(k) {
@@ -310,24 +420,46 @@ function nextPenSeg(k) {
   if (state.pens[k].ext >= 5) return null;
   if (d.dir === 'left') return { x: r.x - 1, y: r.y, w: 1, h: r.h };
   if (d.dir === 'right') return { x: r.x + r.w, y: r.y, w: 1, h: r.h };
+  if (d.dir === 'down') return { x: r.x, y: r.y + r.h, w: r.w, h: 1 };
   return { x: r.x, y: r.y - 1, w: r.w, h: 1 };
 }
 function penInterior(k) {
-  const r = penRect(k), m = k === 'cow' || k === 'horse' ? 0.65 : 0.4;
+  const sp = state.pens[k].species, r = penRect(k), m = sp && SPECIES[sp].big ? 0.65 : 0.4;
   return { x0: r.x + m, x1: r.x + r.w - m, y0: r.y + 0.75, y1: r.y + r.h - 0.25 };
 }
-const penCap = k => CONFIG.pens[k].cap + CONFIG.pens[k].capPerSegment * state.pens[k].ext;
-const sowCost = k => CONFIG.crops[k].sow + CONFIG.sowPerSegment * state.patches[k].ext;
+const penCap = (k, sp = state.pens[k].species) => { const c = CONFIG.animals[sp]; return c ? c.cap + c.capPerSegment * state.pens[k].ext : 0; };
+const owned = k => { const d = PENS[k] || PATCHES[k]; return !d.plot || state.plots[k]; };
+const plotPrice = () => CONFIG.plotPrice[Math.min(CONFIG.plotPrice.length - 1, Object.values(state.plots).filter(Boolean).length)];
+const isBirdPen = k => { const sp = state.pens[k].species; return !!sp && !!SPECIES[sp].bird; };
+const eggLimit = k => CONFIG.coop.eggs[state.pens[k].coopLv - 1];
+// The coop sits in a back corner of the pen's starting area, away from the side it extends towards.
+const COOP_SIZE = [[1.6, 1.1], [1.9, 1.25], [2.2, 1.4], [2.5, 1.55]];
+function coopRect(k) {
+  const d = PENS[k], [w, h] = COOP_SIZE[state.pens[k].coopLv - 1];
+  return { x: d.dir === 'left' ? d.x0 + d.w - w - 0.25 : d.x0 + 0.25, y: d.y0 + 0.3, w, h };
+}
+const coopDoor = k => { const c = coopRect(k); return { x: c.x + c.w / 2, y: c.y + c.h + 0.2 }; };
+function nestPos(k) { const c = coopRect(k); return { x: PENS[k].dir === 'left' ? c.x - 0.4 : c.x + c.w + 0.4, y: c.y + c.h }; }
+// where the pond (ducks, geese) or the mud (pigs) goes
+function featurePos(k) { const d = PENS[k]; return { x: d.dir === 'left' ? d.x0 + 1.5 : d.x0 + d.w - 1.5, y: d.y0 + d.h * 0.45 }; }
+function findMount(id) {
+  if (id == null) return null;
+  for (const k in PENS) { const a = state.pens[k].animals.find(b => b.id === id); if (a) return { k, a }; }
+  return null;
+}
+const sowCost = (k, crop) => CONFIG.crops[crop].sow + CONFIG.sowPerSegment * state.patches[k].ext;
 const tractorCap = () => CONFIG.tractor.storage[state.tractor.lv.storage - 1];
-const loadTotal = () => { const l = state.tractor.load; return l.corn + l.potato + l.carrot; };
+const loadTotal = () => CROPS.reduce((n, c) => n + state.tractor.load[c], 0);
 const stockTotal = () => STOCK_KINDS.reduce((n, k) => n + state.shop.stock[k], 0);
 const carryTotal = () => CARRY_KINDS.reduce((n, k) => n + state.player.carry[k], 0);
-const basketRoom = () => CONFIG.carryLimit - carryTotal();
-const findHorse = id => state.pens.horse.animals.find(a => a.id === id);
+const basketCap = () => CONFIG.basket.size[state.basketLv - 1];
+const basketRoom = () => basketCap() - carryTotal();
 const bareTiles = k => Object.values(state.patches[k].tiles).filter(v => v < 0).length;
+const fieldIcon = k => bareTiles(k) < Object.keys(state.patches[k].tiles).length ? state.patches[k].last || 'seeds' : 'seeds';
 
 function patchAt(tx, ty) {
   for (const k in PATCHES) {
+    if (!owned(k)) continue;
     const r = patchRect(k);
     if (tx >= r.x && tx < r.x + r.w && ty >= r.y && ty < r.y + r.h) return k;
   }
@@ -345,19 +477,26 @@ function buildObstacles() {
   add(HOUSE.x + 0.15, HOUSE.y + 1.0, HOUSE.x + HOUSE.w - 0.15, HOUSE.y + HOUSE.h);
   add(SHOP.x + 0.2, SHOP.y + 0.4, SHOP.x + SHOP.w - 0.2, SHOP.y + SHOP.h);
   add(SHED.x + 0.1, SHED.y + 0.4, SHED.x + SHED.w - 0.1, SHED.y + SHED.h);
+  add(JAR.x - 0.22, JAR.y - 0.3, JAR.x + 0.22, JAR.y);
+  add(DOGHOUSE.x - 0.5, DOGHOUSE.y - 0.35, DOGHOUSE.x + 0.5, DOGHOUSE.y);
+  add(0, STREAM.y, STREAM.bridge[0], STREAM.y + STREAM.h);
+  add(STREAM.bridge[1], STREAM.y, W, STREAM.y + STREAM.h);
   for (const t of TREES) add(t.x - 0.2, t.y - 0.15, t.x + 0.2, t.y + 0.08);
   SPOTS.forEach((s, i) => { if (state.orchard[i].kind) add(s.x - 0.2, s.y - 0.15, s.x + 0.2, s.y + 0.08); });
   for (const b of BUSHES) add(b.x - 0.5, b.y - 0.3, b.x + 0.5, b.y + 0.2);
   const t = 0.1;
   for (const k in PENS) {
+    if (!owned(k)) continue;
     const d = PENS[k], r = penRect(k), x1 = r.x + r.w, y1 = r.y + r.h;
+    add(r.x - 0.15, r.y - 0.15, x1 + 0.15, y1 + 0.15, 'tractor');
+    add(r.x - 0.2, r.y - 0.2, x1 + 0.2, y1 + 0.2, 'dog');
+    if (d.open) continue;
     add(r.x - t, r.y - t, x1 + t, r.y + t);
     add(r.x - t, r.y - t, r.x + t, y1 + t);
     add(x1 - t, r.y - t, x1 + t, y1 + t);
     add(r.x - t, y1 - t, d.gate[0], y1 + t);
     add(d.gate[1], y1 - t, x1 + t, y1 + t);
-    if (d.coop) add(d.coop.x, d.coop.y + 0.3, d.coop.x + d.coop.w, d.coop.y + d.coop.h);
-    add(r.x - 0.15, r.y - 0.15, x1 + 0.15, y1 + 0.15, 'tractor');
+    if (isBirdPen(k)) { const c = coopRect(k); add(c.x, c.y + 0.3, c.x + c.w, c.y + c.h); }
   }
 }
 
@@ -405,6 +544,7 @@ function unstick(e, hw, hh, mode) {
 function unstickAll() {
   const p = state.player;
   unstick(state.tractor, ...BOX.tractor, 'tractor');
+  unstick(state.dog, ...BOX.dog, 'dog');
   if (p.mode === 'tractor') { p.x = state.tractor.x; p.y = state.tractor.y; }
   else unstick(p, ...BOX[p.mode], p.mode === 'horse' ? 'horse' : 'walk');
 }
@@ -494,143 +634,512 @@ function star(x, y, r, c) {
 // Characters and animals. (x, y) is where the feet touch the ground.
 // face is 1 (looking right) or -1 (looking left).
 // ======================================================================
-function drawFarmer(x, y, dir, phase, moving, carry) {
-  shadow(x, y, 0.2, 0.06);
-  const b = moving ? Math.abs(Math.sin(phase)) * 0.035 : 0;
-  const sw = moving ? Math.sin(phase) * 0.07 : 0;
-  const side = dir === 'left' || dir === 'right', f = dir === 'left' ? -1 : 1;
-  rect(x - 0.12, y - 0.3 - Math.max(0, sw), 0.1, 0.3, '#2d4f86');
-  rect(x + 0.02, y - 0.3 - Math.max(0, -sw), 0.1, 0.3, '#2d4f86');
-  rect(x - 0.13, y - 0.04 - Math.max(0, sw), 0.12, 0.05, '#4a3020');
-  rect(x + 0.01, y - 0.04 - Math.max(0, -sw), 0.12, 0.05, '#4a3020');
-  const by = y - 0.66 - b;
-  if (!side) { rect(x - 0.24, by + 0.06, 0.08, 0.26, '#d64b3c'); rect(x + 0.16, by + 0.06, 0.08, 0.26, '#d64b3c'); }
-  rrect(x - 0.17, by, 0.34, 0.4, 0.08, '#3f6fb5', OUT);
-  if (dir === 'down') { line(x - 0.1, by + 0.02, x - 0.08, by + 0.14, '#2d4f86', 0.03); line(x + 0.1, by + 0.02, x + 0.08, by + 0.14, '#2d4f86', 0.03); }
-  if (side) rect(x - 0.04 + f * 0.02, by + 0.08, 0.09, 0.24, '#d64b3c');
-  const hy = y - 0.8 - b;
-  circ(x, hy, 0.15, '#f1c6a0', OUT);
-  if (dir === 'up') ell(x, hy + 0.02, 0.13, 0.1, '#6b4423');
-  else if (side) { circ(x + f * 0.07, hy - 0.01, 0.018, '#222'); circ(x + f * 0.14, hy + 0.03, 0.025, '#e8a888'); }
-  else { circ(x - 0.05, hy - 0.01, 0.018, '#222'); circ(x + 0.05, hy - 0.01, 0.018, '#222'); circ(x - 0.09, hy + 0.05, 0.025, '#f0a090'); circ(x + 0.09, hy + 0.05, 0.025, '#f0a090'); }
-  ell(x, hy - 0.11, 0.18, 0.07, '#1e2230', OUT);
-  circ(x, hy - 0.18, 0.025, '#1e2230');
-  if (carry) {
-    const inBasket = ['egg', 'manure', ...FRUITS].filter(k => carry[k] > 0);
-    if (inBasket.length) {
-      line(x - 0.35, by + 0.22, x - 0.27, by + 0.08, '#8a5a25', 0.025); line(x - 0.27, by + 0.08, x - 0.19, by + 0.22, '#8a5a25', 0.025);
-      inBasket.slice(0, 3).forEach((k, i) => circ(x - 0.33 + i * 0.06, by + 0.21, 0.04, k === 'egg' ? '#fbf3e3' : k === 'manure' ? '#6e4b2a' : FRUIT_COLOR[k]));
-      rrect(x - 0.36, by + 0.22, 0.18, 0.13, 0.04, '#c48a3f', OUT);
-    }
-    if (carry.milk) {
-      rrect(x + 0.18, by + 0.14, 0.15, 0.22, 0.03, '#d8dde3', OUT);
-      rect(x + 0.2, by + 0.14 + 0.2 * (1 - Math.min(1, carry.milk / 8)), 0.11, 0.2 * Math.min(1, carry.milk / 8), '#ffffff');
-      rect(x + 0.21, by + 0.1, 0.09, 0.05, '#9aa4ad');
-    }
+// ---------- The farmer: a boy with short blond hair, checked shirt, dungarees and wellies.
+// Arms and legs swing from shoulder and hip; he bobs as he walks, breathes and blinks when he stands.
+const SKIN = '#f6d2b0', CHEEK = '#f2a594', HAIR = '#ddb24f', HAIR_D = '#b38630', SHIRT = '#d9473a', SHIRT_L = '#f08070',
+      SHIRT_D = '#b83a30', DENIM = '#3f6fb5', DENIM_D = '#2f5694', BOOT = '#3f8f3a', BOOT_D = '#2f6e2c';
+// an arm or leg: a thick rounded line from a joint, swung by angle a (0 = straight down); returns where it ends
+function limb(x, y, len, a, w, c) {
+  const ex = x + Math.sin(a) * len, ey = y + Math.cos(a) * len;
+  line(x, y, ex, ey, OUT, w + 0.035); line(x, y, ex, ey, c, w);
+  return [ex, ey];
+}
+function boot(x, y, side) {
+  if (side) { rrect(x - 0.07, y - 0.09, 0.15, 0.1, 0.04, BOOT, OUT); rect(x - 0.07, y - 0.025, 0.15, 0.025, BOOT_D); }
+  else { rrect(x - 0.065, y - 0.11, 0.13, 0.12, 0.04, BOOT, OUT); rect(x - 0.065, y - 0.03, 0.13, 0.03, BOOT_D); }
+}
+const hand = (x, y) => circ(x, y, 0.045, SKIN, OUT);
+function boyTorso(shY, dir) {
+  if (dir === 'left' || dir === 'right') {
+    rrect(-0.14, shY - 0.02, 0.27, 0.32, 0.1, SHIRT, OUT);
+    for (const yy of [shY + 0.08, shY + 0.18]) line(-0.13, yy, 0.12, yy, SHIRT_L, 0.02);
+    rrect(-0.13, shY + 0.12, 0.25, 0.2, 0.06, DENIM, OUT);
+    line(0.02, shY + 0.13, 0.02, shY + 0.01, DENIM, 0.05); circ(0.02, shY + 0.13, 0.02, '#f2c230');
+    return;
+  }
+  rrect(-0.19, shY - 0.02, 0.38, 0.32, 0.11, SHIRT, OUT);
+  for (const yy of [shY + 0.07, shY + 0.16]) line(-0.18, yy, 0.18, yy, SHIRT_L, 0.02);
+  for (const xx of [-0.09, 0, 0.09]) line(xx, shY, xx, shY + 0.28, 'rgba(240,128,112,.6)', 0.015);
+  rrect(-0.16, shY + 0.18, 0.32, 0.15, 0.06, DENIM, OUT);
+  if (dir === 'down') {
+    rrect(-0.11, shY + 0.04, 0.22, 0.18, 0.04, DENIM, OUT);
+    line(-0.1, shY + 0.05, -0.14, shY - 0.01, DENIM, 0.045); line(0.1, shY + 0.05, 0.14, shY - 0.01, DENIM, 0.045);
+    circ(-0.08, shY + 0.07, 0.022, '#f2c230'); circ(0.08, shY + 0.07, 0.022, '#f2c230');
+    rrect(-0.05, shY + 0.1, 0.1, 0.07, 0.02, DENIM_D);
+  } else {
+    line(-0.13, shY, 0.1, shY + 0.2, DENIM, 0.045); line(0.13, shY, -0.1, shY + 0.2, DENIM, 0.045);
   }
 }
-
-function drawChicken(x, y, face, sex, baby, peck) {
-  g.save(); g.translate(x, y); g.scale(face, 1);
-  if (baby) {
-    shadow(0, 0, 0.11, 0.035);
-    line(-0.02, -0.05, -0.03, 0, '#e08a1e', 0.02); line(0.03, -0.05, 0.03, 0, '#e08a1e', 0.02);
-    ell(0, -0.1, 0.1, 0.08, '#f7d54a', OUT);
-    circ(0.07, peck ? -0.12 : -0.18, 0.06, '#f7d54a', OUT);
-    poly([[0.12, peck ? -0.13 : -0.19], [0.17, peck ? -0.11 : -0.17], [0.12, peck ? -0.1 : -0.16]], '#f0a020');
-    circ(0.09, peck ? -0.13 : -0.19, 0.012, '#222');
-    g.restore(); return;
+// his head at (0, hy) in the current drawing frame (already mirrored when he faces left)
+function boyHead(hy, dir) {
+  const side = dir === 'left' || dir === 'right', blink = (T % 3.7) < 0.12;
+  if (!side) { circ(-0.2, hy + 0.02, 0.045, SKIN, OUT); circ(0.2, hy + 0.02, 0.045, SKIN, OUT); }
+  circ(0, hy, 0.2, SKIN, OUT);
+  if (dir === 'up') {
+    poly([[-0.2, hy + 0.04], [-0.19, hy - 0.1], [-0.1, hy - 0.19], [0.1, hy - 0.19], [0.19, hy - 0.1], [0.2, hy + 0.04],
+          [0.15, hy + 0.11], [0.1, hy + 0.08], [0.05, hy + 0.13], [0, hy + 0.09], [-0.05, hy + 0.13], [-0.1, hy + 0.08], [-0.15, hy + 0.11]], HAIR, OUT);
+    g.beginPath(); g.arc(-0.03, hy - 0.02, 0.1, -2.6, -1.2); g.strokeStyle = HAIR_D; g.lineWidth = 0.02; g.stroke();
+    g.beginPath(); g.arc(0.05, hy + 0.02, 0.09, -1.9, -0.6); g.stroke();
+  } else if (side) {
+    ell(-0.07, hy + 0.04, 0.032, 0.042, SKIN, OUT);
+    poly([[0.19, hy - 0.09], [0.12, hy - 0.06], [0.08, hy - 0.09], [0.03, hy - 0.05], [-0.02, hy - 0.06], [-0.06, hy + 0.0],
+          [-0.1, hy + 0.08], [-0.16, hy + 0.11], [-0.2, hy + 0.03], [-0.19, hy - 0.1], [-0.1, hy - 0.19], [0.05, hy - 0.21], [0.15, hy - 0.16]], HAIR, OUT);
+    line(-0.12, hy - 0.13, 0.1, hy - 0.15, HAIR_D, 0.02);
+    if (blink) line(0.09, hy + 0.01, 0.14, hy + 0.01, '#3a2a20', 0.02);
+    else { ell(0.115, hy + 0.005, 0.022, 0.032, '#3a2a20'); circ(0.122, hy - 0.005, 0.008, '#fff'); }
+    line(0.08, hy - 0.04, 0.15, hy - 0.045, HAIR_D, 0.018);
+    ell(0.09, hy + 0.08, 0.035, 0.022, CHEEK);
+    g.beginPath(); g.arc(0.14, hy + 0.07, 0.04, 0.3, 1.6); g.strokeStyle = '#8a3a2a'; g.lineWidth = 0.016; g.stroke();
+  } else {
+    poly([[-0.2, hy + 0.03], [-0.19, hy - 0.09], [-0.1, hy - 0.19], [0.08, hy - 0.2], [0.18, hy - 0.11], [0.2, hy + 0.02],
+          [0.15, hy - 0.05], [0.09, hy - 0.02], [0.05, hy - 0.07], [-0.01, hy - 0.03], [-0.06, hy - 0.08], [-0.12, hy - 0.03], [-0.16, hy - 0.07]], HAIR, OUT);
+    line(-0.08, hy - 0.15, 0.06, hy - 0.16, HAIR_D, 0.02);
+    for (const ex of [-0.075, 0.075]) {
+      if (blink) line(ex - 0.025, hy + 0.02, ex + 0.025, hy + 0.02, '#3a2a20', 0.02);
+      else { ell(ex, hy + 0.02, 0.022, 0.032, '#3a2a20'); circ(ex + 0.007, hy + 0.008, 0.008, '#fff'); }
+      line(ex - 0.03, hy - 0.04, ex + 0.03, hy - 0.045, HAIR_D, 0.018);
+    }
+    ell(-0.12, hy + 0.08, 0.035, 0.022, CHEEK); ell(0.12, hy + 0.08, 0.035, 0.022, CHEEK);
+    ell(0, hy + 0.06, 0.018, 0.014, '#e8b090');
+    g.beginPath(); g.arc(0, hy + 0.08, 0.05, 0.4, Math.PI - 0.4); g.strokeStyle = '#8a3a2a'; g.lineWidth = 0.018; g.stroke();
   }
-  const rooster = sex === 'm', body = rooster ? '#d9792b' : '#fbf8f0', wing = rooster ? '#a8501c' : '#e9e1cf';
+}
+// what he carries: a basket hanging from one hand, a milk can from the other
+function carryBasket(hx, hy, carry) {
+  const inside = ['egg', 'wool', 'manure', ...FRUITS].filter(k => carry[k] > 0);
+  if (!inside.length) return;
+  line(hx - 0.08, hy + 0.07, hx, hy - 0.01, '#8a5a25', 0.025); line(hx, hy - 0.01, hx + 0.08, hy + 0.07, '#8a5a25', 0.025);
+  inside.slice(0, 3).forEach((k, i) => circ(hx - 0.06 + i * 0.06, hy + 0.07, 0.04, k === 'egg' ? '#fbf3e3' : k === 'wool' ? '#fdfbf4' : k === 'manure' ? '#6e4b2a' : FRUIT_COLOR[k]));
+  rrect(hx - 0.1, hy + 0.07, 0.2, 0.13, 0.04, '#c48a3f', OUT);
+}
+function carryCan(hx, hy, carry) {
+  if (!carry.milk) return;
+  const f = Math.min(1, carry.milk / 8);
+  rrect(hx - 0.07, hy + 0.02, 0.14, 0.2, 0.03, '#d8dde3', OUT);
+  rect(hx - 0.05, hy + 0.04 + 0.16 * (1 - f), 0.1, 0.16 * f, '#ffffff');
+  rect(hx - 0.05, hy - 0.01, 0.1, 0.04, '#9aa4ad');
+}
+
+function drawFarmer(x, y, dir, phase, moving, carry) {
+  const side = dir === 'left' || dir === 'right', f = dir === 'left' ? -1 : 1;
+  const sw = moving ? Math.sin(phase) : 0, bob = moving ? Math.abs(Math.cos(phase)) * 0.035 : Math.sin(T * 2) * 0.006;
+  shadow(x, y, 0.2, 0.06);
+  g.save(); g.translate(x, y);
+  if (side) g.scale(f, 1);
+  const hipY = -0.33 - bob, shY = -0.6 - bob;
+  if (side) {
+    // far leg and arm first (darker), then the body, then the near ones
+    const [fx, fy] = limb(-0.01, hipY, 0.27, -sw * 0.55, 0.1, DENIM_D); boot(fx + 0.02, fy + 0.02, true);
+    const [ax, ay] = limb(0, shY + 0.04, 0.23, -0.1 + sw * 0.6, 0.075, SHIRT_D); hand(ax, ay);
+    if (carry) carryCan(ax, ay, carry);
+    boyTorso(shY, dir);
+    const [nx, ny] = limb(0.01, hipY, 0.27, sw * 0.55, 0.1, DENIM); boot(nx + 0.02, ny + 0.02, true);
+    const [bx, by] = limb(0.03, shY + 0.05, 0.23, -0.18 - sw * 0.6, 0.075, SHIRT); hand(bx, by);
+    if (carry) carryBasket(bx, by, carry);
+  } else {
+    const l = Math.max(0, sw) * 0.06, r = Math.max(0, -sw) * 0.06;
+    line(-0.075, hipY, -0.075, -0.06 - l, OUT, 0.135); line(-0.075, hipY, -0.075, -0.06 - l, DENIM_D, 0.1);
+    line(0.075, hipY, 0.075, -0.06 - r, OUT, 0.135); line(0.075, hipY, 0.075, -0.06 - r, DENIM_D, 0.1);
+    boot(-0.075, -l, false); boot(0.075, -r, false);
+    const [lx, ly] = limb(-0.19, shY + 0.05, 0.23, 0.12 + sw * 0.12, 0.08, SHIRT);
+    const [rx, ry] = limb(0.19, shY + 0.05, 0.23, -0.12 + sw * 0.12, 0.08, SHIRT);
+    boyTorso(shY, dir);
+    hand(lx, ly); hand(rx, ry);
+    if (carry) { carryBasket(lx - 0.04, ly, carry); carryCan(rx + 0.03, ry, carry); }
+  }
+  boyHead(-0.84 - bob, dir);
+  g.restore();
+}
+
+// chicks, ducklings, goslings and poults: one round baby bird in the right colour
+// Animal movement. an = { phase, walk, graze (0..1), swish (0..1), blink, flap (0..1) }
+// legs swing in diagonal pairs while walking; idle animals graze, swish their tails, blink, flap.
+const swing = (an, off, amp) => an.walk ? Math.sin(an.phase + off) * amp : 0;
+// a tiny hop at each step
+const bobOf = an => an.walk ? Math.abs(Math.cos(an.phase)) * 0.025 : 0;
+// a leg hanging from the hip at (x, y), swung by angle a, with a hoof or foot at the end
+function leg(x, y, len, a, w, c, hoof) {
+  const ex = x + Math.sin(a) * len, ey = y + Math.cos(a) * len;
+  line(x, y, ex, ey, c, w);
+  if (hoof) line(ex - Math.sin(a) * 0.05, ey - Math.cos(a) * 0.05, ex, ey, hoof, w);
+}
+// legs of a four-legged animal: far legs darker; diagonal pairs move together
+function legs4(xs, hip, len, w, c, cFar, hoof, an, amp) {
+  const off = [0, Math.PI, Math.PI, 0];
+  xs.forEach((lx, i) => leg(lx, hip, len, swing(an, off[i], amp), w, i % 2 === 0 ? cFar : c, hoof));
+}
+const eye = (x, y, r, blink) => blink ? line(x - r, y, x + r, y, '#222', r * 0.8) : circ(x, y, r, '#222');
+// rotate part of a drawing (a head) around a pivot
+function turn(px, py, a, fn, drop = 0) { g.save(); g.translate(px, py + drop); g.rotate(a); g.translate(-px, -py); fn(); g.restore(); }
+// a tail hanging from (x, y), swishing
+function tail(x, y, len, base, an, c, w, tuft) {
+  const a = base + (an.swish || 0) * Math.sin(T * 7) * 0.5 + (an.walk ? Math.sin(an.phase * 2) * 0.08 : 0);
+  const ex = x - Math.sin(a) * len, ey = y + Math.cos(a) * len;
+  line(x, y, ex, ey, c, w);
+  if (tuft) ell(ex, ey + 0.02, 0.035, 0.065, tuft, null, a);
+}
+// now-and-then actions: bump() is 0 most of the time and rises to 1 and back for `len` seconds every `period`
+function bump(t, period, len) { const p = ((t % period) + period) % period; return p < len ? Math.sin(p / len * Math.PI) : 0; }
+
+// ---- birds: legs step, heads bob; ducks and geese waddle; wings flap now and then
+function birdLegs(an, c, h, sep) {
+  const l = an.walk ? Math.max(0, Math.sin(an.phase)) * 0.04 : 0, r = an.walk ? Math.max(0, -Math.sin(an.phase)) * 0.04 : 0;
+  line(-sep / 2, -h, -sep / 2 - 0.01, -l, c, 0.03); line(sep / 2, -h, sep / 2, -r, c, 0.03);
+}
+function wing(x, y, rx, ry, c, an) {
+  const f = an.flap || 0;
+  ell(x - f * 0.05, y - f * 0.08, rx * (1 + f * 0.3), ry, c, null, -f * 0.9);
+}
+
+function drawBirdBaby(x, y, face, color, an) {
+  const peck = !an.walk && (an.graze || 0) > 0.5, hop = an.walk ? Math.abs(Math.sin(an.phase)) * 0.025 : 0;
+  g.save(); g.translate(x, y); g.scale(face, 1);
+  shadow(0, 0, 0.11, 0.035);
+  birdLegs(an, '#e08a1e', 0.05, 0.05);
+  g.translate(0, -hop);
+  ell(0, -0.1, 0.1, 0.08, color, OUT);
+  ell(-0.02, -0.1, 0.05, 0.035, 'rgba(255,255,255,.35)', null, -(an.flap || 0) * 0.8);
+  const hy = peck ? -0.12 : -0.18;
+  circ(0.07, hy, 0.06, color, OUT);
+  poly([[0.12, hy - 0.01], [0.17, hy + 0.01], [0.12, hy + 0.02]], '#f0a020');
+  eye(0.09, hy - 0.01, 0.012, an.blink);
+  g.restore();
+}
+
+function drawChicken(x, y, face, sex, baby, an = {}) {
+  if (baby) return drawBirdBaby(x, y, face, '#f7d54a', an);
+  g.save(); g.translate(x, y); g.scale(face, 1);
+  const rooster = sex === 'm', body = rooster ? '#d9792b' : '#fbf8f0', wingC = rooster ? '#a8501c' : '#e9e1cf';
   shadow(0, 0, 0.2, 0.06);
-  line(-0.04, -0.09, -0.05, 0, '#e08a1e', 0.03); line(0.05, -0.09, 0.05, 0, '#e08a1e', 0.03);
+  birdLegs(an, '#e08a1e', 0.09, 0.09);
+  const bb = an.walk ? Math.abs(Math.cos(an.phase)) * 0.02 : 0;
+  g.translate(0, -bb);
   if (rooster) { ell(-0.18, -0.32, 0.08, 0.17, '#2f5d3a', OUT, -0.5); ell(-0.13, -0.34, 0.05, 0.14, '#1d3b26', OUT, -0.2); }
   else poly([[-0.14, -0.2], [-0.27, -0.34], [-0.1, -0.29]], body, OUT);
   ell(0, -0.18, 0.19, 0.13, body, OUT);
-  ell(-0.03, -0.18, 0.1, 0.06, wing);
-  const hx = peck ? 0.17 : 0.13, hy = peck ? -0.17 : -0.33;
+  wing(-0.03, -0.18, 0.1, 0.06, wingC, an);
+  const peck = !an.walk && (an.graze || 0) > 0.5, nod = an.walk ? Math.sin(an.phase * 2) * 0.03 : 0;
+  const hx = (peck ? 0.17 : 0.13) + nod, hy = peck ? -0.17 : -0.33;
   if (rooster) { circ(hx - 0.03, hy - 0.08, 0.045, '#e0302a'); circ(hx + 0.02, hy - 0.09, 0.045, '#e0302a'); circ(hx + 0.06, hy - 0.07, 0.035, '#e0302a'); }
   else circ(hx, hy - 0.08, 0.035, '#e0302a');
   circ(hx, hy, 0.08, rooster ? '#e08a3a' : body, OUT);
   circ(hx + 0.04, hy + 0.07, 0.025, '#e0302a');
   poly([[hx + 0.07, hy - 0.015], [hx + 0.14, hy + 0.01], [hx + 0.07, hy + 0.03]], '#f0a020');
-  circ(hx + 0.03, hy - 0.015, 0.015, '#222');
+  eye(hx + 0.03, hy - 0.015, 0.015, an.blink);
   g.restore();
 }
 
-function drawPig(x, y, face, sex, baby) {
-  const s = baby ? 0.55 : 1;
-  g.save(); g.translate(x, y); g.scale(face * s, s);
+function drawPig(x, y, face, sex, baby, an = {}) {
+  const s = baby ? 0.55 : 1, b = bobOf(an);
+  shadow(x, y, 0.33 * s, 0.08 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
   const boar = sex === 'm' && !baby, body = boar ? '#b48a78' : '#f3a9b5', dark = boar ? '#8f6656' : '#df8a99';
-  shadow(0, 0, 0.33, 0.08);
-  rect(-0.24, -0.15, 0.08, 0.15, dark); rect(-0.1, -0.13, 0.08, 0.13, dark); rect(0.1, -0.15, 0.08, 0.15, dark); rect(0.2, -0.13, 0.08, 0.13, dark);
-  g.beginPath(); g.arc(-0.35, -0.32, 0.05, 0, Math.PI * 1.6); g.strokeStyle = dark; g.lineWidth = 0.03; g.stroke();
+  legs4([-0.2, -0.1, 0.14, 0.22], -0.15, 0.15, 0.08, dark, boar ? '#7a5546' : '#c97a88', null, an, 0.45);
+  g.save(); g.translate(-0.35, -0.32); g.rotate(an.walk ? an.phase * 2 : T * 1.5); g.beginPath(); g.arc(0, 0, 0.05, 0, Math.PI * 1.6); g.strokeStyle = dark; g.lineWidth = 0.03; g.stroke(); g.restore();
   ell(0, -0.28, 0.32, 0.19, body, OUT);
-  circ(0.28, -0.32, 0.14, body, OUT);
-  poly([[0.19, -0.42], [0.24, -0.53], [0.3, -0.43]], dark, OUT);
-  ell(0.41, -0.3, 0.05, 0.065, dark, OUT);
-  circ(0.4, -0.32, 0.012, '#6a3a40'); circ(0.42, -0.28, 0.012, '#6a3a40');
-  circ(0.31, -0.37, 0.02, '#222');
-  if (boar) poly([[0.37, -0.25], [0.43, -0.17], [0.35, -0.22]], '#fffbe8', OUT);
+  ell(-0.1, -0.36, 0.14, 0.05, 'rgba(255,255,255,.18)');
+  const root = an.graze || 0, wig = an.walk ? 0 : Math.sin(T * 10) * 0.012;
+  turn(0.2, -0.32, root * 0.5, () => {
+    circ(0.28, -0.32, 0.14, body, OUT);
+    poly([[0.19, -0.42], [0.24, -0.53 + (an.swish || 0) * Math.sin(T * 9) * 0.03], [0.3, -0.43]], dark, OUT);
+    ell(0.41, -0.3 + wig, 0.05, 0.065, dark, OUT);
+    circ(0.4, -0.32 + wig, 0.012, '#6a3a40'); circ(0.42, -0.28 + wig, 0.012, '#6a3a40');
+    eye(0.31, -0.37, 0.02, an.blink);
+    if (boar) poly([[0.37, -0.25], [0.43, -0.17], [0.35, -0.22]], '#fffbe8', OUT);
+  });
   g.restore();
 }
 
-function drawCow(x, y, face, sex, baby) {
-  const s = baby ? 0.6 : 1;
-  g.save(); g.translate(x, y); g.scale(face * s, s);
-  const bull = sex === 'm' && !baby, body = bull ? '#7a4a2c' : '#fafaf5', leg = bull ? '#5e3820' : '#e6e6e0';
-  shadow(0, 0, 0.5, 0.1);
-  for (const lx of [-0.4, -0.25, 0.18, 0.3]) { rect(lx, -0.3, 0.09, 0.3, leg); rect(lx, -0.06, 0.09, 0.06, '#3a2a20'); }
-  line(-0.46, -0.6, -0.54, -0.32, bull ? '#5e3820' : '#cfcfc8', 0.04); ell(-0.54, -0.3, 0.035, 0.06, '#3a2a20');
+function drawCow(x, y, face, sex, baby, an = {}) {
+  const s = baby ? 0.6 : 1, b = bobOf(an);
+  shadow(x, y, 0.5 * s, 0.1 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
+  const bull = sex === 'm' && !baby, body = bull ? '#7a4a2c' : '#fafaf5', leg_ = bull ? '#5e3820' : '#e6e6e0', far = bull ? '#4e2e18' : '#cfcfc8';
+  legs4([-0.36, -0.26, 0.2, 0.3], -0.3, 0.3, 0.09, leg_, far, '#3a2a20', an, 0.4);
+  tail(-0.46, -0.62, 0.3, 0.25, an, bull ? '#5e3820' : '#cfcfc8', 0.04, '#3a2a20');
   rrect(-0.5, -0.74, 0.88, 0.48, 0.16, body, OUT);
   if (!bull) { ell(-0.22, -0.57, 0.13, 0.09, '#2b2b2b'); ell(0.1, -0.45, 0.1, 0.07, '#2b2b2b'); ell(-0.36, -0.4, 0.06, 0.05, '#2b2b2b'); ell(0.18, -0.64, 0.06, 0.04, '#2b2b2b'); }
   if (sex === 'f' && !baby) ell(-0.06, -0.26, 0.1, 0.065, '#f5a3b3', OUT);
-  if (bull) { poly([[0.36, -0.88], [0.27, -1.02], [0.42, -0.9]], '#efe6d0', OUT); poly([[0.52, -0.88], [0.62, -1.02], [0.48, -0.9]], '#efe6d0', OUT); }
-  else if (!baby) { poly([[0.38, -0.88], [0.34, -0.97], [0.42, -0.89]], '#efe6d0'); poly([[0.52, -0.88], [0.56, -0.97], [0.48, -0.89]], '#efe6d0'); }
-  ell(0.3, -0.82, 0.08, 0.04, body, OUT);
-  rrect(0.32, -0.9, 0.28, 0.34, 0.1, body, OUT);
-  rrect(0.41, -0.68, 0.22, 0.15, 0.06, bull ? '#a8765a' : '#f2b8a0', OUT);
-  circ(0.47, -0.62, 0.015, '#5a3a30'); circ(0.56, -0.62, 0.015, '#5a3a30');
-  circ(0.45, -0.79, 0.022, '#222');
-  if (bull) { g.beginPath(); g.arc(0.52, -0.56, 0.04, 0, Math.PI); g.strokeStyle = '#d4b14a'; g.lineWidth = 0.025; g.stroke(); }
+  turn(0.32, -0.62, (an.graze || 0) * 1.1, () => {
+    if (bull) { poly([[0.36, -0.88], [0.27, -1.02], [0.42, -0.9]], '#efe6d0', OUT); poly([[0.52, -0.88], [0.62, -1.02], [0.48, -0.9]], '#efe6d0', OUT); }
+    else if (!baby) { poly([[0.38, -0.88], [0.34, -0.97], [0.42, -0.89]], '#efe6d0'); poly([[0.52, -0.88], [0.56, -0.97], [0.48, -0.89]], '#efe6d0'); }
+    ell(0.3, -0.82, 0.08, 0.04, body, OUT, (an.swish || 0) * Math.sin(T * 9) * 0.3);
+    rrect(0.32, -0.9, 0.28, 0.34, 0.1, body, OUT);
+    rrect(0.41, -0.68, 0.22, 0.15, 0.06, bull ? '#a8765a' : '#f2b8a0', OUT);
+    circ(0.47, -0.62, 0.015, '#5a3a30'); circ(0.56, -0.62, 0.015, '#5a3a30');
+    eye(0.45, -0.79, 0.022, an.blink);
+    if (bull) { g.beginPath(); g.arc(0.52, -0.56, 0.04, 0, Math.PI); g.strokeStyle = '#d4b14a'; g.lineWidth = 0.025; g.stroke(); }
+  }, (an.graze || 0) * 0.2);
   g.restore();
 }
 
-function drawHorse(x, y, face, sex, baby, rider) {
-  const s = baby ? 0.6 : 1;
+function drawHorse(x, y, face, sex, baby, pony) {
+  const s = (baby ? 0.6 : 1) * (pony ? 0.78 : 1);
   g.save(); g.translate(x, y); g.scale(face * s, s);
-  const c = baby ? '#c79a6b' : sex === 'm' ? '#3b2b25' : '#a5643a';
-  const mane = baby ? '#8a5a35' : sex === 'm' ? '#141010' : '#5b3420';
+  const c = pony ? (baby ? '#f0e0bc' : sex === 'm' ? '#d6d2cb' : '#e3c48a') : baby ? '#c79a6b' : sex === 'm' ? '#3b2b25' : '#a5643a';
+  const mane = pony ? (sex === 'm' ? '#6e6a66' : '#faf3e2') : baby ? '#8a5a35' : sex === 'm' ? '#141010' : '#5b3420';
+  const nose = pony ? '#b8a48a' : baby ? '#a87a4b' : sex === 'm' ? '#2a1e1a' : '#7e4a2a';
   shadow(0, 0, 0.5, 0.1);
   for (const lx of [-0.36, -0.24, 0.2, 0.3]) { rect(lx, -0.46, 0.08, 0.46, c); rect(lx, -0.06, 0.08, 0.06, '#2a2020'); }
   poly([[-0.42, -0.72], [-0.52, -0.65], [-0.6, -0.3], [-0.5, -0.32], [-0.44, -0.58]], mane, OUT);
   ell(-0.02, -0.62, 0.45, 0.21, c, OUT);
   poly([[0.2, -0.74], [0.36, -1.05], [0.52, -0.98], [0.42, -0.62]], c, OUT);
   rrect(0.38, -1.12, 0.36, 0.19, 0.08, c, OUT);
-  rrect(0.6, -1.06, 0.14, 0.13, 0.05, baby ? '#a87a4b' : sex === 'm' ? '#2a1e1a' : '#7e4a2a');
+  rrect(0.6, -1.06, 0.14, 0.13, 0.05, nose);
   poly([[0.18, -0.76], [0.34, -1.08], [0.4, -1.04], [0.25, -0.72]], mane);
   poly([[0.42, -1.1], [0.44, -1.22], [0.5, -1.11]], c, OUT);
   circ(0.5, -1.05, 0.022, '#111');
-  if (sex === 'f' && !baby) line(0.56, -1.11, 0.68, -1.04, '#f4efe4', 0.04);
-  if (rider) {
-    rect(-0.04, -0.92, 0.1, 0.34, '#2d4f86'); rect(-0.05, -0.62, 0.12, 0.06, '#4a3020');
-    rrect(-0.2, -1.28, 0.32, 0.38, 0.08, '#3f6fb5', OUT);
-    rect(0.02, -1.2, 0.09, 0.22, '#d64b3c');
-    circ(-0.04, -1.42, 0.15, '#f1c6a0', OUT);
-    circ(0.04, -1.43, 0.018, '#222'); circ(0.1, -1.39, 0.025, '#e8a888');
-    ell(-0.04, -1.53, 0.18, 0.07, '#1e2230', OUT); circ(-0.04, -1.6, 0.025, '#1e2230');
+  if (sex === 'f' && !baby && !pony) line(0.56, -1.11, 0.68, -1.04, '#f4efe4', 0.04);
+  g.restore();
+}
+
+function drawHorseSprite(x, y, sex, baby, dir, frame) {
+  const view = dir === 'right' ? 'left' : dir, im = art(sex === 'm' && !baby ? 'horse_m' : 'horse_f', view);
+  if (!im) return false;
+  const n = HORSE_FRAMES[view], fw = im.naturalWidth / n, fh = im.naturalHeight, k = baby ? 0.6 : 1;
+  const w = fw * HORSE_SCALE * k, h = fh * HORSE_SCALE * k;
+  shadow(x, y, (view === 'left' ? 0.5 : 0.3) * k, 0.1 * k);
+  g.save(); g.translate(x, y);
+  if (dir === 'right') g.scale(-1, 1);
+  if (baby) g.filter = 'brightness(1.18) saturate(0.85)';
+  g.drawImage(im, (frame % n) * fw, 0, fw, fh, -w / 2, 0.04 - h, w, h);
+  g.restore();
+  return true;
+}
+
+function drawEquine(x, y, face, sex, baby, an, kind) {
+  // kind 'pony' (the horse drawing, smaller) or 'donkey'
+  const pony = kind === 'pony', s = (baby ? 0.6 : 1) * (pony ? 0.78 : 1), b = bobOf(an);
+  shadow(x, y, 0.48 * s, 0.1 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
+  const c = pony ? (baby ? '#f0e0bc' : sex === 'm' ? '#d6d2cb' : '#e3c48a') : baby ? '#b5afa6' : sex === 'm' ? '#7d766e' : '#9a948c';
+  const far = pony ? (sex === 'm' ? '#b9b5ae' : '#c9a86e') : '#7a746c';
+  const mane = pony ? (sex === 'm' ? '#6e6a66' : '#faf3e2') : '#4a4540';
+  legs4([-0.36, -0.24, 0.2, 0.3], -0.44, 0.44, 0.08, c, far, '#2a2020', an, 0.38);
+  if (pony) {
+    const a = 0.4 + (an.swish || 0) * Math.sin(T * 6) * 0.5 + (an.walk ? Math.sin(an.phase * 2) * 0.1 : 0);
+    turn(-0.44, -0.66, a - 0.4, () => poly([[-0.42, -0.72], [-0.52, -0.65], [-0.6, -0.3], [-0.5, -0.32], [-0.44, -0.58]], mane, OUT));
+  } else tail(-0.42, -0.62, 0.3, 0.25, an, c, 0.04, mane);
+  ell(-0.02, -0.6, pony ? 0.45 : 0.42, pony ? 0.21 : 0.2, c, OUT);
+  if (!pony) ell(0, -0.48, 0.3, 0.07, '#e6e1d8');
+  turn(0.25, -0.55, (an.graze || 0) * 1.5, () => {
+    if (pony) {
+      poly([[0.2, -0.74], [0.36, -1.05], [0.52, -0.98], [0.42, -0.62]], c, OUT);
+      rrect(0.38, -1.12, 0.36, 0.19, 0.08, c, OUT);
+      rrect(0.6, -1.06, 0.14, 0.13, 0.05, '#b8a48a');
+      poly([[0.18, -0.76], [0.34, -1.08], [0.4, -1.04], [0.25, -0.72]], mane);
+      poly([[0.42, -1.1], [0.44 - (an.swish || 0) * Math.sin(T * 9) * 0.02, -1.22], [0.5, -1.11]], c, OUT);
+      eye(0.5, -1.05, 0.022, an.blink);
+    } else {
+      poly([[0.2, -0.7], [0.32, -0.96], [0.46, -0.9], [0.38, -0.58]], c, OUT);
+      poly([[0.2, -0.72], [0.31, -0.98], [0.35, -0.95], [0.26, -0.7]], mane);
+      const e = (an.swish || 0) * Math.sin(T * 8) * 0.04;
+      poly([[0.36, -1.04], [0.29 - e, -1.34], [0.43, -1.06]], c, OUT);
+      poly([[0.43, -1.04], [0.46 + e, -1.32], [0.5, -1.04]], c, OUT);
+      rrect(0.34, -1.06, 0.34, 0.2, 0.09, c, OUT);
+      rrect(0.56, -1.0, 0.13, 0.14, 0.05, '#e6e1d8');
+      eye(0.47, -0.99, 0.02, an.blink);
+    }
+  });
+  g.restore();
+}
+
+function drawGoat(x, y, face, sex, baby, an = {}) {
+  const s = baby ? 0.6 : 1, b = bobOf(an);
+  shadow(x, y, 0.32 * s, 0.08 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
+  const billy = sex === 'm' && !baby, body = billy ? '#c9a27a' : '#f4f1ea', dark = billy ? '#8a6544' : '#d8d2c4', far = billy ? '#6e4f33' : '#bdb6a6';
+  legs4([-0.24, -0.15, 0.12, 0.2], -0.3, 0.3, 0.065, dark, far, '#4a3a2a', an, 0.45);
+  turn(-0.3, -0.52, (an.swish || 0) * Math.sin(T * 12) * 0.5, () => poly([[-0.3, -0.5], [-0.38, -0.62], [-0.27, -0.55]], body, OUT));
+  rrect(-0.32, -0.56, 0.6, 0.3, 0.12, body, OUT);
+  if (sex === 'f' && !baby) ell(-0.04, -0.26, 0.06, 0.04, '#f2a9b4', OUT);
+  turn(0.18, -0.48, (an.graze || 0) * 1.4, () => {
+    poly([[0.16, -0.5], [0.26, -0.72], [0.36, -0.68], [0.3, -0.46]], body, OUT);
+    rrect(0.24, -0.82, 0.22, 0.17, 0.07, body, OUT);
+    ell(0.24, -0.76, 0.08, 0.03, dark, null, 0.4 + (an.swish || 0) * Math.sin(T * 8) * 0.3);
+    if (billy) { g.beginPath(); g.arc(0.24, -0.84, 0.1, -2.7, -1.1); g.strokeStyle = '#8a7a62'; g.lineWidth = 0.04; g.lineCap = 'round'; g.stroke(); }
+    else if (!baby) line(0.3, -0.82, 0.27, -0.9, '#9a8a72', 0.03);
+    if (!baby) poly([[0.4, -0.67], [0.43, -0.56 + (an.walk ? 0 : Math.sin(T * 5) * 0.015)], [0.36, -0.65]], billy ? '#6b4f35' : '#d8d2c4');
+    eye(0.38, -0.77, 0.017, an.blink);
+  });
+  g.restore();
+}
+
+function drawAlpaca(x, y, face, sex, baby, wool, an = {}) {
+  const s = baby ? 0.6 : 1, b = bobOf(an);
+  shadow(x, y, 0.32 * s, 0.08 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
+  const c = sex === 'm' ? '#a77b52' : '#efe2c4', dark = sex === 'm' ? '#7d5a3a' : '#cdbb94', far = sex === 'm' ? '#654630' : '#b5a37c';
+  legs4([-0.2, -0.12, 0.1, 0.18], -0.32, 0.32, 0.06, dark, far, null, an, 0.4);
+  const R = baby ? 0.15 : 0.11 + 0.06 * wool;
+  const puffs = [[-0.16, -0.42], [0, -0.46], [0.14, -0.42], [-0.06, -0.34], [0.08, -0.34]];
+  for (const [px, py] of puffs) circ(px, py, R, c, OUT);
+  for (const [px, py] of puffs) circ(px, py, R - 0.02, c);
+  circ(-0.26, -0.44, 0.06, c, OUT);
+  turn(0.18, -0.46, (an.graze || 0) * 1.7, () => {
+    rrect(0.12, -0.95, 0.14, 0.52, 0.07, c, OUT);
+    const e = (an.swish || 0) * Math.sin(T * 9) * 0.05;
+    poly([[0.15, -1.1], [0.12 - e, -1.24], [0.2, -1.12]], c, OUT); poly([[0.22, -1.1], [0.24 + e, -1.24], [0.27, -1.1]], c, OUT);
+    rrect(0.1, -1.1, 0.27, 0.18, 0.08, c, OUT);
+    circ(0.16, -1.11, 0.07, c);
+    ell(0.34, -1.0 + (an.walk ? 0 : Math.sin(T * 6) * 0.008), 0.05, 0.04, dark);
+    eye(0.26, -1.03, 0.02, an.blink);
+  });
+  g.restore();
+  if (!baby && wool >= 1) { const ph = (T * 0.9 + x) % 3; if (ph < 0.5) star(x - face * 0.1, y - 0.8, 0.1 * Math.sin(ph / 0.5 * Math.PI), '#fffbe0'); }
+}
+
+function drawDuck(x, y, face, sex, baby, an = {}, swim = false) {
+  if (baby) return drawBirdBaby(x, y, face, '#f7e04a', an);
+  g.save(); g.translate(x, y); g.scale(face, 1);
+  const drake = sex === 'm', body = drake ? '#c9b89a' : '#fbfaf5';
+  if (swim) { ell(0, -0.02, 0.3, 0.08, 'rgba(255,255,255,.45)'); g.translate(0, 0.07 + Math.sin(T * 2 + x) * 0.01); }
+  else {
+    shadow(0, 0, 0.2, 0.06);
+    birdLegs(an, '#f08a1e', 0.08, 0.1);
+    g.rotate(an.walk ? Math.sin(an.phase) * 0.12 : 0);     // the waddle
+  }
+  poly([[-0.2, -0.18], [-0.3, -0.25], [-0.17, -0.12]], body, OUT);
+  ell(-0.02, -0.15, 0.21, 0.11, body, OUT);
+  wing(-0.04, -0.16, 0.11, 0.055, drake ? '#a8977a' : '#ece6d6', an);
+  const peck = !an.walk && (an.graze || 0) > 0.5;
+  const hx = (peck ? 0.18 : 0.14) + (an.walk ? Math.sin(an.phase * 2) * 0.02 : 0), hy = peck ? -0.16 : -0.3, head = drake ? '#2e7d4f' : body;
+  if (!peck) rect(0.1, hy, 0.07, 0.14, head);
+  circ(hx, hy, 0.075, head, OUT);
+  if (drake) line(0.09, hy + 0.1, 0.18, hy + 0.1, '#fff', 0.025);
+  poly([[hx + 0.05, hy - 0.01], [hx + 0.16, hy + 0.01], [hx + 0.15, hy + 0.04], [hx + 0.05, hy + 0.035]], drake ? '#e8c63a' : '#f08a1e', OUT);
+  eye(hx + 0.02, hy - 0.02, 0.014, an.blink);
+  g.restore();
+}
+
+function drawGoose(x, y, face, sex, baby, an = {}, swim = false) {
+  if (baby) return drawBirdBaby(x, y, face, '#d8d29a', an);
+  const s = sex === 'm' ? 1.08 : 1;
+  g.save(); g.translate(x, y); g.scale(face * s, s);
+  if (swim) { ell(0, -0.02, 0.34, 0.09, 'rgba(255,255,255,.45)'); g.translate(0, 0.08 + Math.sin(T * 2 + x) * 0.01); }
+  else {
+    shadow(0, 0, 0.24, 0.07);
+    birdLegs(an, '#f08a1e', 0.1, 0.1);
+    g.rotate(an.walk ? Math.sin(an.phase) * 0.1 : 0);
+  }
+  const body = '#f6f5f0', wingC = sex === 'm' ? '#c9c9c4' : '#e3e1da';
+  poly([[-0.24, -0.24], [-0.36, -0.32], [-0.22, -0.16]], body, OUT);
+  ell(-0.03, -0.2, 0.25, 0.14, body, OUT);
+  wing(-0.06, -0.21, 0.14, 0.07, wingC, an);
+  const peck = !an.walk && (an.graze || 0) > 0.5;
+  const sway = an.walk ? Math.sin(an.phase * 2) * 0.03 : Math.sin(T * 1.3) * 0.015;
+  const hx = (peck ? 0.25 : 0.21) + sway, hy = peck ? -0.18 : -0.56;
+  if (!peck) { line(0.14, -0.26, hx - 0.01, hy + 0.04, OUT, 0.12); line(0.14, -0.26, hx - 0.01, hy + 0.04, body, 0.085); }
+  circ(hx, hy, 0.07, body, OUT);
+  poly([[hx + 0.05, hy - 0.02], [hx + 0.17, hy + 0.01], [hx + 0.05, hy + 0.04]], '#f08a1e', OUT);
+  if (sex === 'm') circ(hx + 0.06, hy - 0.04, 0.025, '#3a3a3a');
+  eye(hx + 0.02, hy - 0.02, 0.015, an.blink);
+  g.restore();
+}
+
+function drawTurkey(x, y, face, sex, baby, an = {}) {
+  if (baby) return drawBirdBaby(x, y, face, '#b08a5a', an);
+  g.save(); g.translate(x, y); g.scale(face, 1);
+  const tom = sex === 'm', body = tom ? '#6b4428' : '#8e6a4a';
+  shadow(0, 0, 0.22, 0.06);
+  birdLegs(an, '#c98a6a', 0.1, 0.09);
+  const bb = an.walk ? Math.abs(Math.cos(an.phase)) * 0.02 : 0;
+  g.translate(0, -bb);
+  const fan = 1 + (an.flap || 0) * 0.35;    // the tom fans his tail now and then
+  if (tom) for (let i = -3; i <= 3; i++) {
+    const a = -Math.PI / 2 - 0.45 + i * 0.3 * fan;
+    ell(-0.1 + Math.cos(a) * 0.19 * fan, -0.3 + Math.sin(a) * 0.19 * fan, 0.065, 0.16 * fan, i % 2 ? '#7a5030' : '#b07c45', OUT, a + Math.PI / 2);
+  }
+  else poly([[-0.16, -0.2], [-0.3, -0.3], [-0.14, -0.28]], body, OUT);
+  ell(0, -0.2, 0.2, 0.15, body, OUT);
+  wing(-0.03, -0.2, 0.11, 0.07, tom ? '#4f321d' : '#6f5238', tom ? {} : an);
+  const peck = !an.walk && (an.graze || 0) > 0.5;
+  const hx = (peck ? 0.17 : 0.14) + (an.walk ? Math.sin(an.phase * 2) * 0.03 : 0), hy = peck ? -0.17 : -0.36;
+  if (!peck) line(0.08, -0.26, hx, hy, tom ? '#8fb4d6' : '#c9a088', 0.06);
+  circ(hx, hy, 0.065, tom ? '#8fb4d6' : '#c9a088', OUT);
+  ell(hx + 0.04, hy + 0.07, 0.025, tom ? 0.06 : 0.035, '#d8352a');
+  if (tom) line(hx + 0.05, hy - 0.02, hx + 0.08, hy + 0.07 + (an.walk ? Math.sin(an.phase * 2) * 0.02 : 0), '#d8352a', 0.022);
+  poly([[hx + 0.05, hy - 0.015], [hx + 0.12, hy + 0.01], [hx + 0.05, hy + 0.03]], '#e8c08a');
+  eye(hx + 0.02, hy - 0.02, 0.014, an.blink);
+  g.restore();
+}
+
+// the farmer sitting on a horse, pony or donkey; seat = how high the saddle is;
+// dir 'up' / 'down' draws him from behind / from the front, otherwise from the side
+// the farmer boy sitting on a horse, pony or donkey; seat = how high the saddle is;
+// dir 'up' / 'down' draws him from behind / from the front, otherwise from the side
+function drawRider(x, y, face, seat, dir) {
+  g.save(); g.translate(x, y + seat);
+  if (dir === 'up' || dir === 'down') {
+    const [lx, ly] = limb(-0.15, -0.12, 0.26, 0.3, 0.095, DENIM); boot(lx - 0.02, ly + 0.05, false);
+    const [rx, ry] = limb(0.15, -0.12, 0.26, -0.3, 0.095, DENIM); boot(rx + 0.02, ry + 0.05, false);
+    boyTorso(-0.48, dir);
+    const [ax, ay] = limb(-0.19, -0.43, 0.2, 0.5, 0.08, SHIRT), [bx, by] = limb(0.19, -0.43, 0.2, -0.5, 0.08, SHIRT);
+    hand(ax, ay); hand(bx, by);
+    boyHead(-0.72, dir);
+  } else {
+    g.scale(face, 1);
+    boyTorso(-0.48, 'right');
+    const [kx, ky] = limb(0, -0.14, 0.15, 1.35, 0.1, DENIM);
+    const [fx, fy] = limb(kx, ky, 0.18, 0.15, 0.09, DENIM); boot(fx + 0.02, fy + 0.04, true);
+    const [hx, hy] = limb(0.03, -0.42, 0.21, 1.0, 0.075, SHIRT); hand(hx, hy);
+    boyHead(-0.72, 'right');
   }
   g.restore();
 }
 
+function drawSheep(x, y, face, sex, baby, wool, an = {}) {
+  const s = baby ? 0.6 : 1, b = bobOf(an);
+  shadow(x, y, 0.36 * s, 0.08 * s);
+  g.save(); g.translate(x, y - b * s); g.scale(face * s, s);
+  legs4([-0.2, -0.11, 0.1, 0.19], -0.24, 0.24, 0.065, '#2e2a28', '#1e1a18', null, an, 0.45);
+  const R = baby ? 0.15 : 0.12 + 0.07 * wool, c = baby || wool >= 1 ? '#fdfbf4' : '#efe7d8';
+  const puffs = [[-0.18, -0.34], [0, -0.42], [0.16, -0.35], [-0.08, -0.27], [0.08, -0.27], [-0.2, -0.24]];
+  for (const [px, py] of puffs) circ(px, py, R, c, OUT);
+  for (const [px, py] of puffs) circ(px, py, R - 0.02, c);
+  circ(-0.06, -0.44, R * 0.5, 'rgba(255,255,255,.5)');
+  turn(0.2, -0.38, (an.graze || 0) * 1.0, () => {
+    ell(0.3, -0.42, 0.1, 0.13, '#2e2a28', OUT, 0.3);
+    ell(0.22, -0.52, 0.08, 0.035, '#2e2a28', null, -0.5 + (an.swish || 0) * Math.sin(T * 9) * 0.4);
+    if (an.blink) line(0.31, -0.46, 0.35, -0.46, '#fff', 0.015); else circ(0.33, -0.46, 0.02, '#fff');
+    if (sex === 'm' && !baby) { g.beginPath(); g.arc(0.22, -0.48, 0.09, -0.5, Math.PI * 1.3); g.strokeStyle = '#c9b48a'; g.lineWidth = 0.055; g.lineCap = 'round'; g.stroke(); }
+  }, (an.graze || 0) * 0.1);
+  g.restore();
+  if (!baby && wool >= 1) { const ph = (T * 0.9 + x) % 3; if (ph < 0.5) star(x - face * 0.1, y - 0.75, 0.1 * Math.sin(ph / 0.5 * Math.PI), '#fffbe0'); }
+}
+
+// a = the animal (walking, grazing, wool, swimming); icons pass nothing and get a full-grown, woolly animal standing still.
+// Idle animals blink, swish their tails and flap their wings now and then, each at its own moment.
+function drawSpecies(sp, x, y, face, sex, baby, a = {}) {
+  const wool = a.wool ?? 1, live = a.id != null && !a.walk, id = a.id || 0;
+  const an = { walk: a.walk, phase: a.phase || 0, graze: a.graze || 0,
+    blink: live && (T + id * 0.37) % 4 < 0.13, swish: live ? bump(T + id * 1.7, 6, 1.4) : 0, flap: live ? bump(T + id * 2.3, 9, 0.7) : 0 };
+  if (SPECIES[sp].bird) an.graze = an.graze > 0.5 && Math.sin(T * 6 + id) > 0.2 ? 1 : 0;   // birds peck
+  switch (sp) {
+    case 'hen': return drawChicken(x, y, face, sex, baby, an);
+    case 'duck': return drawDuck(x, y, face, sex, baby, an, a.swim);
+    case 'goose': return drawGoose(x, y, face, sex, baby, an, a.swim);
+    case 'turkey': return drawTurkey(x, y, face, sex, baby, an);
+    case 'pig': return drawPig(x, y, face, sex, baby, an);
+    case 'goat': return drawGoat(x, y, face, sex, baby, an);
+    case 'cow': return drawCow(x, y, face, sex, baby, an);
+    case 'sheep': return drawSheep(x, y, face, sex, baby, wool, an);
+    case 'alpaca': return drawAlpaca(x, y, face, sex, baby, wool, an);
+    case 'pony': return drawEquine(x, y, face, sex, baby, an, 'pony');
+    case 'donkey': return drawEquine(x, y, face, sex, baby, an, 'donkey');
+    case 'horse': if (drawHorseSprite(x, y, sex, baby, a.dir || (face > 0 ? 'right' : 'left'), a.walk ? Math.floor(a.phase || 0) : 0)) return;
+    default: return drawHorse(x, y, face, sex, baby, false);
+  }
+}
 function drawAnimal(k, a) {
-  const peck = a.wait > 0 && Math.sin(T * 6 + a.id) > 0.6;
-  if (k === 'chicken') drawChicken(a.x, a.y, a.face, a.sex, !a.adult, peck);
-  else if (k === 'pig') drawPig(a.x, a.y, a.face, a.sex, !a.adult);
-  else if (k === 'cow') {
-    drawCow(a.x, a.y, a.face, a.sex, !a.adult);
-    if (a.milk > 0) { const by = Math.sin(T * 3 + a.id) * 0.05; circ(a.x + a.face * 0.45, a.y - 1.15 + by, 0.12, '#ffffff', OUT); ell(a.x + a.face * 0.45, a.y - 1.15 + by, 0.05, 0.07, '#cfe6f5'); }
-  } else drawHorse(a.x, a.y, a.face, a.sex, !a.adult, false);
+  const sp = state.pens[k].species;
+  let swim = false;
+  if (SPECIES[sp].pond) { const f = featurePos(k); swim = ((a.x - f.x) / 0.95) ** 2 + ((a.y - f.y) / 0.5) ** 2 < 1; }
+  drawSpecies(sp, a.x, a.y, a.face, a.sex, !a.adult, { id: a.id, wool: a.wool, graze: a.graze, swim, dir: a.dir, walk: a.walk, phase: a.phase });
+  if (a.milk > 0) {
+    const by = Math.sin(T * 3 + a.id) * 0.05, hy = sp === 'cow' ? 1.15 : 0.95, hx = sp === 'cow' ? 0.45 : 0.35;
+    circ(a.x + a.face * hx, a.y - hy + by, 0.12, '#ffffff', OUT); ell(a.x + a.face * hx, a.y - hy + by, 0.05, 0.07, '#cfe6f5');
+  }
 }
 
 // ======================================================================
@@ -694,17 +1203,68 @@ const ICON = {
     line(-0.02, 0, 0.08, 0.02, '#c86a10', 0.03); line(-0.1, 0.16, 0, 0.18, '#c86a10', 0.03);
   },
   egg: () => ell(0, 0.02, 0.25, 0.33, '#fbf3e3', OUT),
+  pumpkin: () => {
+    ell(-0.2, 0.08, 0.2, 0.3, '#e07a18', OUT); ell(0.2, 0.08, 0.2, 0.3, '#e07a18', OUT);
+    ell(0, 0.08, 0.22, 0.32, '#f08a24', OUT);
+    rect(-0.04, -0.36, 0.08, 0.14, '#6a7a2a'); ell(0.14, -0.3, 0.12, 0.06, '#4f9f2f', null, -0.4);
+  },
+  seeds: () => {
+    poly([[-0.3, -0.12], [0.3, -0.12], [0.36, 0.42], [-0.36, 0.42]], '#c9a06a', OUT);
+    poly([[-0.3, -0.12], [-0.18, -0.34], [0.18, -0.34], [0.3, -0.12]], '#b88c55', OUT);
+    line(-0.22, -0.16, 0.22, -0.16, '#8a5a25', 0.05);
+    line(0, 0.32, 0, 0.08, '#4f9f2f', 0.05);
+    ell(-0.09, 0.08, 0.1, 0.05, '#5fb03a', null, 0.5); ell(0.09, 0.04, 0.1, 0.05, '#5fb03a', null, -0.5);
+    for (const [sx, sy] of [[-0.2, 0.3], [0.2, 0.26], [0.14, 0.36]]) ell(sx, sy, 0.035, 0.025, '#7a5532');
+  },
   apple: () => drawFruit('apple', 0, 0.08, 0.34),
   pear: () => drawFruit('pear', 0, 0.12, 0.34),
   peach: () => drawFruit('peach', 0, 0.08, 0.34),
   orange: () => drawFruit('orange', 0, 0.08, 0.34),
+  avocado: () => drawFruit('avocado', 0, 0.06, 0.34),
+  onion: () => {
+    for (const a of [-0.35, 0, 0.35]) line(0, -0.12, Math.sin(a) * 0.22, -0.46, '#5fa53a', 0.06);
+    ell(0, 0.12, 0.3, 0.27, '#d9a25a', OUT);
+    for (const xx of [-0.12, 0, 0.12]) line(xx * 0.6, -0.12, xx, 0.36, 'rgba(140,90,40,.5)', 0.025);
+    poly([[-0.06, -0.12], [0, -0.2], [0.06, -0.12]], '#b88544');
+  },
+  tomato: () => {
+    ell(0, 0.08, 0.36, 0.3, '#e2452f', OUT);
+    ell(-0.14, -0.02, 0.07, 0.05, 'rgba(255,255,255,.35)', null, -0.5);
+    for (let i = 0; i < 5; i++) { const a = i * 1.257 - 1.57; poly([[0, -0.18], [Math.cos(a) * 0.17, -0.2 + Math.sin(a) * 0.08], [Math.cos(a + 0.4) * 0.05, -0.18]], '#3f8f2a'); }
+    rect(-0.02, -0.32, 0.04, 0.12, '#3f8f2a');
+  },
+  pepper: () => jalapeno(0.02, -0.26, 0.62, -0.35, '#d93a2a'),
+  gate: () => {
+    ell(0, 0.36, 0.46, 0.09, '#9fd06f');
+    rect(-0.46, -0.32, 0.1, 0.68, '#6f4826'); rect(0.36, -0.32, 0.1, 0.68, '#6f4826');
+    for (const yy of [-0.2, 0, 0.2]) line(-0.36, yy, 0.02, yy - 0.16, '#a0703e', 0.07);
+    line(0.02, -0.4, 0.02, 0.06, '#6f4826', 0.07);
+  },
+  plotPen: () => {
+    rrect(-0.44, -0.32, 0.88, 0.6, 0.06, '#a9cb80', '#7a5230');
+    for (const [px, py] of [[-0.44, -0.32], [0.44, -0.32], [-0.44, 0.28], [0.44, 0.28]]) rect(px - 0.045, py - 0.14, 0.09, 0.18, '#6f4826');
+    circ(0.26, 0.24, 0.18, '#f4b52f', '#9b6a10'); star(0.26, 0.24, 0.09, '#ffd257');
+  },
+  plotField: () => {
+    rrect(-0.44, -0.32, 0.88, 0.6, 0.06, '#8e6b44', '#6f5233');
+    for (const yy of [-0.17, -0.02, 0.13]) line(-0.38, yy, 0.38, yy, '#6f5233', 0.04);
+    circ(0.26, 0.24, 0.18, '#f4b52f', '#9b6a10'); star(0.26, 0.24, 0.09, '#ffd257');
+  },
+  coop: () => drawCoopShape({ x: -0.42, y: -0.18, w: 0.84, h: 0.6 }),
+  trailer: () => {
+    for (const yy of [-0.32, -0.26]) line(0.36, yy, 0.5, yy, '#6a8a3c', 0.04);
+    rrect(-0.46, -0.3, 0.74, 0.46, 0.06, '#c8553d', OUT);
+    for (const xx of [-0.3, -0.12, 0.06]) line(xx, -0.24, xx, 0.1, 'rgba(60,20,10,.45)', 0.04);
+    line(0.28, 0.08, 0.44, 0.08, '#4a3010', 0.05);
+    circ(-0.22, 0.2, 0.11, '#2a2a2a', OUT); circ(0.06, 0.2, 0.11, '#2a2a2a', OUT);
+  },
   basket: () => {
     g.beginPath(); g.arc(0, 0, 0.3, Math.PI, 0); g.strokeStyle = '#8a5a25'; g.lineWidth = 0.07; g.stroke();
     circ(-0.16, 0.0, 0.1, '#fbf3e3'); circ(0.02, -0.03, 0.1, FRUIT_COLOR.apple); circ(0.18, 0.01, 0.09, FRUIT_COLOR.orange);
     poly([[-0.42, 0.02], [0.42, 0.02], [0.32, 0.4], [-0.32, 0.4]], '#c48a3f', OUT);
     line(-0.38, 0.15, 0.38, 0.15, '#9b6a2e', 0.04); line(-0.35, 0.28, 0.35, 0.28, '#9b6a2e', 0.04);
   },
-  ...Object.fromEntries(['apple', 'pear', 'peach', 'orange'].map(k => ['tree-' + k, () => {
+  ...Object.fromEntries(FRUITS.map(k => ['tree-' + k, () => {
     scaled(0.5, () => drawFruitTree(-0.2, 0.9, k, 1, 5, 3));
     circ(0.27, 0.27, 0.2, '#fff', OUT);
     drawFruit(k, 0.27, 0.3, 0.13);
@@ -721,14 +1281,21 @@ const ICON = {
     line(-0.3, -0.25, -0.25, -0.38, '#6b5a40', 0.025); line(0.28, -0.2, 0.33, -0.34, '#6b5a40', 0.025);
   },
   coin: () => { circ(0, 0, 0.46, '#f4b52f', '#9b6a10'); circ(0, 0, 0.33, '#ffd257'); circ(0, 0, 0.33, 'rgba(0,0,0,0)', 'rgba(155,106,16,.6)'); star(0, 0, 0.18, '#f4b52f'); },
-  hen: () => scaled(1.9, () => drawChicken(0, 0.22, 1, 'f', false, false)),
-  rooster: () => scaled(1.75, () => drawChicken(0.02, 0.24, 1, 'm', false, false)),
-  sow: () => scaled(1.4, () => drawPig(-0.03, 0.3, 1, 'f', false)),
-  boar: () => scaled(1.4, () => drawPig(-0.03, 0.3, 1, 'm', false)),
-  cow: () => scaled(0.82, () => drawCow(-0.06, 0.55, 1, 'f', false)),
-  bull: () => scaled(0.82, () => drawCow(-0.06, 0.6, 1, 'm', false)),
-  mare: () => scaled(0.76, () => drawHorse(-0.1, 0.62, 1, 'f', false, false)),
-  stallion: () => scaled(0.76, () => drawHorse(-0.1, 0.62, 1, 'm', false, false)),
+  wool: () => {
+    for (const [x, y, r] of [[-0.18, 0.08, 0.2], [0.16, 0.1, 0.19], [0, -0.1, 0.22], [0, 0.16, 0.2]]) circ(x, y, r, '#fdfbf4', OUT);
+    for (const [x, y, r] of [[-0.18, 0.08, 0.18], [0.16, 0.1, 0.17], [0, -0.1, 0.2], [0, 0.16, 0.18]]) circ(x, y, r, '#fdfbf4');
+    g.beginPath(); g.arc(0, 0.02, 0.1, 0.3, 4.5); g.strokeStyle = '#d8cfbf'; g.lineWidth = 0.04; g.stroke();
+  },
+  extendMeadow: () => {
+    rrect(-0.46, -0.3, 0.62, 0.6, 0.12, '#9fd06f', OUT);
+    circ(-0.28, -0.1, 0.05, '#fff'); circ(-0.05, 0.1, 0.05, '#f7d54a'); circ(-0.2, 0.16, 0.04, '#f6c2d6');
+    circ(0.32, 0.26, 0.17, '#6ab04c', OUT); line(0.22, 0.26, 0.42, 0.26, '#fff', 0.06); line(0.32, 0.16, 0.32, 0.36, '#fff', 0.06);
+  },
+  shovel: () => {
+    line(0.3, -0.42, -0.02, 0.06, '#8a5a25', 0.09);
+    line(0.22, -0.44, 0.38, -0.36, '#5e3a1c', 0.1);
+    poly([[-0.02, 0.0], [0.1, 0.12], [-0.12, 0.42], [-0.34, 0.3], [-0.24, 0.1]], '#9aa4ad', OUT);
+  },
   speed: () => {
     for (const yy of [-0.2, 0, 0.2]) line(-0.48, yy, -0.2, yy, '#6a8a3c', 0.06);
     circ(0.12, 0, 0.36, '#2a2a2a', OUT); circ(0.12, 0, 0.17, '#f2c230', OUT); circ(0.12, 0, 0.05, '#2a2a2a');
@@ -778,6 +1345,15 @@ const ICON = {
   },
   star: () => star(0, 0, 0.46, '#f2c230'),
 };
+// every animal: 'hen-f', 'hen-m', 'cow-f' … scale and offset fit each one into the icon box
+const SPECIES_ICON = {
+  hen: [1.8, 0, 0.23], duck: [1.8, -0.02, 0.24], goose: [1.22, -0.03, 0.38], turkey: [1.3, 0.02, 0.35],
+  pig: [1.3, -0.04, 0.32], goat: [1.05, -0.05, 0.42], cow: [0.82, -0.06, 0.55], sheep: [1.12, -0.02, 0.36],
+  alpaca: [0.78, -0.08, 0.62], pony: [0.95, -0.08, 0.5], donkey: [0.8, -0.08, 0.6], horse: [0.6, 0, 0.75],
+};
+for (const sp in SPECIES_ICON) for (const sex of ['f', 'm']) {
+  ICON[sp + '-' + sex] = () => { const [sc, x, y] = SPECIES_ICON[sp]; scaled(sc, () => drawSpecies(sp, x, y, 1, sex, false)); };
+}
 function drawIcon(k, x, y, size) { g.save(); g.translate(x, y); g.scale(size, size); ICON[k](); g.restore(); }
 
 function iconCanvas(k, px, cls) {
@@ -804,39 +1380,67 @@ function fenceH(x0, x1, y) {
 }
 function fenceV(x, y0, y1) { rect(x - 0.04, y0 - 0.45, 0.08, y1 - y0 + 0.2, FENCE); post(x, y1); }
 
+// a leafy crown of overlapping blobs in three shades
+function crown(cx, cy, r, base, seed) {
+  const blobs = [[0, 0.05, 1], [-0.55, 0.18, 0.68], [0.55, 0.15, 0.7], [-0.32, -0.42, 0.66], [0.34, -0.4, 0.68], [0, 0.42, 0.6], [0.02, -0.62, 0.52]];
+  const dark = shade(base, -0.25), light = shade(base, 0.22);
+  for (const [bx, by, br] of blobs) circ(cx + bx * r, cy + by * r, br * r * 0.72, dark, OUT);
+  for (const [bx, by, br] of blobs) circ(cx + bx * r, cy + by * r - 0.03, br * r * 0.66, base);
+  for (const [bx, by, br] of blobs.slice(3)) circ(cx + bx * r - r * 0.12, cy + by * r - r * 0.14, br * r * 0.38, light);
+  for (let i = 0; i < 6; i++) {
+    const a = hash(seed, i) * 6.28, d = 0.2 + hash(i, seed) * 0.6;
+    g.beginPath(); g.arc(cx + Math.cos(a) * d * r, cy + Math.sin(a) * d * r, r * 0.12, 0.3, 2.6); g.strokeStyle = dark; g.lineWidth = 0.02; g.stroke();
+  }
+}
+// a trunk flaring into roots, with bark lines
+function trunk(x, y, h, w) {
+  poly([[x - w * 1.6, y + 0.01], [x - w * 0.7, y - 0.12], [x - w * 0.6, y - h], [x + w * 0.6, y - h], [x + w * 0.7, y - 0.12], [x + w * 1.6, y + 0.01]], '#7a5230', OUT);
+  for (const d of [-0.3, 0.25]) line(x + d * w, y - 0.1, x + d * w * 0.8, y - h * 0.8, '#5e3e22', 0.015);
+}
+// scenery trees sway gently; about a third of the woods are pines
 function drawTree(t) {
+  const sw = Math.sin(T * 1.1 + t.x) * 0.03;
+  if (t.woods && (t.pine ?? hash(t.x * 10, t.y * 10) < 0.35)) {             // a pine among the round trees
+    shadow(t.x, t.y, 0.5, 0.15);
+    rect(t.x - 0.07, t.y - 0.35, 0.14, 0.37, '#6b4626');
+    const c = '#2f6a3a';
+    for (let i = 0; i < 3; i++) {
+      const by = t.y - 0.3 - i * 0.42, w = 0.62 - i * 0.14, s = sw * (i + 1) * 0.5;
+      poly([[t.x - w + s * 0.5, by], [t.x + s, by - 0.62], [t.x + w + s * 0.5, by]], shade(c, -0.1 * i), OUT);
+      poly([[t.x + s * 0.7, by - 0.5], [t.x - w * 0.6 + s * 0.5, by - 0.04], [t.x - w * 0.3 + s * 0.5, by - 0.04]], shade(c, 0.2));
+    }
+    return;
+  }
   shadow(t.x, t.y, 0.6, 0.18);
-  rect(t.x - 0.1, t.y - 0.7, 0.2, 0.72, '#7a5230');
-  circ(t.x, t.y - 1.15, 0.62, t.apple ? '#5a9a3c' : '#4a8636', OUT);
-  circ(t.x - 0.22, t.y - 1.32, 0.3, t.apple ? '#6fb04a' : '#5c9c42');
-  if (t.apple) for (let i = 0; i < 6; i++) { const a = hash(i, t.x * 10) * 6.28, r = 0.2 + hash(t.y * 10, i) * 0.32; circ(t.x + Math.cos(a) * r, t.y - 1.15 + Math.sin(a) * r * 0.9, 0.06, '#e2452f'); }
+  trunk(t.x, t.y, 0.75, 0.1);
+  line(t.x, t.y - 0.6, t.x - 0.22 + sw, t.y - 0.95, '#7a5230', 0.06); line(t.x + 0.02, t.y - 0.65, t.x + 0.25 + sw, t.y - 1.0, '#7a5230', 0.05);
+  crown(t.x + sw, t.y - 1.18, 0.62, t.woods ? (hash(t.x * 7, 3) < 0.5 ? '#3f7a32' : '#467f36') : '#4a8636', t.x * 10 | 0);
 }
 function drawFruit(kind, x, y, r) {
   if (kind === 'pear') {
     circ(x, y + r * 0.25, r * 0.8, FRUIT_COLOR.pear, OUT);
     circ(x, y - r * 0.45, r * 0.5, FRUIT_COLOR.pear, OUT);
     circ(x, y + r * 0.25, r * 0.78, FRUIT_COLOR.pear);
+  } else if (kind === 'avocado') {
+    ell(x, y + r * 0.12, r * 0.74, r * 1.0, FRUIT_COLOR.avocado, OUT);
   } else circ(x, y, r, FRUIT_COLOR[kind], OUT);
+  circ(x - r * 0.32, y - r * 0.28, r * 0.25, 'rgba(255,255,255,.45)');
   if (kind === 'peach') { line(x, y - r * 0.8, x - r * 0.25, y + r * 0.5, 'rgba(190,80,50,.5)', r * 0.12); circ(x + r * 0.35, y - r * 0.2, r * 0.3, 'rgba(230,90,80,.45)'); }
   if (kind === 'orange') for (let i = 0; i < 3; i++) circ(x - r * 0.3 + i * r * 0.3, y + r * 0.1 - (i % 2) * r * 0.3, r * 0.06, 'rgba(180,90,10,.5)');
-  if (kind === 'apple') circ(x - r * 0.35, y - r * 0.3, r * 0.22, 'rgba(255,255,255,.4)');
   line(x, y - r * (kind === 'pear' ? 0.9 : 0.85), x + r * 0.1, y - r * 1.25, '#6f4826', r * 0.14);
-  ell(x + r * 0.4, y - r * 1.05, r * 0.32, r * 0.16, '#4f9f2f', null, -0.4);
+  leafShape(x + r * 0.08, y - r * 1.1, r * 0.7, r * 0.25, -0.5, '#4f9f2f');
 }
 
-// a planted fruit tree; growth 0..1 grows the sapling, fruit = ripe fruit hanging on it
+// a planted fruit tree: growth 0..1 grows the sapling; fruit = ripe fruit hanging on it
 function drawFruitTree(x, y, kind, growth, fruit, seed) {
-  const s = 0.35 + 0.65 * growth;
+  const s = 0.35 + 0.65 * growth, sw = Math.sin(T * 1.1 + seed) * 0.025;
   shadow(x, y, 0.6 * s, 0.18 * s);
   g.save(); g.translate(x, y); g.scale(s, s);
-  rect(-0.1, -0.7, 0.2, 0.72, '#7a5230');
-  circ(0, -1.15, 0.62, LEAF_COLOR[kind], OUT);
-  circ(-0.22, -1.32, 0.3, 'rgba(255,255,255,.14)');
-  if (kind === 'orange') circ(0.2, -0.95, 0.25, 'rgba(0,0,0,.08)');
-  for (let j = 0; j < fruit; j++) {
-    const a = hash(seed, j * 7 + 1) * Math.PI * 2, r = 0.15 + hash(j + 3, seed) * 0.33;
-    drawFruit(kind, Math.cos(a) * r, -1.12 + Math.sin(a) * r * 0.85, 0.1);
-  }
+  trunk(0, 0, 0.72, 0.1);
+  line(0, -0.58, -0.2 + sw, -0.9, '#7a5230', 0.055); line(0.02, -0.62, 0.22 + sw, -0.95, '#7a5230', 0.045);
+  crown(sw, -1.15, 0.6, LEAF_COLOR[kind], seed);
+  const spots = [[-0.32, -1.0], [0.3, -1.12], [0.02, -0.82], [-0.08, -1.42], [0.36, -1.45]];
+  for (let j = 0; j < Math.min(fruit, spots.length); j++) drawFruit(kind, sw + spots[j][0], spots[j][1], 0.1);
   g.restore();
 }
 
@@ -850,7 +1454,14 @@ function drawSpot(i) {
   if (hov) { g.save(); g.globalAlpha = 0.6; drawFruitTree(sp.x, sp.y, 'apple', 0, 0, 0); g.restore(); }
 }
 
-function drawBush(b) { shadow(b.x, b.y, 0.6, 0.14); ell(b.x, b.y - 0.28, 0.6, 0.38, '#4f8f3a', OUT); ell(b.x - 0.18, b.y - 0.4, 0.25, 0.15, '#62a548'); }
+function drawBush(b) {
+  shadow(b.x, b.y, 0.6, 0.14);
+  const blobs = [[-0.3, -0.22, 0.3], [0.3, -0.22, 0.3], [0, -0.32, 0.36], [-0.12, -0.5, 0.25], [0.15, -0.48, 0.24]];
+  for (const [bx, by, r] of blobs) circ(b.x + bx, b.y + by, r, '#3f7a30', OUT);
+  for (const [bx, by, r] of blobs) circ(b.x + bx, b.y + by - 0.02, r * 0.88, '#4f8f3a');
+  for (const [bx, by, r] of blobs.slice(2)) circ(b.x + bx - 0.06, b.y + by - 0.06, r * 0.45, '#62a548');
+  for (let i = 0; i < 4; i++) circ(b.x - 0.3 + i * 0.2, b.y - 0.3 - (i % 2) * 0.15, 0.03, '#e8e0f0');
+}
 
 function windowShutters(x, y, w, h) {
   rect(x - w * 0.45, y, w * 0.42, h, '#b8352a'); rect(x + w * 1.03, y, w * 0.42, h, '#b8352a');
@@ -876,7 +1487,7 @@ function drawHouse() {
   for (let x = 20.4; x < 25.7; x += 0.3) rect(x, 5.0, 0.06, 0.36, '#7a5230');
   windowShutters(21.3, 4.25, 0.55, 0.5); windowShutters(24.15, 4.25, 0.55, 0.5);
   windowShutters(20.4, 6.1, 0.75, 0.7); windowShutters(24.85, 6.1, 0.75, 0.7);
-  rrect(22.35, 6.35, 1.3, 1.65, [0.65, 0.65, 0, 0], '#6b4226', OUT);
+  rrect(22.35, 6.35, 1.3, 1.65, [0.65, 0.65, 0, 0], hoverId === 'house' ? '#9a6338' : '#6b4226', OUT);
   line(23, 6.4, 23, 8, '#4f2f18', 0.04);
   circ(23.35, 7.2, 0.05, '#e2c27a');
   poly([[18.1, 5.95], [cx, 2.6], [cx, 3.05], [18.4, 6.2]], '#8f3b27', OUT);
@@ -890,21 +1501,30 @@ function drawShop() {
   rrect(x + 0.2, top + 0.55, w - 0.4, F - top - 0.55, 0.04, '#f6ecd6', OUT);
   rect(x + 0.6, top + 1.35, w - 1.2, 1.6, '#5a4636');
   rect(x + 0.7, top + 1.95, w - 1.4, 0.08, '#8a6a4a'); rect(x + 0.7, top + 2.5, w - 1.4, 0.08, '#8a6a4a');
-  for (let i = 0; i < 9; i++) { circ(x + 0.95 + i * 0.6, top + 1.86, 0.1, ['#f2c535', '#ef8a23', '#c99a5a'][i % 3]); circ(x + 1.1 + i * 0.6, top + 2.42, 0.1, ['#eef2f5', '#fbf3e3', '#e2452f'][i % 3]); }
   const ay = top + 0.85, n = 10, sw = (w + 0.2) / n;
   for (let i = 0; i < n; i++) rect(x - 0.1 + i * sw, ay, sw, 0.45, i % 2 ? '#f6f2ea' : '#d8352a');
   for (let i = 0; i < n; i++) circ(x - 0.1 + (i + 0.5) * sw, ay + 0.45, sw / 2, i % 2 ? '#f6f2ea' : '#d8352a');
   rrect(x + 0.3, F - 0.78, w - 0.6, 0.8, 0.06, '#a8743f', OUT);
   rect(x + 0.3, F - 0.8, w - 0.6, 0.16, '#c99459');
-  STOCK_KINDS.forEach((kind, i) => {
-    const n2 = Math.min(4, state.shop.stock[kind]), sx = slotX(i);
-    for (let j = 0; j < n2; j++) drawIcon(kind, sx + (j % 2) * 0.18 - 0.09, F - 0.9 - Math.floor(j / 2) * 0.17, 0.3);
-  });
-  drawJar();
+  rect(x + 0.45, F - 1.27, w - 0.9, 0.08, '#8a6a4a');
+  for (const kind of STOCK_KINDS) {
+    if (!state.shop.stock[kind]) continue;
+    const { x: sx, y: cy } = slotPos(kind);
+    drawIcon(kind, sx, cy - 0.36, 0.34);
+    rrect(sx - 0.24, cy - 0.28, 0.48, 0.3, 0.04, '#b77b3f', OUT);
+    line(sx - 0.22, cy - 0.15, sx + 0.22, cy - 0.15, '#8a5a25', 0.03);
+  }
+  rrect(JAR.x - 0.22, JAR.y - 0.5, 0.44, 0.52, 0.08, '#8a5a30', OUT);
+  line(JAR.x - 0.22, JAR.y - 0.33, JAR.x + 0.22, JAR.y - 0.33, '#5e3a1c', 0.04); line(JAR.x - 0.22, JAR.y - 0.13, JAR.x + 0.22, JAR.y - 0.13, '#5e3a1c', 0.04);
+  drawJar(JAR.x, JAR.y - 0.5);
 }
-const slotX = i => SHOP.x + 0.8 + i * 0.56;
-function drawJar() {
-  const x = JAR.x, y = JAR.y, jar = state.shop.jar;
+// each kind of goods has its own crate: crops on the back shelf, everything else on the counter
+function slotPos(kind) {
+  const F = SHOP.y + SHOP.h, c = CROPS.indexOf(kind);
+  return c >= 0 ? { x: SHOP.x + 1.0 + c * 0.82, y: F - 1.28 } : { x: SHOP.x + 0.75 + CARRY_KINDS.indexOf(kind) * 0.62, y: F - 0.72 };
+}
+function drawJar(x, y) {
+  const jar = state.shop.jar;
   rrect(x - 0.25, y - 0.6, 0.5, 0.6, 0.1, 'rgba(205,235,250,.55)', OUT);
   const h = 0.48 * Math.min(1, jar / 30);
   if (jar > 0) { rect(x - 0.19, y - 0.06 - h, 0.38, h, '#f2b42c'); for (let i = 0; i < Math.min(6, jar); i++) circ(x - 0.12 + (i % 3) * 0.12, y - 0.1 - Math.floor(i / 3) * 0.1, 0.05, '#ffd257'); }
@@ -951,13 +1571,55 @@ function drawTroughs(k) {
   troughBox(d.x + 1.0, d.y, 0.8, pen.water, '#4aa3df');
 }
 
-function drawCoop(c) {
+function drawCoopShape(c) {
   shadow(c.x + c.w / 2, c.y + c.h, c.w / 2 + 0.1, 0.12);
   rect(c.x + 0.1, c.y + 0.25, c.w - 0.2, c.h - 0.25, '#c9955a');
   for (let yy = c.y + 0.4; yy < c.y + c.h; yy += 0.18) line(c.x + 0.1, yy, c.x + c.w - 0.1, yy, 'rgba(90,50,20,.3)', 0.025);
-  poly([[c.x - 0.05, c.y + 0.35], [c.x + c.w / 2, c.y - 0.25], [c.x + c.w + 0.05, c.y + 0.35]], '#b5523b', OUT);
+  poly([[c.x - 0.05, c.y + 0.35], [c.x + c.w / 2, c.y - 0.25 - c.w * 0.08], [c.x + c.w + 0.05, c.y + 0.35]], '#b5523b', OUT);
+  circ(c.x + c.w / 2, c.y + 0.42, Math.min(0.12, c.w * 0.08), '#3a2618');
   rrect(c.x + c.w / 2 - 0.18, c.y + c.h - 0.42, 0.36, 0.42, [0.18, 0.18, 0, 0], '#3a2618');
-  line(c.x + c.w / 2 + 0.2, c.y + c.h, c.x + c.w / 2 + 0.55, c.y + c.h - 0.3, '#8a5a30', 0.05);
+}
+// the coop with its ramp, and the nest basket by the door showing the eggs waiting to be collected
+function drawCoop(c, k) {
+  drawCoopShape(c);
+  poly([[c.x + c.w / 2 - 0.14, c.y + c.h], [c.x + c.w / 2 + 0.14, c.y + c.h], [c.x + c.w / 2 + 0.18, c.y + c.h + 0.32], [c.x + c.w / 2 - 0.18, c.y + c.h + 0.32]], '#a0703e', OUT);
+  const n = nestPos(k), eggs = state.pens[k].eggs;
+  ell(n.x, n.y - 0.08, 0.3, 0.08, '#6f4a22');
+  for (let i = 0; i < Math.min(eggs, 6); i++) ell(n.x - 0.17 + (i % 3) * 0.17, n.y - 0.12 - Math.floor(i / 3) * 0.08, 0.065, 0.085, '#fbf3e3', OUT);
+  rrect(n.x - 0.32, n.y - 0.1, 0.64, 0.17, 0.06, '#c48a3f', OUT);
+  line(n.x - 0.28, n.y - 0.02, n.x + 0.28, n.y - 0.02, '#9b6a2e', 0.025);
+}
+
+function drawDog() {
+  const d = state.dog, view = dogAnim.moving ? d.dir : 'sit';
+  shadow(d.x, d.y + 0.1, view === 'left' || view === 'right' ? 0.42 : 0.28, 0.09);
+  const im = art('dog', view);
+  if (!im) { ell(d.x, d.y - 0.25, 0.3, 0.18, '#c8743a', OUT); circ(d.x + 0.25, d.y - 0.45, 0.13, '#c8743a', OUT); return; }
+  const n = DOG_FRAMES[view], fw = im.naturalWidth / n, fh = im.naturalHeight;
+  const f = dogAnim.moving ? Math.floor(dogAnim.phase) % n : DOG_SIT[d.dir] || 0;
+  const w = fw * DOG_SCALE, h = fh * DOG_SCALE;
+  g.drawImage(im, f * fw, 0, fw, fh, d.x - w / 2, d.y + 0.12 - h, w, h);
+}
+
+function drawDogHouse() {
+  const x = DOGHOUSE.x, y = DOGHOUSE.y;
+  shadow(x, y, 0.6, 0.14);
+  rect(x - 0.45, y - 0.55, 0.9, 0.55, '#c48a4a');
+  for (let yy = y - 0.45; yy < y; yy += 0.12) line(x - 0.45, yy, x + 0.45, yy, 'rgba(90,50,20,.3)', 0.02);
+  poly([[x - 0.56, y - 0.5], [x, y - 0.95], [x + 0.56, y - 0.5]], '#b5523b', OUT);
+  rrect(x - 0.16, y - 0.4, 0.32, 0.4, [0.16, 0.16, 0, 0], '#3a2618');
+  ell(x + 0.6, y + 0.05, 0.14, 0.06, '#9aa4ad', OUT);
+  ell(x + 0.6, y + 0.03, 0.09, 0.03, '#4aa3df');
+}
+
+// land for sale: stakes at the corners and a rope between them
+function drawPlot(r) {
+  rrect(r.x, r.y, r.w, r.h, 0.3, 'rgba(70,100,30,.1)');
+  g.save(); g.setLineDash([0.22, 0.12]); g.strokeStyle = '#9a6a3a'; g.lineWidth = 0.05;
+  g.strokeRect(r.x, r.y, r.w, r.h); g.restore();
+  for (const [px, py] of [[r.x, r.y], [r.x + r.w, r.y], [r.x, r.y + r.h], [r.x + r.w, r.y + r.h]]) {
+    rect(px - 0.05, py - 0.4, 0.1, 0.42, '#7a5230'); rect(px - 0.05, py - 0.4, 0.1, 0.06, '#c4925a');
+  }
 }
 
 function drawCar(c) {
@@ -978,25 +1640,55 @@ function drawCar(c) {
 // ======================================================================
 function drawGround(v) {
   rect(v.x0, v.y0, v.x1 - v.x0, v.y1 - v.y0, '#7aa951');
-  rect(0, 0, W, H, '#8cc063');
+  rect(0, Y0, W, H - Y0, '#8cc063');
+  rect(0, Y0, W, 2.6, '#6f9f4c');
   const tx0 = Math.max(0, Math.floor(v.x0)), tx1 = Math.min(W - 1, Math.ceil(v.x1));
-  const ty0 = Math.max(0, Math.floor(v.y0)), ty1 = Math.min(H - 1, Math.ceil(v.y1));
+  const ty0 = Math.max(Y0, Math.floor(v.y0)), ty1 = Math.min(H - 1, Math.ceil(v.y1)), tufts = [[], []];
   for (let ty = ty0; ty <= ty1; ty++) {
     if (ty >= 31 && ty <= 32) continue;
     for (let tx = tx0; tx <= tx1; tx++) {
       const h = hash(tx, ty), h2 = hash(ty + 7, tx + 3);
       if (h < 0.6) {
         const gx = tx + 0.1 + h * 0.8, gy = ty + 0.15 + h2 * 0.75;
-        line(gx, gy, gx - 0.05, gy - 0.12, '#79ad52', 0.035); line(gx, gy, gx + 0.05, gy - 0.12, '#79ad52', 0.035);
+        tufts[h2 < 0.5 ? 0 : 1].push(gx, gy);
       }
-      if (h > 0.95) { const fx = tx + h2 * 0.8 + 0.1, fy = ty + h * 0.5 + 0.2; for (let i = 0; i < 4; i++) circ(fx + Math.cos(i * 1.57) * 0.05, fy + Math.sin(i * 1.57) * 0.05, 0.04, h2 > 0.5 ? '#fff' : '#f7d54a'); circ(fx, fy, 0.03, '#f2a020'); }
+      if (h > 0.93) {
+        const fx = tx + h2 * 0.8 + 0.1, fy = ty + h * 0.5 + 0.2;
+        line(fx, fy + 0.06, fx, fy, '#5f9a3a', 0.02);
+        if (h2 > 0.66) flower5(fx, fy, 0.03, '#fff', '#f2c230');          // daisy
+        else if (h2 > 0.33) flower5(fx, fy, 0.026, '#f7d54a', '#e8a91a');  // buttercup
+        else { for (let i = 0; i < 3; i++) circ(fx + Math.cos(i * 2.09) * 0.03, fy + Math.sin(i * 2.09) * 0.03, 0.028, '#6fb04a'); circ(fx, fy - 0.07, 0.03, '#e6a3c8'); }   // clover
+      }
     }
   }
+  ['#79ad52', '#6fa54a'].forEach((c, i) => {
+    const p = tufts[i];
+    g.beginPath();
+    for (let n = 0; n < p.length; n += 2) {
+      const gx = p[n], gy = p[n + 1];
+      g.moveTo(gx, gy); g.quadraticCurveTo(gx - 0.04, gy - 0.08, gx - 0.08, gy - 0.12);
+      g.moveTo(gx, gy); g.quadraticCurveTo(gx, gy - 0.1, gx + 0.01, gy - 0.16);
+      g.moveTo(gx, gy); g.quadraticCurveTo(gx + 0.04, gy - 0.08, gx + 0.09, gy - 0.11);
+    }
+    g.strokeStyle = c; g.lineWidth = 0.03; g.lineCap = 'round'; g.stroke();
+  });
   for (const t of TRACKS) rrect(t.x, t.y, t.w, t.h, 0.35, '#d9be88');
   for (const t of TRACKS) for (let i = 0; i < t.w * t.h * 0.6; i++) {
     const px = t.x + 0.2 + hash(i, t.x) * (t.w - 0.4), py = t.y + 0.2 + hash(t.y, i) * (t.h - 0.4);
     if (px > v.x0 && px < v.x1 && py > v.y0 && py < v.y1) circ(px, py, 0.04, '#c4a670');
   }
+  // the stream, with reeds and ripples, and the wooden bridge where the track crosses it
+  rect(0, STREAM.y - 0.08, W, STREAM.h + 0.16, '#7d9a55');
+  rect(0, STREAM.y, W, STREAM.h, '#5fa8d8');
+  for (let x = 0.4; x < W; x += 1.3) {
+    const ph = (T * 0.6 + x * 0.37) % 1;
+    line(x + ph * 0.6, STREAM.y + 0.35 + (x % 2.6 < 1.3 ? 0.25 : 0), x + ph * 0.6 + 0.3, STREAM.y + 0.35 + (x % 2.6 < 1.3 ? 0.25 : 0), 'rgba(255,255,255,.5)', 0.04);
+    if (hash(x * 10, 7) < 0.3 && (x < STREAM.bridge[0] - 1 || x > STREAM.bridge[1] + 1)) for (const dx of [0, 0.1, 0.2]) line(x + dx, STREAM.y + 0.05, x + dx + 0.03, STREAM.y - 0.35, '#5f8f3a', 0.04);
+  }
+  const [b0, b1] = STREAM.bridge;
+  rect(b0, STREAM.y - 0.3, b1 - b0, STREAM.h + 0.6, '#b07c45');
+  for (let y = STREAM.y - 0.25; y < STREAM.y + STREAM.h + 0.3; y += 0.2) line(b0, y, b1, y, 'rgba(90,50,20,.35)', 0.03);
+  rect(b0 - 0.05, STREAM.y - 0.35, 0.14, STREAM.h + 0.7, '#6f4826'); rect(b1 - 0.09, STREAM.y - 0.35, 0.14, STREAM.h + 0.7, '#6f4826');
   for (const p of [SHOP_PAD, SHED_PAD]) rrect(p.x, p.y, p.w, p.h - 0.05, 0.12, '#cdc8bc', '#a8a294');
   ell(28.2, 30.2, 0.4, 0.15, 'rgba(60,60,60,.18)');
   rect(0, 31, W, 2.2, '#77756f');
@@ -1004,8 +1696,17 @@ function drawGround(v) {
   for (let x = 0.3; x < W; x += 1.6) rect(x, 32.06, 0.8, 0.08, '#f0ece0');
   for (let x = 0.5; x < W; x += 1.1) ell(x, 34.35, 0.75, 0.5, x % 2.2 < 1.1 ? '#4f8a3a' : '#5a9842', OUT);
   // mud and dropped items in the pens
-  const mud = PENS.pig.mud;
-  ell(mud.x, mud.y, 1.0, 0.42, '#7a5a3a'); ell(mud.x + 0.2, mud.y - 0.05, 0.55, 0.2, '#8a6842');
+  for (const k in PENS) {
+    const sp = state.pens[k].species;
+    if (!sp || !owned(k)) continue;
+    const f = featurePos(k);
+    if (SPECIES[sp].mud) { ell(f.x, f.y, 1.0, 0.42, '#7a5a3a'); ell(f.x + 0.2, f.y - 0.05, 0.55, 0.2, '#8a6842'); }
+    if (SPECIES[sp].pond) {
+      ell(f.x, f.y, 1.05, 0.55, '#7d9a55'); ell(f.x, f.y, 0.95, 0.48, '#5fa8d8');
+      ell(f.x - 0.3, f.y - 0.12, 0.25, 0.08, 'rgba(255,255,255,.35)');
+      ell(f.x + 0.45, f.y + 0.15, 0.12, 0.06, '#5f9f3a'); ell(f.x - 0.5, f.y + 0.2, 0.1, 0.05, '#5f9f3a');
+    }
+  }
   for (const k in PENS) for (const it of state.pens[k].items) {
     if (it.kind === 'egg') { shadow(it.x, it.y, 0.1, 0.03); ell(it.x, it.y - 0.09, 0.085, 0.11, '#fbf3e3', OUT); }
     else {
@@ -1015,52 +1716,219 @@ function drawGround(v) {
   }
 }
 
-function drawPatches() {
+function drawMeadow(k) {
+  const r = penRect(k);
+  rrect(r.x, r.y, r.w, r.h, 0.8, 'rgba(255,255,200,.16)');
+  for (let ty = r.y; ty < r.y + r.h; ty++) for (let tx = r.x; tx < r.x + r.w; tx++) {
+    const h = hash(tx * 3 + 1, ty * 5 + 2);
+    if (h < 0.35) { const fx = tx + 0.2 + hash(ty, tx + 9) * 0.6, fy = ty + 0.2 + h * 1.6; circ(fx, fy, 0.045, h < 0.17 ? '#fff' : '#f7d54a'); circ(fx + 0.12, fy + 0.05, 0.035, '#f6c2d6'); }
+  }
+  const stones = [[r.x, r.y], [r.x + r.w, r.y], [r.x, r.y + r.h], [r.x + r.w, r.y + r.h]];
+  for (let x = r.x + 2; x < r.x + r.w - 1; x += 2.5) stones.push([x, r.y], [x, r.y + r.h]);
+  for (let y = r.y + 2; y < r.y + r.h - 1; y += 2.5) stones.push([r.x, y], [r.x + r.w, y]);
+  for (const [sx, sy] of stones) { ell(sx, sy, 0.16, 0.1, '#a9a49a', OUT); ell(sx - 0.04, sy - 0.03, 0.07, 0.04, '#c9c4ba'); }
+}
+
+function drawPatches(v) {
+  for (const k in PENS) {
+    if (!owned(k)) drawPlot(penRect(k));
+    else if (PENS[k].open) drawMeadow(k);
+  }
   for (const k in PATCHES) {
+    if (!owned(k)) { drawPlot(patchRect(k)); continue; }
     const r = patchRect(k), tiles = state.patches[k].tiles;
     rrect(r.x - 0.06, r.y - 0.06, r.w + 0.12, r.h + 0.12, 0.14, '#7d5c39');
     rect(r.x, r.y, r.w, r.h, '#8e6b44');
     for (let ty = r.y; ty < r.y + r.h; ty++) { rect(r.x + 0.08, ty + 0.28, r.w - 0.16, 0.06, '#77583a'); rect(r.x + 0.08, ty + 0.72, r.w - 0.16, 0.06, '#77583a'); }
     const seg = nextPatchSeg(k);
     if (seg) dashed(seg);
-    eachTile(r, (tx, ty) => { const v = tiles[tx + ',' + ty]; if (v >= 0) drawCrop(k, tx, ty, v); });
+    eachTile(r, (tx, ty) => {
+      if (tx < v.x0 - 1 || tx > v.x1 || ty < v.y0 || ty > v.y1 + 1) return;
+      const key = tx + ',' + ty, gr = tiles[key];
+      if (gr >= 0) drawCrop(state.patches[k].crops[key], tx, ty, gr);
+    });
   }
-  for (const k in PENS) { const seg = nextPenSeg(k); if (seg) dashed(seg); }
+  for (const k in PENS) { const seg = owned(k) && nextPenSeg(k); if (seg) dashed(seg); }
 }
 function dashed(r) {
   g.save(); g.setLineDash([0.18, 0.14]); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 0.05;
   g.strokeRect(r.x + 0.08, r.y + 0.08, r.w - 0.16, r.h - 0.16); g.restore();
 }
 
-function drawCrop(k, tx, ty, v) {
-  const ripe = v >= 1, st = ripe ? 3 : v < 0.34 ? 0 : v < 0.67 ? 1 : 2;
-  const sway = Math.sin(T * 2 + tx * 0.7 + ty * 1.3) * (ripe ? 0.05 : 0.02);
+// ---- plant helpers
+// lighten (f > 0) or darken (f < 0) a #rrggbb colour
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255];
+  return '#' + c.map(v => Math.round(f > 0 ? v + (255 - v) * f : v * (1 + f)).toString(16).padStart(2, '0')).join('');
+}
+// a curved stem or blade from (x, y) to (ex, ey), bending towards (cx, cy)
+function curl(x, y, cx, cy, ex, ey, c, w) {
+  g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(cx, cy, ex, ey); g.strokeStyle = c; g.lineWidth = w; g.lineCap = 'round'; g.stroke();
+}
+// a pointed leaf from (x, y), pointing along angle a
+function leafShape(x, y, len, wid, a, c, s) {
+  g.save(); g.translate(x, y); g.rotate(a);
+  g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(len * 0.5, -wid, len, 0); g.quadraticCurveTo(len * 0.5, wid, 0, 0);
+  g.fillStyle = c; g.fill(); if (s) { g.strokeStyle = s; g.lineWidth = LW * 0.8; g.stroke(); }
+  g.restore();
+}
+function flower5(x, y, r, petal, mid) {
+  for (let i = 0; i < 5; i++) { const a = i * 1.2566; circ(x + Math.cos(a) * r, y + Math.sin(a) * r, r * 0.75, petal); }
+  circ(x, y, r * 0.6, mid);
+}
+// a jalapeño hanging from (x, y), tilted by a
+function jalapeno(x, y, len, a, c) {
+  const w = len * 0.26;
+  g.save(); g.translate(x, y); g.rotate(a);
+  g.beginPath(); g.moveTo(-w, 0); g.quadraticCurveTo(-w * 1.15, len * 0.65, w * 0.2, len); g.quadraticCurveTo(w * 1.25, len * 0.55, w, 0); g.closePath();
+  g.fillStyle = c; g.fill(); g.strokeStyle = OUT; g.lineWidth = LW * 0.8; g.stroke();
+  line(-w * 0.35, len * 0.12, -w * 0.4, len * 0.55, 'rgba(255,255,255,.45)', w * 0.35);
+  ell(0, 0, w * 1.1, w * 0.5, '#3f7a2a');
+  curl(0, 0, w * 0.6, -len * 0.18, w * 0.2, -len * 0.3, '#3f7a2a', w * 0.45);
+  g.restore();
+}
+
+// one crop tile at growth stage st (0-3), drawn without wind; drawCrop caches it as a picture
+function drawCropShape(k, tx, ty, st) {
+  const ripe = st === 3, sway = 0;
+  const sprout = (px, py) => { leafShape(px, py, 0.09, 0.03, -2.3, '#6dbb45'); leafShape(px, py, 0.09, 0.03, -0.8, '#5fae3c'); };
   if (k === 'corn') {
     for (let i = 0; i < 3; i++) {
-      const px = tx + 0.2 + i * 0.3, py = ty + 0.5 + (i % 2) * 0.28, h = [0.12, 0.35, 0.6, 0.88][st];
-      if (st === 0) { ell(px, py - 0.04, 0.06, 0.04, '#6dbb45'); continue; }
-      line(px, py, px + sway, py - h, '#4f8f2f', 0.06);
-      line(px, py - h * 0.35, px - 0.15 + sway * 0.5, py - h * 0.5, '#5fa53a', 0.05);
-      line(px, py - h * 0.6, px + 0.15 + sway * 0.6, py - h * 0.75, '#5fa53a', 0.05);
-      if (ripe) { ell(px + sway * 0.7 + 0.06, py - h * 0.55, 0.055, 0.12, '#f3c837', OUT); line(px + sway, py - h, px + sway * 1.2, py - h - 0.12, '#e8cf8a', 0.04); }
+      const px = tx + 0.2 + i * 0.3, py = ty + 0.5 + (i % 2) * 0.28, h = [0.12, 0.38, 0.62, 0.9][st];
+      if (st === 0) { sprout(px, py); continue; }
+      const top = [px + sway, py - h];
+      line(px, py, top[0], top[1], '#4f8f2f', 0.055);
+      for (const f of [0.35, 0.6]) line(px + sway * f - 0.03, py - h * f, px + sway * f + 0.03, py - h * f, '#3f7a26', 0.02);
+      [[0.3, -1], [0.5, 1], [0.72, -1]].forEach(([f, sd]) => {
+        const bx = px + sway * f, by = py - h * f;
+        curl(bx, by, bx + sd * 0.12, by - h * 0.22, bx + sd * 0.2 + sway, by - h * 0.05, '#5fa53a', 0.045);
+        curl(bx, by, bx + sd * 0.11, by - h * 0.21, bx + sd * 0.18 + sway, by - h * 0.06, '#7cc04f', 0.015);
+      });
+      if (st >= 2) for (const d of [-0.05, 0, 0.05]) line(top[0], top[1], top[0] + d + sway * 0.3, top[1] - 0.1, '#d8c27a', 0.02);
+      if (ripe) {
+        const cx = px + sway * 0.6 + 0.07, cy = py - h * 0.52;
+        ell(cx, cy, 0.055, 0.12, '#f3c837', OUT, 0.15);
+        for (let j = -2; j <= 2; j++) circ(cx + 0.012, cy + j * 0.04, 0.012, '#e0a820');
+        poly([[cx - 0.06, cy + 0.12], [cx - 0.07, cy - 0.02], [cx - 0.01, cy + 0.08]], '#6fae3a', OUT);
+        poly([[cx + 0.05, cy + 0.12], [cx + 0.07, cy], [cx + 0.01, cy + 0.08]], '#5fa53a', OUT);
+        curl(cx, cy - 0.12, cx + 0.05, cy - 0.18, cx + 0.08, cy - 0.14, '#c98a3a', 0.015);
+      }
     }
   } else if (k === 'potato') {
     for (let i = 0; i < 2; i++) {
       const px = tx + 0.3 + i * 0.4, py = ty + 0.45 + i * 0.25;
-      if (st === 0) { ell(px, py - 0.03, 0.07, 0.04, '#6dbb45'); continue; }
-      const r = [0, 0.12, 0.17, 0.22][st];
-      if (ripe) { ell(px - 0.13, py + 0.04, 0.08, 0.055, '#c99a5a', OUT); ell(px + 0.12, py + 0.06, 0.06, 0.045, '#b98a50', OUT); }
-      ell(px + sway, py - r * 0.7, r, r * 0.75, ripe ? '#4f8f2f' : '#5a9e3a', OUT);
-      ell(px - r * 0.3 + sway, py - r * 0.95, r * 0.45, r * 0.3, '#6fb04a');
-      if (ripe) { circ(px - 0.07 + sway, py - r * 1.2, 0.035, '#fff'); circ(px + 0.09 + sway, py - r * 1.0, 0.035, '#c9a6e8'); }
+      if (st === 0) { sprout(px, py); continue; }
+      const r = [0, 0.12, 0.17, 0.22][st], cy = py - r * 0.7;
+      if (ripe) { ell(px - 0.14, py + 0.05, 0.08, 0.055, '#c99a5a', OUT); circ(px - 0.16, py + 0.04, 0.008, '#8a6538'); ell(px + 0.13, py + 0.07, 0.06, 0.045, '#b98a50', OUT); }
+      ell(px + sway, cy, r * 0.8, r * 0.55, '#3f7f2a');
+      for (let j = 0; j < 8; j++) {
+        const a = j * 0.785 + 0.2;
+        leafShape(px + sway, cy, r * 1.05, r * 0.32, a, j % 2 ? '#5fa53a' : '#4f962f', 'rgba(45,28,12,.35)');
+      }
+      for (let j = 0; j < 4; j++) leafShape(px + sway, cy - r * 0.1, r * 0.6, r * 0.25, j * 1.57 + 0.8, '#6dbb45');
+      ell(px - r * 0.3 + sway, cy - r * 0.35, r * 0.35, r * 0.18, 'rgba(255,255,255,.15)');
+      if (ripe) { flower5(px - 0.07 + sway, cy - r * 0.55, 0.018, '#fff', '#f2c230'); flower5(px + 0.08 + sway, cy - r * 0.4, 0.016, '#d9c6f0', '#f2c230'); }
     }
-  } else {
+  } else if (k === 'carrot') {
     for (let i = 0; i < 3; i++) {
-      const px = tx + 0.2 + i * 0.3, py = ty + 0.55 + (i % 2) * 0.22, h = [0.1, 0.2, 0.3, 0.36][st];
-      for (let j = -2; j <= 2; j++) line(px, py, px + j * 0.055 + sway, py - h + Math.abs(j) * 0.04, '#5fb03a', 0.035);
-      if (ripe) ell(px, py + 0.02, 0.065, 0.045, '#ef8a23', OUT);
+      const px = tx + 0.2 + i * 0.3, py = ty + 0.55 + (i % 2) * 0.22, h = [0.1, 0.2, 0.3, 0.38][st];
+      if (ripe) { ell(px, py + 0.01, 0.065, 0.05, '#ef8a23', OUT); line(px - 0.03, py, px + 0.03, py, '#c86a10', 0.012); }
+      for (let j = -2; j <= 2; j++) {
+        const ex = px + j * 0.055 + sway, ey = py - h + Math.abs(j) * 0.04;
+        line(px, py - (ripe ? 0.03 : 0), ex, ey, '#4f9f2f', 0.02);
+        if (st >= 1) for (const f of [0.45, 0.7, 0.92]) {
+          const lx = px + (ex - px) * f, ly = py + (ey - py) * f;
+          ell(lx - 0.018, ly, 0.022, 0.01, '#6fbf45', null, 0.6); ell(lx + 0.018, ly, 0.022, 0.01, '#5fb03a', null, -0.6);
+        }
+      }
+    }
+  } else if (k === 'onion') {
+    for (let i = 0; i < 3; i++) {
+      const px = tx + 0.2 + i * 0.3, py = ty + 0.55 + (i % 2) * 0.22, h = [0.12, 0.25, 0.35, 0.4][st];
+      if (ripe) {
+        ell(px, py - 0.05, 0.085, 0.075, '#d9a25a', OUT);
+        for (const d of [-0.04, 0, 0.04]) curl(px + d * 0.5, py - 0.12, px + d * 1.6, py - 0.06, px + d, py + 0.01, '#b07a3a', 0.01);
+        ell(px - 0.03, py - 0.08, 0.02, 0.03, 'rgba(255,255,255,.4)');
+      }
+      for (const d of [-0.045, 0, 0.045]) {
+        const flop = ripe ? 0.09 : 0.02;
+        curl(px, py - (ripe ? 0.11 : 0), px + d * 1.5 + sway, py - h, px + d * 2.4 + sway + Math.sign(d || 1) * flop, py - h + flop, '#3f8a2a', 0.04);
+        curl(px, py - (ripe ? 0.11 : 0), px + d * 1.5 + sway, py - h, px + d * 2.4 + sway + Math.sign(d || 1) * flop, py - h + flop, '#7cc04f', 0.018);
+      }
+    }
+  } else if (k === 'tomato') {
+    for (let i = 0; i < 2; i++) {
+      const px = tx + 0.28 + i * 0.42, py = ty + 0.55 + i * 0.2, h = [0.15, 0.42, 0.64, 0.74][st];
+      if (st === 0) { sprout(px, py); continue; }
+      line(px + 0.08, py, px + 0.08, py - h - 0.06, '#c4925a', 0.035);
+      for (let y = py - 0.12; y > py - h; y -= 0.22) line(px + 0.04, y, px + 0.12, y, '#e8dcc0', 0.012);
+      g.beginPath(); g.moveTo(px, py);
+      for (let j = 1; j <= 4; j++) g.lineTo(px + (j % 2 ? 0.05 : -0.01) + sway * j / 4, py - h * j / 4);
+      g.strokeStyle = '#4f8f2f'; g.lineWidth = 0.03; g.stroke();
+      for (let j = 0; j < 4; j++) for (const sd of [-1, 1]) {
+        const ly = py - h * (0.18 + j * 0.24) - (sd > 0 ? 0.05 : 0), lx = px + 0.02 + sway * (0.2 + j * 0.25);
+        for (let q = 0; q < 3; q++) leafShape(lx, ly, 0.17 - q * 0.03, 0.05, sd > 0 ? -0.5 + q * 0.5 : Math.PI + 0.5 - q * 0.5, q % 2 ? '#5fa53a' : '#4f962f');
+      }
+      if (st >= 2) for (let j = 0; j < 3; j++) {
+        const fx = px - 0.06 + j * 0.07 + sway, fy = py - h * (0.32 + (j % 2) * 0.28), c = ripe ? '#e2452f' : '#9cbf4a';
+        circ(fx, fy, 0.058, c, OUT); circ(fx - 0.018, fy - 0.018, 0.016, 'rgba(255,255,255,.55)');
+        star(fx, fy - 0.04, 0.025, '#3f8f2a');
+      }
+    }
+  } else if (k === 'pepper') {
+    for (let i = 0; i < 2; i++) {
+      const px = tx + 0.3 + i * 0.4, py = ty + 0.5 + i * 0.25, r = [0.06, 0.15, 0.2, 0.23][st];
+      if (st === 0) { sprout(px, py); continue; }
+      line(px, py, px + sway, py - r * 1.3, '#3f7a26', 0.03);
+      ell(px + sway, py - r * 0.95, r * 0.95, r * 0.6, '#3f7f2a', OUT);
+      for (let j = 0; j < 7; j++) leafShape(px + sway, py - r * 0.95, r * 1.05, r * 0.3, -0.1 - j * 0.49, j % 2 ? '#5fa53a' : '#4f962f');
+      if (st >= 2) {
+        const c = ripe ? '#cf2e22' : '#4f8a2a', len = ripe ? 0.27 : 0.19;
+        jalapeno(px - 0.1 + sway, py - r * 0.85, len, 0.3, c);
+        jalapeno(px + 0.08 + sway, py - r * 0.8, len * 0.92, -0.25, c);
+        if (ripe) jalapeno(px - 0.01 + sway, py - r * 0.95, len * 0.88, 0.05, '#e03a2a');
+      }
+    }
+  } else if (k === 'pumpkin') {
+    const px = tx + 0.5, py = ty + 0.62;
+    const lf = (x, y, r, c) => { circ(x - r * 0.35, y, r * 0.7, c, OUT); circ(x + r * 0.35, y, r * 0.7, c, OUT); circ(x, y - r * 0.25, r * 0.7, c); line(x, y + r * 0.3, x, y - r * 0.4, shade(c, -0.25), 0.012); };
+    const size = [0.07, 0.11, 0.14, 0.15][st];
+    curl(px - 0.38, py - 0.02, px - 0.1, py - 0.1, px + 0.38, py - 0.18, '#4f8f2f', 0.03);
+    for (let j = 0; j < 4; j++) { const a = j * 1.57 + 0.4; lf(px + Math.cos(a) * 0.25 + sway, py - 0.12 + Math.sin(a) * 0.12, size, j % 2 ? '#5a9e3a' : '#4f8f2f'); }
+    if (st >= 1) { g.beginPath(); g.arc(px + 0.33, py - 0.3, 0.04, 0, Math.PI * 1.5); g.strokeStyle = '#6fae3a'; g.lineWidth = 0.012; g.stroke(); }
+    if (st >= 2) {
+      const pr = ripe ? 0.2 : 0.11, c = ripe ? '#f08a24' : '#9cbf4a', d = shade(c, -0.15);
+      ell(px - pr * 0.55, py - pr * 0.8, pr * 0.6, pr * 0.85, d, OUT); ell(px + pr * 0.55, py - pr * 0.8, pr * 0.6, pr * 0.85, d, OUT);
+      ell(px, py - pr * 0.8, pr * 0.65, pr * 0.9, c, OUT);
+      for (const dx of [-0.3, 0.3]) curl(px + dx * pr, py - pr * 1.6, px + dx * pr * 1.6, py - pr * 0.8, px + dx * pr, py - pr * 0.05, shade(c, -0.25), 0.012);
+      ell(px - pr * 0.25, py - pr * 1.1, pr * 0.15, pr * 0.3, 'rgba(255,255,255,.3)');
+      curl(px, py - pr * 1.65, px + 0.01, py - pr * 1.95, px + 0.05, py - pr * 2.0, '#6a7a2a', 0.035);
     }
   }
+}
+// Each crop stage is drawn once into a small picture at the screen's resolution (again when the zoom changes):
+// a field holds dozens of plants with many leaves each. The wind leans the picture by skewing it.
+const cropPics = { px: 0, map: new Map() };
+function cropPic(k, st) {
+  const px = S * DPR;
+  if (cropPics.px !== px) { cropPics.px = px; cropPics.map.clear(); }
+  let c = cropPics.map.get(k + st);
+  if (!c) {
+    c = document.createElement('canvas'); c.width = Math.ceil(1.6 * px); c.height = Math.ceil(2 * px);
+    const keep = g; g = c.getContext('2d');
+    g.setTransform(px, 0, 0, px, 0.3 * px, 1 * px);   // the tile's corner sits 0.3 in from the left, 1 down from the top
+    drawCropShape(k, 0, 0, st);
+    g = keep;
+    cropPics.map.set(k + st, c);
+  }
+  return c;
+}
+function drawCrop(k, tx, ty, v) {
+  const ripe = v >= 1, st = ripe ? 3 : v < 0.34 ? 0 : v < 0.67 ? 1 : 2;
+  const sway = Math.sin(T * 2 + tx * 0.7 + ty * 1.3) * (ripe ? 0.05 : 0.02);
+  g.save(); g.transform(1, 0, -sway, 1, sway * (ty + 0.8), 0);   // tops lean, roots stay put
+  g.drawImage(cropPic(k, st), tx - 0.3, ty - 1, 1.6, 2);
+  g.restore();
   if (ripe) {
     const ph = (T * 0.8 + hash(tx, ty) * 10) % 4;
     if (ph < 0.5) star(tx + 0.3 + hash(ty, tx) * 0.4, ty - 0.1, 0.12 * Math.sin(ph / 0.5 * Math.PI), '#fffbe0');
@@ -1074,7 +1942,8 @@ const cam = { x: 23, y: 12 };
 const anim = { moving: false, phase: 0 };
 let T = 0, hoverId = null, pendingCoins = 0;
 let particles = [], flyers = [], cars = [];
-let carT = 3, jarT = 0, milkT = 0, fruitT = 0, fullWarnT = 0, tractorOnShedPad = false;
+const dogAnim = { moving: false, phase: 0, stuckT: 0, waitT: 0 };
+let carT = 3, jarT = 0, milkT = 0, fruitT = 0, eggT = 0, fullWarnT = 0, tractorOnShedPad = false;
 
 function burst(x, y, c, n, up = 2) {
   for (let i = 0; i < n; i++) particles.push({ x, y, vx: rand(-1.5, 1.5), vy: rand(-up - 1, -up + 0.5), life: rand(0.4, 0.8), max: 0.8, c, s: rand(0.04, 0.08) });
@@ -1099,6 +1968,7 @@ function update(dt) {
   for (const k in PENS) updatePen(k, dt);
   updateOrchard(dt);
   updatePickups(dt);
+  updateDog(dt);
   updateShop(dt);
   updateCars(dt);
   for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 6 * dt; p.life -= dt; }
@@ -1107,7 +1977,7 @@ function update(dt) {
   for (const f of flyers) if (f.t >= f.dur && f.done) f.done();
   flyers = flyers.filter(f => f.t < f.dur);
   const p = state.player;
-  const tx = clamp(p.x, 0, W), ty = clamp(p.y - 0.5, 0, H);
+  const tx = clamp(p.x, 0, W), ty = clamp(p.y - 0.5, Y0, H);
   const k = Math.min(1, dt * 6);
   cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
   clampCam();
@@ -1117,7 +1987,7 @@ function update(dt) {
 function clampCam() {
   const vw = VW / S, vh = VH / S;
   cam.x = vw >= W ? W / 2 : clamp(cam.x, vw / 2, W - vw / 2);
-  cam.y = vh >= H ? H / 2 : clamp(cam.y, vh / 2, H - vh / 2);
+  cam.y = vh >= H - Y0 ? (Y0 + H) / 2 : clamp(cam.y, Y0 + vh / 2, H - vh / 2);
 }
 
 const keys = {};
@@ -1130,7 +2000,8 @@ function updatePlayer(dt) {
   else if (iy && !ix) dir = iy > 0 ? 'down' : 'up';
   else if (ix && iy) { const h = ix > 0 ? 'right' : 'left', v = iy > 0 ? 'down' : 'up'; if (dir !== h && dir !== v) dir = h; }
   const mode = p.mode, moving = !!(ix || iy);
-  const speed = mode === 'tractor' ? CONFIG.tractor.speed[state.tractor.lv.speed - 1] : mode === 'horse' ? CONFIG.horseSpeed : CONFIG.walkSpeed;
+  const mount = mode === 'horse' ? findMount(p.mount) : null;
+  const speed = mode === 'tractor' ? CONFIG.tractor.speed[state.tractor.lv.speed - 1] : mount ? SPECIES[state.pens[mount.k].species].ride : CONFIG.walkSpeed;
   const ent = mode === 'tractor' ? state.tractor : p;
   if (moving) {
     const len = Math.hypot(ix, iy);
@@ -1138,7 +2009,7 @@ function updatePlayer(dt) {
   }
   p.dir = dir;
   if (mode === 'tractor') { state.tractor.dir = dir; p.x = ent.x; p.y = ent.y; }
-  if (mode === 'horse') { const h = findHorse(p.horse); if (h) { h.x = p.x; h.y = p.y; if (ix) h.face = ix > 0 ? 1 : -1; } }
+  if (mount) { mount.a.x = p.x; mount.a.y = p.y; if (ix) mount.a.face = ix > 0 ? 1 : -1; }
   anim.moving = moving;
   if (moving) anim.phase += dt * (mode === 'horse' ? 10 : 8);
 }
@@ -1149,10 +2020,14 @@ function nearestMount() {
   let best = null, bd = 1e9;
   const d0 = Math.hypot(Math.max(0, Math.abs(p.x - t.x) - 0.6), Math.max(0, Math.abs(p.y - t.y) - 0.4));
   if (d0 < 0.8) { best = { type: 'tractor', e: t }; bd = d0; }
-  for (const a of state.pens.horse.animals) {
-    if (!a.adult || a.ridden) continue;
-    const d = Math.hypot(a.x - p.x, (a.y - p.y) * 1.5) - 0.35;
-    if (d < 0.8 && d < bd) { best = { type: 'horse', e: a }; bd = d; }
+  for (const k in PENS) {
+    const sp = state.pens[k].species;
+    if (!sp || !SPECIES[sp].ride) continue;
+    for (const a of state.pens[k].animals) {
+      if (!a.adult || a.ridden) continue;
+      const d = Math.hypot(a.x - p.x, (a.y - p.y) * 1.5) - 0.35;
+      if (d < 0.8 && d < bd) { best = { type: 'horse', e: a }; bd = d; }
+    }
   }
   return best;
 }
@@ -1163,10 +2038,10 @@ function toggleMount() {
     const m = nearestMount();
     if (!m) return;
     if (m.type === 'tractor') { p.mode = 'tractor'; p.x = m.e.x; p.y = m.e.y; p.dir = m.e.dir; sfx('engine'); }
-    else { p.mode = 'horse'; p.horse = m.e.id; m.e.ridden = true; p.x = m.e.x; p.y = m.e.y; sfx('neigh'); unstick(p, ...BOX.horse, 'horse'); }
+    else { p.mode = 'horse'; p.mount = m.e.id; m.e.ridden = true; p.x = m.e.x; p.y = m.e.y; sfx('neigh'); unstick(p, ...BOX.horse, 'horse'); }
     return;
   }
-  const horse = p.mode === 'horse' ? findHorse(p.horse) : null;
+  const ridden = p.mode === 'horse' ? findMount(p.mount) : null, horse = ridden && ridden.a;
   const from = p.mode === 'tractor' ? state.tractor : p;
   const offs = p.mode === 'tractor'
     ? [[0, 0.7], [-1.0, 0], [1.0, 0], [0, -0.7], [0, 1.1], [-1.3, 0.4], [1.3, 0.4], [-1.3, -0.4], [1.3, -0.4]]
@@ -1177,8 +2052,8 @@ function toggleMount() {
     if (!blockedAt(fx0 + ox, fy0 + oy, ...BOX.walk, 'walk')) { p.x = fx0 + ox; p.y = fy0 + oy; placed = true; break; }
   }
   if (!placed) { p.x = fx0; p.y = fy0; unstick(p, ...BOX.walk, 'walk'); }
-  if (horse) { horse.ridden = false; horse.x = fx0; horse.y = fy0; horse.wait = rand(1, 3); horse.tx = fx0; horse.ty = fy0; }
-  p.mode = 'walk'; p.horse = null;
+  if (horse) { horse.ridden = false; horse.x = fx0; horse.y = fy0; horse.wait = rand(1, 3); horse.tx = fx0; horse.ty = fy0; horse.dir = p.dir; horse.walk = false; }
+  p.mode = 'walk'; p.mount = null;
   p.dir = 'down';
 }
 
@@ -1190,13 +2065,13 @@ function updateHarvest(dt) {
     for (let ty = Math.floor(t.y - 0.3); ty <= Math.floor(t.y + 0.3); ty++) {
       const k = patchAt(tx, ty);
       if (!k) continue;
-      const tiles = state.patches[k].tiles, key = tx + ',' + ty;
+      const tiles = state.patches[k].tiles, key = tx + ',' + ty, crop = state.patches[k].crops[key];
       if (!(tiles[key] >= 1)) continue;
       const load = loadTotal();
       if (load >= cap) { if (fullWarnT <= 0) { sfx('full'); fullWarnT = 2.5; } continue; }
       tiles[key] = -1;
-      t.load[k] += Math.min(yld, cap - load);
-      burst(tx + 0.5, ty + 0.4, { corn: '#f2c535', potato: '#c99a5a', carrot: '#ef8a23' }[k], 5);
+      t.load[crop] += Math.min(yld * CONFIG.crops[crop].perTile, cap - load);
+      burst(tx + 0.5, ty + 0.4, CROP_COLOR[crop], 5);
       burst(tx + 0.5, ty + 0.4, '#6fb04a', 3);
       sfx('cut', 40);
       if (loadTotal() >= cap) { sfx('full'); fullWarnT = 2.5; }
@@ -1206,69 +2081,96 @@ function updateHarvest(dt) {
 
 function updateCrops(dt) {
   for (const k in PATCHES) {
-    const tiles = state.patches[k].tiles, step = dt / CONFIG.crops[k].grow;
-    for (const key in tiles) { const v = tiles[key]; if (v >= 0 && v < 1) tiles[key] = Math.min(1, v + step); }
+    const { tiles, crops } = state.patches[k];
+    for (const key in tiles) { const v = tiles[key]; if (v >= 0 && v < 1) tiles[key] = Math.min(1, v + dt / CONFIG.crops[crops[key]].grow); }
   }
 }
 
-function makeAnimal(k, sex, adult, x, y) {
-  const pe = CONFIG.pens[k].produceEvery;
+function makeAnimal(sp, sex, adult, x, y) {
+  const pe = CONFIG.animals[sp].produceEvery;
   return { id: state.nextId++, sex, adult, age: 0, x, y, tx: x, ty: y, wait: rand(0.3, 1.5), face: Math.random() < 0.5 ? -1 : 1,
-    prodT: pe ? rand(pe[0], pe[1]) : 0, milk: 0 };
+    prodT: pe ? rand(pe[0], pe[1]) : 0, milk: 0, wool: rand(0, 0.5), inside: 0 };
 }
 function pickTarget(k, a) {
-  const r = penInterior(k), coop = PENS[k].coop;
+  const r = penInterior(k), open = PENS[k].open, coop = isBirdPen(k) && coopRect(k);
   for (let i = 0; i < 8; i++) {
     const x = rand(r.x0, r.x1), y = rand(r.y0, r.y1);
     if (coop && x > coop.x - 0.3 && x < coop.x + coop.w + 0.3 && y < coop.y + coop.h + 0.3) continue;
+    if (open && TREES.some(t => Math.hypot(t.x - x, t.y - y) < 0.8)) continue;
     a.tx = x; a.ty = y; return;
   }
   a.tx = a.x; a.ty = a.y;
 }
+// birds walk to the coop door, pop inside for a few seconds and come back out (laying an egg if they went to lay)
+function goToCoop(k, a) { const d = coopDoor(k); a.toCoop = true; a.tx = d.x + rand(-0.1, 0.1); a.ty = d.y; a.wait = 0; }
 
 function updatePen(k, dt) {
-  const pen = state.pens[k], cfg = CONFIG.pens[k], A = pen.animals;
-  if (A.length) {
+  const pen = state.pens[k], A = pen.animals, sp = pen.species, open = PENS[k].open;
+  if (!sp || !A.length || !owned(k)) return;
+  const cfg = CONFIG.animals[sp], kind = SPECIES[sp];
+  if (!open) {
     const drain = (CONFIG.trough.drainBase + CONFIG.trough.drainPerAnimal * A.length) * dt;
     pen.food = Math.max(0, pen.food - drain);
     pen.water = Math.max(0, pen.water - drain);
   }
-  const ok = pen.food > 0 && pen.water > 0, r = penRect(k), ir = penInterior(k);
+  const ok = open || (pen.food > 0 && pen.water > 0), r = penRect(k), ir = penInterior(k);
   for (const a of A) {
     if (a.ridden) continue;
     a.age += dt;
     if (!a.adult && a.age >= cfg.growUp) { a.adult = true; burst(a.x, a.y - 0.4, '#fff3a0', 8); sfx('pop'); }
+    if (a.inside > 0) {
+      a.inside -= dt;
+      if (a.inside <= 0) {
+        const d = coopDoor(k);
+        a.x = d.x + rand(-0.2, 0.2); a.y = d.y + 0.2; a.wait = rand(0.5, 1.5); pickTarget(k, a);
+        if (a.laying) { a.laying = false; pen.eggs = Math.min(eggLimit(k), pen.eggs + 1); }
+      }
+      continue;
+    }
     const inPen = inRect(a.x, a.y, r);
     if (inPen) {
       a.x = clamp(a.x, ir.x0, ir.x1); a.y = clamp(a.y, ir.y0, ir.y1);
       a.wait -= dt;
+      a.walk = false;
       if (a.wait <= 0) {
         const dx = a.tx - a.x, dy = a.ty - a.y, d = Math.hypot(dx, dy);
-        if (d < 0.05) { a.wait = rand(1, 4); pickTarget(k, a); }
-        else {
-          const st = Math.min(d, ANIMAL_SPEED[k] * (a.adult ? 1 : 1.2) * dt);
+        if (d < 0.05) {
+          if (a.toCoop) { a.toCoop = false; a.inside = rand(3, 5); continue; }
+          a.wait = rand(1, 4); a.grazing = Math.random() < 0.6; pickTarget(k, a);
+          if (kind.bird && Math.random() < 0.08) goToCoop(k, a);
+        } else {
+          const st = Math.min(d, kind.speed * (a.adult ? 1 : 1.2) * dt);
           a.x += dx / d * st; a.y += dy / d * st;
           if (Math.abs(dx) > 0.02) a.face = dx > 0 ? 1 : -1;
+          a.walk = true; a.phase = (a.phase || 0) + dt * (kind.bird ? 9 : 5);
+          a.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
         }
       }
     }
+    a.graze = clamp((a.graze || 0) + (a.grazing && !a.walk && a.wait > 0.4 ? 2.5 : -2.5) * dt, 0, 1);
     if (!ok || !a.adult || !cfg.produceEvery) continue;
-    if (k !== 'pig' && a.sex !== 'f') continue;
+    if (kind.product === 'wool') { a.wool = Math.min(1, (a.wool || 0) + dt * 2 / (cfg.produceEvery[0] + cfg.produceEvery[1])); continue; }
+    if (kind.product !== 'manure' && a.sex !== 'f') continue;
+    // limits: production waits while enough is already lying around
+    if (kind.product === 'egg' && (a.laying || pen.eggs + A.filter(b => b.laying).length >= eggLimit(k))) continue;
+    if (kind.product === 'milk' && a.milk >= CONFIG.limits.milk) continue;
+    if (kind.product === 'manure' && pen.items.length >= CONFIG.limits.manure) continue;
     a.prodT -= dt;
     if (a.prodT > 0) continue;
     a.prodT = rand(cfg.produceEvery[0], cfg.produceEvery[1]);
-    if (k === 'cow') a.milk = Math.min(3, a.milk + 1);
-    else if (inPen && pen.items.length < 14) pen.items.push({ id: state.nextId++, kind: PRODUCT[k], x: a.x + rand(-0.15, 0.15), y: a.y + rand(0, 0.1) });
+    if (kind.product === 'egg') { a.laying = true; goToCoop(k, a); }
+    else if (kind.product === 'milk') a.milk++;
+    else if (inPen) pen.items.push({ id: state.nextId++, kind: 'manure', x: a.x + rand(-0.15, 0.15), y: a.y + rand(0, 0.1) });
   }
   const adults = A.filter(a => a.adult && !a.ridden);
   if (ok && adults.some(a => a.sex === 'f') && adults.some(a => a.sex === 'm') && A.length < penCap(k)) {
     pen.breedT += dt;
     if (pen.breedT >= cfg.breedEvery) {
       pen.breedT = 0;
-      const moms = adults.filter(a => a.sex === 'f' && inRect(a.x, a.y, r));
+      const moms = adults.filter(a => a.sex === 'f' && !(a.inside > 0) && inRect(a.x, a.y, r));
       if (moms.length) {
         const mom = moms[Math.floor(Math.random() * moms.length)];
-        const baby = makeAnimal(k, Math.random() < 0.5 ? 'f' : 'm', false, clamp(mom.x + rand(-0.3, 0.3), ir.x0, ir.x1), clamp(mom.y + 0.15, ir.y0, ir.y1));
+        const baby = makeAnimal(sp, Math.random() < 0.5 ? 'f' : 'm', false, clamp(mom.x + rand(-0.3, 0.3), ir.x0, ir.x1), clamp(mom.y + 0.15, ir.y0, ir.y1));
         A.push(baby);
         burst(baby.x, baby.y - 0.3, '#ff8fb0', 10);
         sfx('baby');
@@ -1277,7 +2179,7 @@ function updatePen(k, dt) {
   }
 }
 
-// Everything the farmer picks up goes in the basket, up to CONFIG.carryLimit.
+// Everything the farmer picks up goes in the basket, up to basketCap().
 function takeIntoBasket(kind, from) {
   if (basketRoom() <= 0) { basketFull(); return false; }
   state.player.carry[kind]++;
@@ -1290,20 +2192,31 @@ function basketFull() { if (fullWarnT <= 0) { sfx('full'); fullWarnT = 2.5; } }
 function updatePickups(dt) {
   const p = state.player;
   if (p.mode === 'tractor') return;
+  milkT -= dt; eggT -= dt;
   for (const k in PENS) {
-    const items = state.pens[k].items;
-    for (let i = items.length - 1; i >= 0; i--) {
-      const it = items[i];
+    const pen = state.pens[k], sp = pen.species;
+    if (!sp || !owned(k)) continue;
+    const product = SPECIES[sp].product;
+    for (let i = pen.items.length - 1; i >= 0; i--) {
+      const it = pen.items[i];
       if (Math.hypot(it.x - p.x, it.y - p.y) > 1.0) continue;
       if (!takeIntoBasket(it.kind, worldPt(it.x, it.y - 0.1))) break;
-      items.splice(i, 1);
+      pen.items.splice(i, 1);
     }
-  }
-  milkT -= dt;
-  if (milkT <= 0 && inRect(p.x, p.y, penRect('cow'))) {
-    const cow = state.pens.cow.animals.find(a => a.milk > 0);
-    if (cow && takeIntoBasket('milk', worldPt(cow.x + cow.face * 0.3, cow.y - 0.35))) cow.milk--;
-    milkT = 0.3;
+    if (product === 'wool') for (const a of pen.animals) {
+      if (a.wool < 1 || a.ridden || Math.hypot(a.x - p.x, a.y - p.y) > 1.0) continue;
+      if (!takeIntoBasket('wool', worldPt(a.x, a.y - 0.4))) break;
+      a.wool = 0;
+      burst(a.x, a.y - 0.4, sp === 'alpaca' && a.sex === 'm' ? '#c9a27a' : '#fbf8f0', 8);
+    }
+    if (product === 'milk' && milkT <= 0 && inRect(p.x, p.y, penRect(k))) {
+      const a = pen.animals.find(b => b.milk > 0);
+      if (a && takeIntoBasket('milk', worldPt(a.x + a.face * 0.3, a.y - 0.35))) { a.milk--; milkT = 0.3; }
+    }
+    if (product === 'egg' && pen.eggs > 0 && eggT <= 0) {
+      const n = nestPos(k);
+      if (Math.hypot(n.x - p.x, n.y - p.y) < 1.2 && takeIntoBasket('egg', worldPt(n.x, n.y - 0.2))) { pen.eggs--; eggT = 0.15; }
+    }
   }
   fruitT -= dt;
   if (fruitT <= 0) {
@@ -1314,6 +2227,44 @@ function updatePickups(dt) {
       fruitT = 0.15;
     });
   }
+}
+
+// The dog lives by the house. It notices the farmer on foot when he comes within 3 tiles and then
+// follows him around the house until he gets 8 tiles ahead; the tractor or a horse leaves it behind.
+// It never enters a pen, and otherwise potters about and sits.
+function updateDog(dt) {
+  const d = state.dog, p = state.player, dist = Math.hypot(p.x - d.x, p.y - d.y);
+  dogAnim.waitT -= dt;
+  if (p.mode !== 'walk' || dist > 8 || Math.hypot(p.x - DOGHOUSE.x, p.y - DOGHOUSE.y) > 14) d.following = false;
+  else if (dist < 3) d.following = true;
+  const follow = d.following && dogAnim.waitT <= 0;
+  if (follow && dist < 1.5) {   // sitting by the farmer, looking at him
+    const fx = p.x - d.x, fy = p.y - d.y;
+    d.dir = Math.abs(fx) > Math.abs(fy) ? (fx > 0 ? 'right' : 'left') : (fy > 0 ? 'down' : 'up');
+  }
+  if (follow) {
+    d.tx = p.x + (d.x - p.x) / (dist || 1) * 1.1; d.ty = p.y + (d.y - p.y) / (dist || 1) * 0.8;
+    d.speed = clamp(dist * 1.4, 1.2, 3.6); d.waitT = rand(2, 5);
+  } else {
+    d.waitT -= dt;
+    if (d.waitT <= 0) {
+      d.waitT = rand(5, 12);
+      if (Math.random() < 0.6 || !inRect(d.x, d.y, DOG_HOME)) {
+        d.tx = rand(DOG_HOME.x, DOG_HOME.x + DOG_HOME.w); d.ty = rand(DOG_HOME.y, DOG_HOME.y + DOG_HOME.h); d.speed = 1.3;
+      }
+    }
+  }
+  const dx = d.tx - d.x, dy = d.ty - d.y, len = Math.hypot(dx, dy);
+  dogAnim.moving = len > 0.08 && !(follow && dist < 1.5);
+  if (!dogAnim.moving) return;
+  const step = Math.min(len, d.speed * dt), x0 = d.x, y0 = d.y;
+  moveEnt(d, dx / len * step, dy / len * step, ...BOX.dog, 'dog');
+  dogAnim.stuckT = Math.hypot(d.x - x0, d.y - y0) < step * 0.3 ? dogAnim.stuckT + dt : 0;
+  if (dogAnim.stuckT > 1.2) {   // a fence in the way: sit and wait a moment
+    d.tx = d.x; d.ty = d.y; dogAnim.stuckT = 0; dogAnim.waitT = 3; dogAnim.moving = false; return;
+  }
+  d.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+  dogAnim.phase += dt * (2 + d.speed * 2.2);
 }
 
 function updateOrchard(dt) {
@@ -1342,7 +2293,7 @@ function updateShop(dt) {
   if (jar > 0 && jarT <= 0) {
     const take = Math.min(jar, Math.max(1, Math.ceil(jar / 15)));
     state.shop.jar -= take; state.coins += take; pendingCoins += take;
-    fly('coin', worldPt(JAR.x, JAR.y - 0.5), elPt(coinIcon), 0.55, () => { pendingCoins -= take; bumpCoins(); sfx('coin', 50); });
+    fly('coin', worldPt(JAR.x, JAR.y - 0.9), elPt(coinIcon), 0.55, () => { pendingCoins -= take; bumpCoins(); sfx('coin', 50); });
     jarT = 0.09;
   }
 }
@@ -1354,8 +2305,8 @@ function unload(src, ent, dy) {
     if (!c) continue;
     state.shop.stock[kind] += c;
     src[kind] = 0;
-    const i = STOCK_KINDS.indexOf(kind);
-    for (let j = 0; j < Math.min(c, 6); j++) fly(kind, entPt(ent, dy), worldPt(slotX(i), SHOP.y + SHOP.h - 1.0), 0.5, null, j * 0.07 + n * 0.1, 0.34);
+    const sp = slotPos(kind);
+    for (let j = 0; j < Math.min(c, 6); j++) fly(kind, entPt(ent, dy), worldPt(sp.x, sp.y - 0.3), 0.5, null, j * 0.07 + n * 0.1, 0.34);
     n++;
   }
   if (n) { sfx('drop'); carT = Math.min(carT, 0.8); }
@@ -1407,8 +2358,9 @@ function carBuys(car) {
       for (const k of STOCK_KINDS) { r -= stock[k]; if (r < 0) { kind = k; break; } }
       if (!kind) kind = STOCK_KINDS.find(k => stock[k] > 0);
       stock[kind]--;
-      const payNow = i === per - 1 ? () => fly('coin', worldPt(car.x, 31.3), worldPt(JAR.x, JAR.y - 0.4), 0.45, () => { state.shop.jar += 1; sfx('clink', 40); }, 0, 0.36) : null;
-      fly(kind, worldPt(slotX(STOCK_KINDS.indexOf(kind)), SHOP.y + SHOP.h - 1.0), () => toScreen(car.x, 31.4), 0.4, payNow, n * 0.12, 0.32);
+      const payNow = i === per - 1 ? () => fly('coin', worldPt(car.x, 31.3), worldPt(JAR.x, JAR.y - 0.85), 0.45, () => { state.shop.jar += 1; sfx('clink', 40); }, 0, 0.36) : null;
+      const from = slotPos(kind);
+      fly(kind, worldPt(from.x, from.y - 0.3), () => toScreen(car.x, 31.4), 0.4, payNow, n * 0.12, 0.32);
     }
   }
   return n;
@@ -1431,9 +2383,9 @@ function draw() {
   ctx.setTransform(DPR * S, 0, 0, DPR * S, DPR * (VW / 2 - cam.x * S), DPR * (VH / 2 - cam.y * S));
   const v = { x0: cam.x - VW / 2 / S - 1, y0: cam.y - VH / 2 / S - 1, x1: cam.x + VW / 2 / S + 1, y1: cam.y + VH / 2 / S + 2 };
   drawGround(v);
-  drawPatches();
+  drawPatches(v);
   const list = [];
-  collectSorted(list);
+  collectSorted(list, v);
   list.sort((a, b) => a.y - b.y);
   for (const it of list) it.f();
   for (const p of particles) { g.globalAlpha = clamp(p.life / 0.4, 0, 1); circ(p.x, p.y, p.s, p.c); }
@@ -1451,34 +2403,53 @@ function draw() {
   }
 }
 
-function collectSorted(list) {
+function collectSorted(list, v) {
   const add = (y, f) => list.push({ y, f });
+  const seen = (x, y) => x > v.x0 - 1.5 && x < v.x1 + 1.5 && y > v.y0 && y < v.y1 + 2;   // trees and animals off screen are skipped
   add(HOUSE.y + HOUSE.h, drawHouse);
   add(SHOP.y + SHOP.h + 0.1, drawShop);
   add(SHED.y + SHED.h, drawShed);
-  for (const t of TREES) add(t.y, () => drawTree(t));
-  for (const b of BUSHES) add(b.y, () => drawBush(b));
+  add(DOGHOUSE.y, drawDogHouse);
+  add(state.dog.y + 0.12, drawDog);
+  for (const t of TREES) if (seen(t.x, t.y)) add(t.y, () => drawTree(t));
+  for (const b of BUSHES) if (seen(b.x, b.y)) add(b.y, () => drawBush(b));
+  const plotWiggle = state.coins >= plotPrice();
   for (const k in PENS) {
-    const d = PENS[k], r = penRect(k), x1 = r.x + r.w, y1 = r.y + r.h;
+    const d = PENS[k], r = penRect(k), x1 = r.x + r.w, y1 = r.y + r.h, sp = state.pens[k].species;
+    if (!owned(k)) { add(d.sign.y, () => drawSign(d.sign, 'plotPen', 'pen-' + k, plotWiggle)); continue; }
+    for (const a of state.pens[k].animals) if (!a.ridden && !(a.inside > 0) && seen(a.x, a.y)) add(a.y, () => drawAnimal(k, a));
+    add(d.sign.y, () => drawSign(d.sign, sp ? sp + '-f' : 'gate', 'pen-' + k, false));
+    if (d.open) continue;
     add(r.y, () => fenceH(r.x, x1, r.y));
     for (let y = r.y; y < y1; y++) add(y + 1, () => { fenceV(r.x, y, y + 1); fenceV(x1, y, y + 1); });
     add(y1 + 0.01, () => { fenceH(r.x, d.gate[0], y1); fenceH(d.gate[1], x1, y1); post(d.gate[0], y1, true); post(d.gate[1], y1, true); });
-    if (d.coop) add(d.coop.y + d.coop.h, () => drawCoop(d.coop));
+    if (isBirdPen(k)) { const c = coopRect(k); add(c.y + c.h, () => drawCoop(c, k)); }
     add(d.troughs.y + 0.42, () => drawTroughs(k));
-    for (const a of state.pens[k].animals) if (!a.ridden) add(a.y, () => drawAnimal(k, a));
-    add(d.sign.y, () => drawSign(d.sign, KINDS[k].f, 'pen-' + k, false));
   }
   for (const k in PATCHES) {
-    const wiggle = bareTiles(k) === Object.keys(state.patches[k].tiles).length && state.coins >= sowCost(k);
-    add(PATCHES[k].sign.y, () => drawSign(PATCHES[k].sign, k, 'crop-' + k, wiggle));
+    if (!owned(k)) { add(PATCHES[k].sign.y, () => drawSign(PATCHES[k].sign, 'plotField', 'crop-' + k, plotWiggle)); continue; }
+    const wiggle = bareTiles(k) === Object.keys(state.patches[k].tiles).length && state.coins >= sowCost(k, CROPS[0]);
+    add(PATCHES[k].sign.y, () => drawSign(PATCHES[k].sign, fieldIcon(k), 'crop-' + k, wiggle));
   }
   SPOTS.forEach((sp, i) => add(sp.y, () => drawSpot(i)));
   const p = state.player, t = state.tractor;
   add(t.y + 0.45, () => drawTractor(t));
   if (p.mode === 'walk') add(p.y + 0.14, () => drawFarmer(p.x, p.y + 0.14, p.dir, anim.phase, anim.moving, p.carry));
-  if (p.mode === 'horse') {
-    const h = findHorse(p.horse);
-    if (h) add(p.y + 0.22, () => { const b = anim.moving ? Math.abs(Math.sin(anim.phase)) * 0.05 : 0; g.save(); g.translate(0, -b); drawHorse(p.x, p.y + 0.22 + b, h.face, h.sex, false, true); g.restore(); });
+  const m = p.mode === 'horse' && findMount(p.mount);
+  if (m) {
+    const sp = state.pens[m.k].species;
+    add(p.y + 0.22, () => {
+      const y = p.y + 0.22 - (anim.moving ? Math.abs(Math.sin(anim.phase)) * 0.05 : 0), dir = p.dir;
+      if (sp === 'horse' && art(m.a.sex === 'm' ? 'horse_m' : 'horse_f', 'left')) {
+        const frame = anim.moving ? Math.floor(anim.phase * 0.6) : 0, side = dir === 'left' || dir === 'right';
+        if (!side) drawRider(p.x, y, 1, HORSE_SEAT[dir], dir);
+        drawHorseSprite(p.x, y, m.a.sex, false, dir, frame);
+        if (side) drawRider(p.x + (dir === 'left' ? 0.12 : -0.12), y, dir === 'left' ? -1 : 1, HORSE_SEAT[dir], dir);
+        return;
+      }
+      drawSpecies(sp, p.x, y, m.a.face, m.a.sex, false, { id: m.a.id, walk: anim.moving, phase: anim.phase * 0.8 });
+      drawRider(p.x, y, m.a.face, SEAT[sp]);
+    });
   }
   for (const c of cars) add(carY(c), () => drawCar(c));
 }
@@ -1487,10 +2458,16 @@ function drawWorldOverlays() {
   // empty trough bubbles
   for (const k in PENS) {
     const pen = state.pens[k], d = PENS[k].troughs;
-    if (!pen.animals.length) continue;
+    if (!d || !owned(k) || !pen.animals.length) continue;
     const pulse = 1 + Math.sin(T * 6) * 0.08;
     if (pen.food <= 0) { circ(d.x + 0.45, d.y - 0.5, 0.32 * pulse, '#fff', OUT); drawIcon('food', d.x + 0.45, d.y - 0.5, 0.42 * pulse); }
     if (pen.water <= 0) { circ(d.x + 1.4, d.y - 0.5, 0.32 * pulse, '#fff', OUT); drawIcon('water', d.x + 1.4, d.y - 0.5, 0.42 * pulse); }
+  }
+  // eggs waiting in a nest basket: a bobbing egg over the coop
+  for (const k in PENS) {
+    if (!owned(k) || !isBirdPen(k) || !state.pens[k].eggs) continue;
+    const c = coopRect(k), bx = c.x + c.w / 2, by = c.y - 0.75 + Math.sin(T * 3) * 0.08;
+    circ(bx, by, 0.34, '#fff', OUT); drawIcon('egg', bx, by, 0.42);
   }
   // tractor load bar
   const t = state.tractor, load = loadTotal(), cap = tractorCap();
@@ -1504,15 +2481,25 @@ function drawWorldOverlays() {
   const p = state.player;
   if (p.mode !== 'tractor' && basketRoom() <= 0) {
     const b = Math.abs(Math.sin(T * 5)) * 0.18;
-    drawIcon('basket', p.x, p.y - (p.mode === 'horse' ? 2.05 : 1.45) - b, 0.7);
+    drawIcon('basket', p.x, p.y - (p.mode === 'horse' ? 2.1 : 1.45) - b, 0.7);
   }
 }
 
 function drawScreenOverlays() {
   const jar = state.shop.jar;
   if (jar > 0) {
-    const [sx, sy] = toScreen(JAR.x, JAR.y - 1.05);
+    const [sx, sy] = toScreen(JAR.x, JAR.y - 1.55);
     numberBadge(sx, sy, jar);
+  }
+  for (const kind of STOCK_KINDS) {
+    const n = state.shop.stock[kind];
+    if (n) { const p = slotPos(kind), [sx, sy] = toScreen(p.x, p.y - 0.14); smallBadge(sx, sy, n); }
+  }
+  // how many eggs wait in each nest basket
+  for (const k in PENS) {
+    if (!owned(k) || !isBirdPen(k) || !state.pens[k].eggs) continue;
+    const c = coopRect(k), [sx, sy] = toScreen(c.x + c.w / 2 + 0.34, c.y - 0.55 + Math.sin(T * 3) * 0.08);
+    smallBadge(sx, sy, state.pens[k].eggs);
   }
   const m = nearestMount();
   if (m && !menu.open) {
@@ -1527,6 +2514,11 @@ function numberBadge(x, y, n) {
   g.beginPath(); g.roundRect(x - w / 2, y - 17, w, 34, 17); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#a86e10'; g.stroke();
   g.font = 'bold 24px "Trebuchet MS", Verdana, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#5a3a05';
   g.fillText(s, x, y + 1);
+}
+function smallBadge(x, y, n) {
+  const s = String(n);
+  g.font = 'bold 14px "Trebuchet MS", Verdana, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineWidth = 3; g.strokeStyle = '#4a3010'; g.strokeText(s, x, y); g.fillStyle = '#fff'; g.fillText(s, x, y);
 }
 function keyHint(x, y) {
   g.beginPath(); g.roundRect(x - 26, y - 22, 52, 40, 9); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#4a3010'; g.stroke();
@@ -1552,7 +2544,7 @@ function updateHUD() {
   const shown = state.coins - pendingCoins;
   if (shown !== coinShown) { coinNum.textContent = shown; coinShown = shown; }
   const p = state.player, t = state.tractor, load = loadTotal(), cap = tractorCap();
-  const sig = p.mode === 'tractor' ? `t|${load}|${cap}` : 'w|' + CARRY_KINDS.map(k => p.carry[k]).join('|');
+  const sig = p.mode === 'tractor' ? `t|${load}|${cap}` : 'w|' + basketCap() + '|' + CARRY_KINDS.map(k => p.carry[k]).join('|');
   if (sig === carrySig) return;
   carrySig = sig;
   carryEl.innerHTML = '';
@@ -1568,7 +2560,7 @@ function updateHUD() {
   };
   if (p.mode === 'tractor') meter('tractor', load, cap);
   else {
-    meter('basket', carryTotal(), CONFIG.carryLimit);
+    meter('basket', carryTotal(), basketCap());
     for (const k of CARRY_KINDS) {
       if (!p.carry[k]) continue;
       const pill = document.createElement('div'); pill.className = 'pill';
@@ -1583,11 +2575,11 @@ function updateHUD() {
 // Menus (signs, troughs, repair shed). No words: pictures, numbers, coins.
 // ======================================================================
 const menuBack = document.getElementById('menuBack'), menuEl = document.getElementById('menu');
-const menu = { open: false, type: null, key: null, pending: { f: 0, m: 0 }, sig: '' };
+const menu = { open: false, type: null, key: null, pending: { f: 0, m: 0 }, choice: null, sig: '' };
 menuBack.addEventListener('pointerdown', e => { if (e.target === menuBack) closeMenu(); });
 
 function openMenu(type, key) {
-  Object.assign(menu, { open: true, type, key, pending: { f: 0, m: 0 } });
+  Object.assign(menu, { open: true, type, key, pending: { f: 0, m: 0 }, choice: null });
   for (const k in keys) keys[k] = false;
   renderMenu();
   menuBack.classList.add('open');
@@ -1598,15 +2590,17 @@ function closeMenu() { if (!menu.open) return; menu.open = false; menuBack.class
 function menuSig() {
   const k = menu.key, parts = [menu.type, k, state.coins, menu.pending.f, menu.pending.m];
   if (menu.type === 'crop') parts.push(state.patches[k].ext, bareTiles(k) > 0);
-  if (menu.type === 'pen') parts.push(state.pens[k].ext, state.pens[k].animals.length);
+  if (menu.type === 'pen') parts.push(state.pens[k].species, menu.choice, state.pens[k].ext, state.pens[k].animals.length, state.pens[k].coopLv);
   if (menu.type === 'trough') parts.push(Math.ceil(state.pens[k].food * 20), Math.ceil(state.pens[k].water * 20));
   if (menu.type === 'repair') parts.push(JSON.stringify(state.tractor.lv));
+  if (menu.type === 'house') parts.push(state.basketLv);
+  if (menu.type === 'tree') parts.push(state.orchard[k].kind);
   return parts.join('|');
 }
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; e.tabIndex = -1; return e; }
 function row(...kids) { const r = el('div', 'row'); r.append(...kids); return r; }
-function pips(n) { const p = el('div', 'pips'); for (let i = 0; i < 5; i++) p.append(el('div', 'pip' + (i < n ? ' on' : ''))); return p; }
+function pips(n, total = 5) { const p = el('div', 'pips'); for (let i = 0; i < total; i++) p.append(el('div', 'pip' + (i < n ? ' on' : ''))); return p; }
 const maxStar = () => iconCanvas('star', 84, 'star');
 function coinBtn(price, enabled, onBuy) {
   const b = el('button', 'coinbtn', price);
@@ -1634,28 +2628,52 @@ function renderMenu() {
   close.onclick = closeMenu;
   menuEl.append(close);
   const k = menu.key;
+  // each choice sits in its own card: its picture and its coin together
+  const cards = (items, make) => { const c = el('div', 'cards'); for (const it of items) { const card = el('div', 'card'); card.append(...make(it)); c.append(card); } menuEl.append(c); };
+  const tool = (icon, act) => { const b = el('button', 'toolbtn'); b.append(iconCanvas(icon, 64)); b.onclick = () => { b.blur(); act(); }; return b; };
   if (menu.type === 'crop') {
-    menuEl.append(row(iconCanvas(k, 84, 'ic'), coinBtn(sowCost(k), bareTiles(k) > 0, () => sow(k))));
+    cards(CROPS, crop => [iconCanvas(crop, 84, 'ic'), coinBtn(sowCost(k, crop), bareTiles(k) > 0, () => sow(k, crop))]);
     const ext = state.patches[k].ext;
     menuEl.append(row(iconCanvas('extendCrop', 84, 'ic'), pips(ext),
       ext < 5 ? coinBtn(CONFIG.cropExtendPrice[ext], true, () => extendPatch(k)) : maxStar()));
+  } else if (menu.type === 'plot') {
+    menuEl.append(row(iconCanvas(PENS[k] ? 'plotPen' : 'plotField', 84, 'ic'), coinBtn(plotPrice(), true, () => buyPlot(k))));
   } else if (menu.type === 'pen') {
-    const pen = state.pens[k], cap = penCap(k), n = pen.animals.length, pend = menu.pending.f + menu.pending.m;
-    const slots = el('div', 'slots');
-    for (let i = 0; i < cap; i++) slots.append(el('div', 'slot' + (i < n ? ' full' : i < n + pend ? ' new' : '')));
-    menuEl.append(slots);
-    for (const sex of ['f', 'm']) {
-      const price = CONFIG.pens[k].price[sex], cnt = menu.pending[sex];
-      const minus = el('button', 'round minus', '−'), plus = el('button', 'round plus', '+'), num = el('div', 'num', cnt);
-      minus.disabled = cnt <= 0;
-      plus.disabled = n + pend >= cap;
-      minus.onclick = () => { minus.blur(); if (menu.pending[sex] > 0) { menu.pending[sex]--; sfx('click'); renderMenu(); } };
-      plus.onclick = () => { plus.blur(); if (n + menu.pending.f + menu.pending.m < cap) { menu.pending[sex]++; sfx('click'); renderMenu(); } };
-      menuEl.append(row(iconCanvas(KINDS[k][sex], 84, 'ic'), minus, num, plus, coinBtn(price * cnt, cnt > 0, () => buyAnimals(k, sex, cnt))));
+    const pen = state.pens[k], sp = pen.species || menu.choice;
+    if (!sp) {
+      // an empty pen: choose which animal it is for
+      const grid = el('div', 'picks');
+      for (const c of PEN_CHOICES) {
+        const b = el('button', 'pick');
+        b.append(iconCanvas(c + '-f', 76));
+        b.onclick = () => { b.blur(); menu.choice = c; sfx('click'); renderMenu(); };
+        grid.append(b);
+      }
+      menuEl.append(grid);
+    } else {
+      const cap = penCap(k, sp), n = pen.animals.length, pend = menu.pending.f + menu.pending.m;
+      const slots = el('div', 'slots');
+      for (let i = 0; i < cap; i++) slots.append(el('div', 'slot' + (i < n ? ' full' : i < n + pend ? ' new' : '')));
+      menuEl.append(slots);
+      for (const sex of ['f', 'm']) {
+        const price = CONFIG.animals[sp].price[sex], cnt = menu.pending[sex];
+        const minus = el('button', 'round minus', '−'), plus = el('button', 'round plus', '+'), num = el('div', 'num', cnt);
+        minus.disabled = cnt <= 0;
+        plus.disabled = n + pend >= cap;
+        minus.onclick = () => { minus.blur(); if (menu.pending[sex] > 0) { menu.pending[sex]--; sfx('click'); renderMenu(); } };
+        plus.onclick = () => { plus.blur(); if (n + menu.pending.f + menu.pending.m < cap) { menu.pending[sex]++; sfx('click'); renderMenu(); } };
+        menuEl.append(row(iconCanvas(sp + '-' + sex, 84, 'ic'), minus, num, plus, coinBtn(price * cnt, cnt > 0, () => buyAnimals(k, sex, cnt))));
+      }
+      const ext = pen.ext;
+      menuEl.append(row(iconCanvas(PENS[k].open ? 'extendMeadow' : 'extendPen', 84, 'ic'), pips(ext),
+        ext < 5 ? coinBtn(CONFIG.penExtendPrice[ext], true, () => extendPen(k)) : maxStar()));
+      if (SPECIES[sp].bird) {
+        const lv = pen.coopLv;
+        menuEl.append(row(iconCanvas('coop', 84, 'ic'), pips(lv, 4),
+          lv < 4 ? coinBtn(CONFIG.coop.price[lv - 1], true, () => upgradeCoop(k)) : maxStar()));
+      }
+      if (n && !PENS[k].open) menuEl.append(row(iconCanvas(sp + '-f', 84, 'ic'), tool('trailer', () => sendAway(k))));
     }
-    const ext = pen.ext;
-    menuEl.append(row(iconCanvas('extendPen', 84, 'ic'), pips(ext),
-      ext < 5 ? coinBtn(CONFIG.penExtendPrice[ext], true, () => extendPen(k)) : maxStar()));
   } else if (menu.type === 'trough') {
     const pen = state.pens[k];
     for (const [what, price, color] of [['food', CONFIG.trough.foodPrice, '#e7c14a'], ['water', CONFIG.trough.waterPrice, '#4aa3df']]) {
@@ -1664,7 +2682,19 @@ function renderMenu() {
       menuEl.append(row(iconCanvas(what, 84, 'ic'), bar, coinBtn(price, pen[what] < 0.95, () => { pen[what] = 1; })));
     }
   } else if (menu.type === 'tree') {
-    for (const f of FRUITS) menuEl.append(row(iconCanvas('tree-' + f, 84, 'ic'), coinBtn(CONFIG.trees[f].price, !state.orchard[k].kind, () => plantTree(k, f))));
+    const planted = state.orchard[k].kind;
+    if (planted) menuEl.append(row(iconCanvas('tree-' + planted, 84, 'ic'), tool('shovel', () => removeTree(k))));
+    else cards(FRUITS, f => [iconCanvas('tree-' + f, 84, 'ic'), coinBtn(CONFIG.trees[f].price, true, () => plantTree(k, f))]);
+  } else if (menu.type === 'house') {
+    const lv = state.basketLv;
+    menuEl.append(row(iconCanvas('basket', 84, 'ic'), pips(lv),
+      lv < 5 ? coinBtn(CONFIG.basket.price[lv - 1], true, upgradeBasket) : maxStar()));
+  } else if (menu.type === 'reset') {
+    // step 1: a big red button; step 2: hold it for 3 seconds while the ring fills
+    const btn = el('button', 'bigred');
+    btn.innerHTML = SVG_RESET_BIG;
+    if (k === 1) { btn.onclick = () => { btn.blur(); menu.key = 2; sfx('click'); renderMenu(); }; menuEl.append(btn); }
+    else { const ring = el('div', 'ring'); ring.append(btn); menuEl.append(ring); holdToReset(btn, ring); }
   } else if (menu.type === 'repair') {
     const lv = state.tractor.lv;
     for (const a of ['speed', 'storage', 'yield']) {
@@ -1682,10 +2712,12 @@ function canUpgrade(a) {
   return after[a] - Math.min(after.speed, after.storage, after.yield) <= CONFIG.maxUpgradeGap;
 }
 
-function sow(k) {
-  const tiles = state.patches[k].tiles;
+function sow(k, crop) {
+  const { tiles, crops } = state.patches[k];
+  state.patches[k].last = crop;
   for (const key in tiles) if (tiles[key] < 0) {
     tiles[key] = 0;
+    crops[key] = crop;
     const [x, y] = key.split(',').map(Number);
     burst(x + 0.5, y + 0.5, '#6dbb45', 2, 1);
   }
@@ -1706,14 +2738,42 @@ function extendPen(k) {
   closeMenu();
 }
 function buyAnimals(k, sex, n) {
-  const d = PENS[k], ir = penInterior(k), gx = (d.gate[0] + d.gate[1]) / 2;
+  const pen = state.pens[k];
+  if (!pen.species) { pen.species = menu.choice; buildObstacles(); unstickAll(); }
+  // new animals arrive at the gate (or near the sign of the open meadow)
+  const d = PENS[k], ir = penInterior(k);
+  const gx = d.gate ? (d.gate[0] + d.gate[1]) / 2 : d.sign.x + 1.2, gy = d.gate ? ir.y1 - 0.3 : ir.y0 + 0.4;
   for (let i = 0; i < n; i++) {
-    const a = makeAnimal(k, sex, true, clamp(gx + rand(-0.6, 0.6), ir.x0, ir.x1), clamp(ir.y1 - rand(0, 0.6), ir.y0, ir.y1));
+    const a = makeAnimal(pen.species, sex, true, clamp(gx + rand(-0.6, 0.6), ir.x0, ir.x1), clamp(gy + rand(-0.3, 0.3), ir.y0, ir.y1));
     a.wait = 0.2 + i * 0.15;
-    state.pens[k].animals.push(a);
+    pen.animals.push(a);
     burst(a.x, a.y - 0.3, '#fff3a0', 8);
   }
   menu.pending[sex] = 0;
+}
+// the trailer takes every animal in the pen away (no refund); the pen can then be used for something else
+function sendAway(k) {
+  const pen = state.pens[k], p = state.player;
+  if (p.mode === 'horse') { const m = findMount(p.mount); if (m && m.k === k) toggleMount(); }
+  for (const a of pen.animals) burst(a.x, a.y - 0.4, '#fff3a0', 6);
+  Object.assign(pen, { species: PENS[k].species || null, animals: [], items: [], eggs: 0, breedT: 0 });
+  buildObstacles();
+  sfx('drop');
+  closeMenu();
+}
+function upgradeCoop(k) {
+  state.pens[k].coopLv++;
+  buildObstacles();
+  unstickAll();
+  const c = coopRect(k);
+  burst(c.x + c.w / 2, c.y + c.h / 2, '#fff3a0', 14, 3);
+}
+function buyPlot(k) {
+  state.plots[k] = true;
+  buildObstacles();
+  unstickAll();
+  eachTile(PENS[k] ? penRect(k) : patchRect(k), (x, y) => burst(x + 0.5, y + 0.5, '#fff3a0', 2));
+  closeMenu();
 }
 function plantTree(i, kind) {
   Object.assign(state.orchard[i], { kind, age: 0, fruit: 0, t: 0 });
@@ -1721,6 +2781,37 @@ function plantTree(i, kind) {
   unstickAll();
   burst(SPOTS[i].x, SPOTS[i].y - 0.3, '#6dbb45', 10);
   closeMenu();
+}
+function removeTree(i) {
+  const sp = SPOTS[i];
+  burst(sp.x, sp.y - 0.6, LEAF_COLOR[state.orchard[i].kind], 14, 2.5);
+  burst(sp.x, sp.y - 0.1, '#8e6b44', 8);
+  Object.assign(state.orchard[i], { kind: null, age: 0, fruit: 0, t: 0 });
+  buildObstacles();
+  sfx('drop');
+  closeMenu();
+}
+function upgradeBasket() {
+  state.basketLv++;
+  const p = state.player;
+  burst(p.x, p.y - 0.8, '#fff3a0', 14, 3);
+}
+function holdToReset(btn, ring) {
+  let start = 0, timer = 0;
+  const tick = () => {
+    const q = Math.min(1, (performance.now() - start) / 3000);
+    ring.style.setProperty('--p', q * 100);
+    if (q >= 1) { clearInterval(timer); resetFarm(); }
+  };
+  const stop = () => { clearInterval(timer); ring.style.setProperty('--p', 0); };
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); clearInterval(timer); start = performance.now(); timer = setInterval(tick, 30); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) btn.addEventListener(ev, stop);
+}
+let resetting = false;
+function resetFarm() {
+  resetting = true;
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  location.reload();
 }
 function upgrade(a) {
   state.tractor.lv[a]++;
@@ -1757,11 +2848,15 @@ function hitTargets() {
   const T2 = [];
   for (const k in PENS) {
     const d = PENS[k].troughs;
-    T2.push({ id: 'trough-' + k, r: { x: d.x - 0.15, y: d.y - 0.9, w: 2.1, h: 1.4 }, act: () => openMenu('trough', k) });
+    if (d && owned(k)) T2.push({ id: 'trough-' + k, r: { x: d.x - 0.15, y: d.y - 0.9, w: 2.1, h: 1.4 }, act: () => openMenu('trough', k) });
   }
-  for (const k in PATCHES) { const s = PATCHES[k].sign; T2.push({ id: 'crop-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('crop', k) }); }
-  for (const k in PENS) { const s = PENS[k].sign; T2.push({ id: 'pen-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu('pen', k) }); }
-  SPOTS.forEach((sp, i) => { if (!state.orchard[i].kind) T2.push({ id: 'spot-' + i, r: { x: sp.x - 0.6, y: sp.y - 0.8, w: 1.2, h: 1.0 }, act: () => openMenu('tree', i) }); });
+  for (const k in PATCHES) { const s = PATCHES[k].sign; T2.push({ id: 'crop-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu(owned(k) ? 'crop' : 'plot', k) }); }
+  for (const k in PENS) { const s = PENS[k].sign; T2.push({ id: 'pen-' + k, r: { x: s.x - 0.55, y: s.y - 1.3, w: 1.1, h: 1.35 }, act: () => openMenu(owned(k) ? 'pen' : 'plot', k) }); }
+  SPOTS.forEach((sp, i) => {
+    const r = state.orchard[i].kind ? { x: sp.x - 0.7, y: sp.y - 1.9, w: 1.4, h: 2.0 } : { x: sp.x - 0.6, y: sp.y - 0.8, w: 1.2, h: 1.0 };
+    T2.push({ id: 'spot-' + i, r, act: () => openMenu('tree', i) });
+  });
+  T2.push({ id: 'house', r: { x: HOUSE.x + 0.2, y: HOUSE.y - 1.6, w: HOUSE.w - 0.4, h: HOUSE.h + 1.6 }, act: () => openMenu('house') });
   T2.push({ id: 'shed', r: { x: SHED.x + 0.2, y: SHED.y - 1.3, w: SHED.w - 0.4, h: SHED.h + 1.3 }, act: () => openMenu('repair') });
   return T2;
 }
@@ -1776,6 +2871,11 @@ cv.addEventListener('pointerdown', e => { ensureAudio(); const h = hitTest(e.cli
 const SVG_SOUND_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#4a3010"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>';
 const SVG_SOUND_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#4a3010"/><path d="M16 9l5 6M21 9l-5 6"/></svg>';
 const SVG_FULL = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const SVG_RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3010" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 3v5h5"/></svg>';
+const SVG_RESET_BIG = SVG_RESET.replace('#4a3010', '#fff').replace('2.6', '3');
+const resetBtn = document.getElementById('resetBtn');
+resetBtn.innerHTML = SVG_RESET;
+resetBtn.onclick = () => { resetBtn.blur(); openMenu('reset', 1); };
 const soundBtn = document.getElementById('soundBtn'), fsBtn = document.getElementById('fsBtn');
 soundBtn.innerHTML = muted ? SVG_SOUND_OFF : SVG_SOUND_ON;
 fsBtn.innerHTML = SVG_FULL;
@@ -1800,6 +2900,7 @@ let padId = null;
 function enableTouch() { document.body.classList.add('touch'); }
 if (matchMedia('(pointer: coarse)').matches) enableTouch();
 addEventListener('pointerdown', e => { if (e.pointerType === 'touch') enableTouch(); }, { capture: true });
+addEventListener('touchstart', enableTouch, { capture: true, passive: true });
 function padSet(e) {
   const r = pad.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
   const d = Math.hypot(dx, dy);
@@ -1828,8 +2929,10 @@ enterBtn.addEventListener('pointerdown', e => { e.preventDefault(); ensureAudio(
 // Start
 // ======================================================================
 let fpsShown = 0, fpsN = 0, fpsT = 0;
+document.getElementById('ver').textContent = VERSION;
 loadGame();
 buildObstacles();
+unstickAll();
 resize();
 { const g0 = g; g = coinIcon.getContext('2d'); const d = Math.min(2, devicePixelRatio || 1); coinIcon.width = coinIcon.height = 56 * d; g.setTransform(56 * d, 0, 0, 56 * d, 28 * d, 28 * d); ICON.coin(); g = g0; }
 cam.x = state.player.x; cam.y = state.player.y - 0.5; clampCam();
